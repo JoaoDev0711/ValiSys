@@ -60,6 +60,9 @@ function renderizarLista() {
       <article class="card">
         <h3>${esc(item.nomeProduto)}</h3>
         <p><strong>EAN:</strong> ${esc(item.ean)}</p>
+        ${marcaFinal ? `<p><strong>Marca:</strong> ${esc(marcaFinal)}</p>` : ""}
+        ${fabricanteFinal ? `<p><strong>Fabricante:</strong> ${esc(fabricanteFinal)}</p>` : ""}
+        ${saborFinal ? `<p><strong>Sabor/variação:</strong> ${esc(saborFinal)}</p>` : ""}
         <p><strong>Setor:</strong> ${esc(item.setor)}</p>
         <p><strong>Quantidade:</strong> ${esc(item.quantidade)}</p>
         <p><strong>Validade:</strong> ${esc(item.validade)}</p>
@@ -67,8 +70,7 @@ function renderizarLista() {
         <p>${status}</p>
         ${
           (() => {
-            const produtoLocal = produtos.find(p => p.ean === item.ean);
-            const fotoFinal = item.foto || produtoLocal?.foto || "";
+            const fotoFinal = item.foto || produtoLocalLista?.foto || "";
             return fotoFinal ? `<img class="produto-img" src="${fotoFinal}" alt="${esc(item.nomeProduto)}">` : "";
           })()
         }

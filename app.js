@@ -71,6 +71,9 @@ function carregarResumoInicial() {
     return {
       ...item,
       dias,
+      marcaFinal: item.marca || produtoLocal?.marca || "",
+      fabricanteFinal: item.fabricante || produtoLocal?.fabricante || "",
+      saborFinal: item.sabor || produtoLocal?.sabor || "",
       fotoFinal: item.foto || produtoLocal?.foto || ""
     };
   });
@@ -129,6 +132,7 @@ function carregarResumoInicial() {
 
         <div class="lembrete-info">
           <h3>${esc(item.nomeProduto)}</h3>
+          ${(item.marcaFinal || item.fabricanteFinal || item.saborFinal) ? `<p>${esc([item.marcaFinal, item.fabricanteFinal, item.saborFinal].filter(Boolean).join(" • "))}</p>` : ""}
           <p>${esc(item.setor)} • Qtd: ${esc(item.quantidade)}</p>
           <p class="muted">Validade: ${esc(item.validade)}</p>
           <p class="muted">Lançado por: ${esc(item.usuarioNome)}</p>

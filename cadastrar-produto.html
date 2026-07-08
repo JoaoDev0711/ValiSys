@@ -20,11 +20,16 @@
     <p class="muted">Gerente e admin podem cadastrar produtos. Ao ler o EAN, o sistema tenta preencher nome, marca, categoria e foto pela API.</p>
 
     <div class="button-row">
-      <button type="button" id="btn-camera">📷 Ler EAN</button>
+      <button type="button" id="btn-camera">📷 Escanear EAN</button>
       <button type="button" id="btn-parar-camera" class="secondary" style="display:none;">Parar câmera</button>
     </div>
 
     <div id="reader"></div>
+
+    <div class="scanner-ajuda">
+      <p id="scanner-status">Aponte a câmera para o código de barras inteiro.</p>
+      <small>Deixe o código bem iluminado, reto e um pouco afastado da câmera.</small>
+    </div>
 
     <form id="form-produto">
       <label for="ean">Código EAN</label>
@@ -34,7 +39,13 @@
       <input type="text" id="nome" placeholder="Ex: Leite Integral 1L" required>
 
       <label for="marca">Marca</label>
-      <input type="text" id="marca" placeholder="Ex: Piracanjuba">
+      <input type="text" id="marca" placeholder="Ex: Finna">
+
+      <label for="fabricante">Fabricante</label>
+      <input type="text" id="fabricante" placeholder="Ex: M. Dias Branco">
+
+      <label for="sabor">Sabor ou variação</label>
+      <input type="text" id="sabor" placeholder="Ex: Morango, Chocolate, Natural">
 
       <label for="categoria">Categoria</label>
       <input type="text" id="categoria" placeholder="Ex: Laticínios">

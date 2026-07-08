@@ -28,3 +28,26 @@ Importante:
 - Se abrir em outro aparelho, os dados não aparecem.
 - Para dados compartilhados entre celulares, depois precisa Supabase/Firebase.
 - Câmera funciona melhor no GitHub Pages/HTTPS ou Live Server.
+
+
+Atualização:
+- API agora tenta puxar marca e sabor/variação pelo EAN.
+- O sabor é inferido pelo nome/categoria/ingredientes do produto, pois nem todo cadastro público possui campo de sabor separado.
+- O setor agora é uma seleção padronizada para manter o visual organizado.
+
+
+Atualização leitura de código:
+- Área de leitura maior para facilitar no celular.
+- Linha visual no leitor para alinhar o código de barras.
+- Status da leitura mostrando quando detectou e quando confirmou.
+- Som curto quando o EAN é confirmado.
+- Vibração dupla quando o EAN é confirmado.
+- Continua validando EAN-13/EAN-8 e confirmando duas leituras para evitar erro.
+
+
+Atualização fabricante:
+- Produto agora tem Marca e Fabricante separados.
+- Exemplo: Marca = Finna, Fabricante = M. Dias Branco.
+- A API tenta puxar fabricante quando disponível.
+- Quando a API não informa fabricante, o sistema usa um mapeamento de marcas conhecidas.
+- O fabricante aparece no cadastro, listas, lembretes e lançamento salvo.

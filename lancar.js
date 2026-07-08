@@ -8,6 +8,8 @@ const produtoPreview = document.getElementById("produto-preview");
 const btnCamera = document.getElementById("btn-camera");
 const btnPararCamera = document.getElementById("btn-parar-camera");
 
+let produtoAtual = null;
+
 const validadeInput = document.getElementById("validade");
 if (validadeInput) {
   validadeInput.min = new Date().toISOString().split("T")[0];
@@ -17,6 +19,48 @@ if (validadeInput) {
 let leitorCamera = null;
 let ultimoCodigoLido = "";
 let repeticoesCodigo = 0;
+let audioLiberado = false;
+
+const scannerStatus = document.getElementById("scanner-status");
+
+function atualizarStatusScanner(texto, tipo = "") {
+  if (!scannerStatus) return;
+
+  scannerStatus.innerText = texto;
+  scannerStatus.className = tipo;
+}
+
+function liberarAudioLeitura() {
+  // Navegadores móveis só deixam tocar som depois de uma ação do usuário.
+  audioLiberado = true;
+}
+
+function tocarSomLeitura() {
+  if (!audioLiberado) return;
+
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const contexto = new AudioContext();
+
+    const oscilador = contexto.createOscillator();
+    const ganho = contexto.createGain();
+
+    oscilador.type = "sine";
+    oscilador.frequency.setValueAtTime(880, contexto.currentTime);
+
+    ganho.gain.setValueAtTime(0.001, contexto.currentTime);
+    ganho.gain.exponentialRampToValueAtTime(0.18, contexto.currentTime + 0.02);
+    ganho.gain.exponentialRampToValueAtTime(0.001, contexto.currentTime + 0.16);
+
+    oscilador.connect(ganho);
+    ganho.connect(contexto.destination);
+
+    oscilador.start();
+    oscilador.stop(contexto.currentTime + 0.18);
+  } catch (erro) {
+    console.warn("Som de leitura não disponível neste navegador.", erro);
+  }
+}
 
 function normalizarCodigo(codigo) {
   return String(codigo || "").replace(/\D/g, "");
@@ -58,6 +102,7 @@ function confirmarLeitura(codigo) {
   const ean = normalizarCodigo(codigo);
 
   if (!validarEAN(ean)) {
+    atualizarStatusScanner("Tentando ler... mantenha o código inteiro dentro da área.", "scanner-lendo");
     return null;
   }
 
@@ -66,9 +111,12 @@ function confirmarLeitura(codigo) {
   } else {
     ultimoCodigoLido = ean;
     repeticoesCodigo = 1;
+    atualizarStatusScanner(`EAN detectado: ${ean}. Segure firme para confirmar...`, "scanner-lendo");
   }
 
+  // Mantém confirmação dupla para evitar leitura errada.
   if (repeticoesCodigo >= 2) {
+    atualizarStatusScanner(`EAN confirmado: ${ean}`, "scanner-ok");
     return ean;
   }
 
@@ -77,16 +125,17 @@ function confirmarLeitura(codigo) {
 
 function configScanner() {
   const config = {
-    fps: 8,
+    fps: 12,
     qrbox: function(viewfinderWidth, viewfinderHeight) {
-      const largura = Math.floor(viewfinderWidth * 0.92);
-      const altura = Math.min(180, Math.floor(viewfinderHeight * 0.28));
+      const largura = Math.floor(viewfinderWidth * 0.96);
+      const altura = Math.min(230, Math.max(150, Math.floor(viewfinderHeight * 0.34)));
 
       return {
         width: largura,
         height: altura
       };
     },
+    aspectRatio: 1.7777778,
     rememberLastUsedCamera: true,
     disableFlip: true
   };
@@ -118,6 +167,8 @@ async function pararCamera() {
 
   btnCamera.style.display = "block";
   btnPararCamera.style.display = "none";
+
+  atualizarStatusScanner("Aponte a câmera para o código de barras inteiro.", "");
 }
 
 
@@ -132,6 +183,7 @@ async function buscarProdutoCompleto(ean) {
   let produto = buscarProdutoLocal(codigo);
 
   if (produto) {
+    produtoAtual = produto;
     nomeInput.value = produto.nome;
     produtoPreview.innerHTML = cardProdutoHTML(produto, "Produto encontrado no cadastro local.");
     return produto;
@@ -149,6 +201,7 @@ async function buscarProdutoCompleto(ean) {
 
     if (produto) {
       produto = salvarProdutoLocalSeNovo(produto);
+      produtoAtual = produto;
       nomeInput.value = produto.nome;
       produtoPreview.innerHTML = cardProdutoHTML(produto, "Produto encontrado na API e salvo no cadastro local.");
       return produto;
@@ -186,6 +239,8 @@ eanInput.addEventListener("blur", async () => {
 });
 
 btnCamera.addEventListener("click", async () => {
+  liberarAudioLeitura();
+  atualizarStatusScanner("Abrindo câmera...", "scanner-lendo");
   if (!window.Html5Qrcode) {
     alert("Biblioteca de leitura não carregou. Verifique a internet ou rode pelo Live Server/GitHub Pages.");
     return;
@@ -209,8 +264,10 @@ btnCamera.addEventListener("click", async () => {
 
         eanInput.value = eanConfirmado;
 
+        tocarSomLeitura();
+
         if (navigator.vibrate) {
-          navigator.vibrate(120);
+          navigator.vibrate([80, 40, 80]);
         }
 
         await pararCamera();
@@ -223,6 +280,7 @@ btnCamera.addEventListener("click", async () => {
     console.error(erro);
     btnCamera.style.display = "block";
     btnPararCamera.style.display = "none";
+    atualizarStatusScanner("Não foi possível abrir a câmera. Verifique permissão e HTTPS.", "scanner-erro");
   }
 });
 
@@ -251,7 +309,10 @@ form.addEventListener("submit", function(event) {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
     ean,
     nomeProduto,
-    setor: document.getElementById("setor").value.trim(),
+    marca: produtoCadastrado ? (produtoCadastrado.marca || "") : (produtoAtual?.marca || ""),
+    fabricante: produtoCadastrado ? (produtoCadastrado.fabricante || "") : (produtoAtual?.fabricante || ""),
+    sabor: produtoCadastrado ? (produtoCadastrado.sabor || "") : (produtoAtual?.sabor || ""),
+    setor: document.getElementById("setor").value,
     quantidade: Number(document.getElementById("quantidade").value),
     validade: document.getElementById("validade").value,
     foto: produtoCadastrado ? produtoCadastrado.foto : "",
