@@ -41,6 +41,52 @@
     <p id="welcome-role">Cargo</p>
   </section>
 
+  <section class="resumo-vencimentos">
+    <div class="resumo-card danger-soft">
+      <span>🚨</span>
+      <div>
+        <strong id="qtd-vencidos">0</strong>
+        <p>Vencidos</p>
+      </div>
+    </div>
+
+    <div class="resumo-card warning-soft">
+      <span>📅</span>
+      <div>
+        <strong id="qtd-hoje">0</strong>
+        <p>Vencem hoje</p>
+      </div>
+    </div>
+
+    <div class="resumo-card alert-soft">
+      <span>⏳</span>
+      <div>
+        <strong id="qtd-7dias">0</strong>
+        <p>Até 7 dias</p>
+      </div>
+    </div>
+
+    <div class="resumo-card ok-soft">
+      <span>🗓️</span>
+      <div>
+        <strong id="qtd-30dias">0</strong>
+        <p>Até 30 dias</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="section-title">
+      <div>
+        <h2>Lembretes de vencimento</h2>
+        <p class="muted" id="texto-lembrete">Produtos que merecem atenção.</p>
+      </div>
+      <span>🔔</span>
+    </div>
+
+    <div id="lembretes-vencimento"></div>
+  </section>
+
   <section class="grid-actions">
     <a href="lancar.html" class="action-card">
       <span>📦</span>
@@ -85,6 +131,7 @@
 </main>
 
 <script src="auth.js"></script>
+<script src="cookies.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

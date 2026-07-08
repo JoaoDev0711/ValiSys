@@ -8,45 +8,180 @@ const produtoPreview = document.getElementById("produto-preview");
 const btnCamera = document.getElementById("btn-camera");
 const btnPararCamera = document.getElementById("btn-parar-camera");
 
-let leitorCamera = null;
+const validadeInput = document.getElementById("validade");
+if (validadeInput) {
+  validadeInput.min = new Date().toISOString().split("T")[0];
+}
 
-function buscarProdutoPorEAN(ean) {
-  const produtos = JSON.parse(localStorage.getItem("produtos")) || [];
-  const produto = produtos.find(p => p.ean === ean);
+
+let leitorCamera = null;
+let ultimoCodigoLido = "";
+let repeticoesCodigo = 0;
+
+function normalizarCodigo(codigo) {
+  return String(codigo || "").replace(/\D/g, "");
+}
+
+function validarEAN8(ean) {
+  if (!/^\d{8}$/.test(ean)) return false;
+
+  const digitos = ean.split("").map(Number);
+  const soma =
+    (digitos[0] + digitos[2] + digitos[4] + digitos[6]) * 3 +
+    (digitos[1] + digitos[3] + digitos[5]);
+
+  const verificador = (10 - (soma % 10)) % 10;
+
+  return verificador === digitos[7];
+}
+
+function validarEAN13(ean) {
+  if (!/^\d{13}$/.test(ean)) return false;
+
+  const digitos = ean.split("").map(Number);
+  let soma = 0;
+
+  for (let i = 0; i < 12; i++) {
+    soma += digitos[i] * (i % 2 === 0 ? 1 : 3);
+  }
+
+  const verificador = (10 - (soma % 10)) % 10;
+
+  return verificador === digitos[12];
+}
+
+function validarEAN(ean) {
+  return validarEAN13(ean) || validarEAN8(ean);
+}
+
+function confirmarLeitura(codigo) {
+  const ean = normalizarCodigo(codigo);
+
+  if (!validarEAN(ean)) {
+    return null;
+  }
+
+  if (ean === ultimoCodigoLido) {
+    repeticoesCodigo++;
+  } else {
+    ultimoCodigoLido = ean;
+    repeticoesCodigo = 1;
+  }
+
+  if (repeticoesCodigo >= 2) {
+    return ean;
+  }
+
+  return null;
+}
+
+function configScanner() {
+  const config = {
+    fps: 8,
+    qrbox: function(viewfinderWidth, viewfinderHeight) {
+      const largura = Math.floor(viewfinderWidth * 0.92);
+      const altura = Math.min(180, Math.floor(viewfinderHeight * 0.28));
+
+      return {
+        width: largura,
+        height: altura
+      };
+    },
+    rememberLastUsedCamera: true,
+    disableFlip: true
+  };
+
+  if (window.Html5QrcodeSupportedFormats) {
+    config.formatsToSupport = [
+      Html5QrcodeSupportedFormats.EAN_13,
+      Html5QrcodeSupportedFormats.EAN_8
+    ].filter(Boolean);
+  }
+
+  return config;
+}
+
+async function pararCamera() {
+  if (leitorCamera) {
+    try {
+      await leitorCamera.stop();
+      leitorCamera.clear();
+    } catch (erro) {
+      console.warn("Câmera já estava parada.", erro);
+    }
+
+    leitorCamera = null;
+  }
+
+  ultimoCodigoLido = "";
+  repeticoesCodigo = 0;
+
+  btnCamera.style.display = "block";
+  btnPararCamera.style.display = "none";
+}
+
+
+async function buscarProdutoCompleto(ean) {
+  const codigo = normalizarCodigo(ean);
+
+  if (!validarEAN(codigo)) {
+    alert("EAN inválido. Confira o código.");
+    return null;
+  }
+
+  let produto = buscarProdutoLocal(codigo);
 
   if (produto) {
     nomeInput.value = produto.nome;
+    produtoPreview.innerHTML = cardProdutoHTML(produto, "Produto encontrado no cadastro local.");
+    return produto;
+  }
+
+  nomeInput.value = "";
+  produtoPreview.innerHTML = `
+    <div class="card">
+      <p class="muted">Buscando produto na API...</p>
+    </div>
+  `;
+
+  try {
+    produto = await buscarProdutoAPI(codigo);
+
+    if (produto) {
+      produto = salvarProdutoLocalSeNovo(produto);
+      nomeInput.value = produto.nome;
+      produtoPreview.innerHTML = cardProdutoHTML(produto, "Produto encontrado na API e salvo no cadastro local.");
+      return produto;
+    }
 
     produtoPreview.innerHTML = `
       <div class="card">
-        <h3>${esc(produto.nome)}</h3>
-        <p><strong>EAN:</strong> ${esc(produto.ean)}</p>
-        <p><strong>Marca:</strong> ${esc(produto.marca || "Não informada")}</p>
-        <p><strong>Categoria:</strong> ${esc(produto.categoria || "Não informada")}</p>
-        ${
-          produto.foto
-            ? `<img class="produto-img" src="${produto.foto}" alt="${esc(produto.nome)}">`
-            : `<p class="muted">Produto sem foto cadastrada.</p>`
-        }
+        <p class="danger">Produto não encontrado na API.</p>
+        <p class="muted">Digite o nome manualmente ou peça para gerente/admin cadastrar o produto com foto.</p>
       </div>
     `;
-  } else {
-    nomeInput.value = "";
+
+    return null;
+  } catch (erro) {
+    console.error(erro);
 
     produtoPreview.innerHTML = `
       <div class="card">
-        <p class="danger">Produto ainda não cadastrado.</p>
-        <p class="muted">Você ainda pode lançar digitando o nome manualmente, mas o ideal é gerente/admin cadastrar o produto com foto.</p>
+        <p class="danger">Não foi possível consultar a API.</p>
+        <p class="muted">Confira a internet ou cadastre/digite o produto manualmente.</p>
       </div>
     `;
+
+    return null;
   }
 }
 
-eanInput.addEventListener("blur", () => {
-  const ean = eanInput.value.trim();
+eanInput.addEventListener("blur", async () => {
+  const ean = normalizarCodigo(eanInput.value);
 
   if (ean !== "") {
-    buscarProdutoPorEAN(ean);
+    eanInput.value = ean;
+    await buscarProdutoCompleto(ean);
   }
 });
 
@@ -61,30 +196,25 @@ btnCamera.addEventListener("click", async () => {
   btnCamera.style.display = "none";
   btnPararCamera.style.display = "block";
 
-  const config = {
-    fps: 10,
-    qrbox: { width: 280, height: 150 }
-  };
-
-  if (window.Html5QrcodeSupportedFormats) {
-    config.formatsToSupport = [
-      Html5QrcodeSupportedFormats.EAN_13,
-      Html5QrcodeSupportedFormats.EAN_8,
-      Html5QrcodeSupportedFormats.UPC_A,
-      Html5QrcodeSupportedFormats.UPC_E,
-      Html5QrcodeSupportedFormats.CODE_128,
-      Html5QrcodeSupportedFormats.CODE_39
-    ].filter(Boolean);
-  }
-
   try {
     await leitorCamera.start(
       { facingMode: "environment" },
-      config,
+      configScanner(),
       async (codigoLido) => {
-        eanInput.value = codigoLido;
-        buscarProdutoPorEAN(codigoLido);
+        const eanConfirmado = confirmarLeitura(codigoLido);
+
+        if (!eanConfirmado) {
+          return;
+        }
+
+        eanInput.value = eanConfirmado;
+
+        if (navigator.vibrate) {
+          navigator.vibrate(120);
+        }
+
         await pararCamera();
+        await buscarProdutoCompleto(eanConfirmado);
       },
       () => {}
     );
@@ -98,30 +228,14 @@ btnCamera.addEventListener("click", async () => {
 
 btnPararCamera.addEventListener("click", pararCamera);
 
-async function pararCamera() {
-  if (leitorCamera) {
-    try {
-      await leitorCamera.stop();
-      leitorCamera.clear();
-    } catch (erro) {
-      console.warn("Câmera já estava parada.", erro);
-    }
-
-    leitorCamera = null;
-  }
-
-  btnCamera.style.display = "block";
-  btnPararCamera.style.display = "none";
-}
-
 form.addEventListener("submit", function(event) {
   event.preventDefault();
 
-  const ean = eanInput.value.trim();
+  const ean = normalizarCodigo(eanInput.value);
   const nomeProduto = nomeInput.value.trim();
 
-  if (!/^\d{6,14}$/.test(ean)) {
-    alert("EAN inválido. Use apenas números.");
+  if (!validarEAN(ean)) {
+    alert("EAN inválido. Leia novamente pela câmera ou digite o código correto.");
     return;
   }
 
@@ -131,9 +245,7 @@ form.addEventListener("submit", function(event) {
   }
 
   const lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
-  const produtos = JSON.parse(localStorage.getItem("produtos")) || [];
-
-  const produtoCadastrado = produtos.find(p => p.ean === ean);
+  const produtoCadastrado = buscarProdutoLocal(ean);
 
   const novo = {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),

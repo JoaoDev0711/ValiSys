@@ -17,10 +17,10 @@
 <main class="container">
   <section class="card">
     <h2>Novo lançamento</h2>
-    <p class="muted">Leia o código de barras pela câmera ou digite o EAN manualmente.</p>
+    <p class="muted">Aponte para o código de barras inteiro. Se o produto não estiver salvo, o sistema tenta buscar nome e foto na API.</p>
 
     <div class="button-row">
-      <button type="button" id="btn-camera">📷 Ler código</button>
+      <button type="button" id="btn-camera">📷 Ler EAN</button>
       <button type="button" id="btn-parar-camera" class="secondary" style="display:none;">Parar câmera</button>
     </div>
 
@@ -51,6 +51,8 @@
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="auth.js"></script>
+<script src="cookies.js"></script>
+<script src="api-produtos.js"></script>
 <script src="lancar.js"></script>
 </body>
 </html>

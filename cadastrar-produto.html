@@ -17,7 +17,7 @@
 <main class="container">
   <section class="card">
     <h2>Cadastrar produto</h2>
-    <p class="muted">Gerente e admin podem cadastrar produtos que ainda não existem.</p>
+    <p class="muted">Gerente e admin podem cadastrar produtos. Ao ler o EAN, o sistema tenta preencher nome, marca, categoria e foto pela API.</p>
 
     <div class="button-row">
       <button type="button" id="btn-camera">📷 Ler EAN</button>
@@ -56,6 +56,8 @@
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="auth.js"></script>
+<script src="cookies.js"></script>
+<script src="api-produtos.js"></script>
 <script src="produto.js"></script>
 </body>
 </html>

@@ -1,28 +1,30 @@
-ValiSys - MVP localStorage
+ValiSys - Versão GitHub Pages simples
 
-Como testar:
-1. Abra a pasta no VS Code.
-2. Instale/use a extensão Live Server.
-3. Clique com o botão direito no login.html e escolha "Open with Live Server".
-4. Faça login com nome e cargo.
-5. Para testar tudo:
-   - Entre como Gerente ou Admin
-   - Vá em Cadastrar Produto
-   - Leia o EAN pela câmera ou digite
-   - Tire/envie a foto do produto
-   - Salve
-   - Vá em Lançar validade
-   - Leia o EAN pela câmera
-   - O sistema puxa nome e foto do produto cadastrado
-   - Informe setor, quantidade e validade
+Esta versão NÃO usa servidor Node e NÃO usa push real.
+Ela foi ajustada para rodar em GitHub Pages.
 
-Permissões:
-- Promotor: lança vencimentos e vê somente os próprios lançamentos.
-- Encarregado: lança vencimentos e vê lista geral.
-- Gerente: lança, vê lista geral e cadastra produtos.
-- Admin: tudo, incluindo usuários.
+O que tem:
+- Login por nome e cargo
+- Senha para encarregado, gerente e admin
+- Promotor sem senha
+- Cadastro de produtos
+- Busca automática por API usando EAN
+- Foto automática quando a API tiver imagem
+- Leitura de EAN pela câmera
+- Lançamento de vencimentos
+- Lembretes na tela inicial
+- Contagem de dias até o vencimento
+- Cookies apenas para lembrar o aviso de cookies
+- Tudo salvo no localStorage do aparelho
 
-Observação:
-- localStorage salva somente no navegador/celular atual.
-- A câmera pode não funcionar abrindo o arquivo direto por file://.
-- Use Live Server ou GitHub Pages/HTTPS.
+Senhas do MVP:
+- Promotor: sem senha
+- Encarregado: enc123
+- Gerente: ger123
+- Admin: admin123
+
+Importante:
+- localStorage salva apenas no celular/navegador usado.
+- Se abrir em outro aparelho, os dados não aparecem.
+- Para dados compartilhados entre celulares, depois precisa Supabase/Firebase.
+- Câmera funciona melhor no GitHub Pages/HTTPS ou Live Server.

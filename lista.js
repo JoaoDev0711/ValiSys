@@ -17,6 +17,7 @@ if (paginaAtual.includes("lista-geral")) {
 
 function renderizarLista() {
   const termo = (filtro?.value || "").toLowerCase().trim();
+  const produtos = JSON.parse(localStorage.getItem("produtos")) || [];
 
   let lancamentos = lancamentosBase.filter(item => {
     const texto = `
@@ -64,7 +65,13 @@ function renderizarLista() {
         <p><strong>Validade:</strong> ${esc(item.validade)}</p>
         <p><strong>Lançado por:</strong> ${esc(item.usuarioNome)} (${esc(nomeCargo(item.usuarioCargo))})</p>
         <p>${status}</p>
-        ${item.foto ? `<img class="produto-img" src="${item.foto}" alt="${esc(item.nomeProduto)}">` : ""}
+        ${
+          (() => {
+            const produtoLocal = produtos.find(p => p.ean === item.ean);
+            const fotoFinal = item.foto || produtoLocal?.foto || "";
+            return fotoFinal ? `<img class="produto-img" src="${fotoFinal}" alt="${esc(item.nomeProduto)}">` : "";
+          })()
+        }
         <div class="card-actions">
           <button class="btn-danger" onclick="apagarLancamento('${item.id}')">Apagar lançamento</button>
         </div>

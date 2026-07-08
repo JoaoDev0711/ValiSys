@@ -27,12 +27,20 @@
         <option value="admin">Admin</option>
       </select>
 
+      <div id="senha-area" style="display:none;">
+        <label for="senha">Senha do cargo</label>
+        <input type="password" id="senha" placeholder="Digite a senha do cargo">
+        <p class="small muted">
+          A senha é exigida para encarregado, gerente e admin.
+        </p>
+      </div>
+
       <button type="submit">Entrar</button>
     </form>
-
   </section>
 </main>
 
+<script src="cookies.js"></script>
 <script src="login.js"></script>
 </body>
 </html>
