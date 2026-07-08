@@ -252,15 +252,6 @@ function confirmarLeitura(codigo) {
 function configScanner() {
   const config = {
     fps: 18,
-    qrbox: function(viewfinderWidth, viewfinderHeight) {
-      const largura = Math.floor(viewfinderWidth * 0.98);
-      const altura = Math.min(300, Math.max(190, Math.floor(viewfinderHeight * 0.42)));
-
-      return {
-        width: largura,
-        height: altura
-      };
-    },
     rememberLastUsedCamera: true,
     disableFlip: true,
     videoConstraints: cameraResolucaoDoCelular()
@@ -294,6 +285,8 @@ async function pararCamera() {
   ultimoCodigoLido = "";
   repeticoesCodigo = 0;
 
+  document.body.classList.remove("camera-aberta");
+
   btnCamera.style.display = "block";
   btnPararCamera.style.display = "none";
 
@@ -309,6 +302,7 @@ async function buscarProdutoCompleto(ean) {
     return null;
   }
 
+  eanInput.value = codigo;
   let produto = null;
 
   nomeInput.value = "";
@@ -320,50 +314,62 @@ async function buscarProdutoCompleto(ean) {
 
   try {
     produto = await valisysDB.buscarProdutoPorEAN(codigo);
+  } catch (erroSupabase) {
+    console.warn("Falha ao buscar produto no Supabase. Tentando API pública.", erroSupabase);
+  }
 
-    if (produto) {
-      produtoAtual = produto;
-      nomeInput.value = produto.nome;
-      produtoPreview.innerHTML = cardProdutoHTML(produto, "Produto encontrado no Supabase.");
-      return produto;
-    }
+  if (produto) {
+    produtoAtual = produto;
+    nomeInput.value = produto.nome || "";
+    produtoPreview.innerHTML = cardProdutoHTML(produto, "Produto encontrado no Supabase.");
+    return produto;
+  }
 
-    produtoPreview.innerHTML = `
-      <div class="card">
-        <p class="muted">Produto não encontrado no Supabase. Buscando na API pública...</p>
-      </div>
-    `;
+  produtoPreview.innerHTML = `
+    <div class="card">
+      <p class="muted">Produto não estava no Supabase. Buscando na API pública...</p>
+    </div>
+  `;
 
+  try {
     produto = await buscarProdutoAPI(codigo);
-
-    if (produto) {
-      produto = await valisysDB.salvarProduto(produto);
-      produtoAtual = produto;
-      nomeInput.value = produto.nome;
-      produtoPreview.innerHTML = cardProdutoHTML(produto, "Produto encontrado na API e salvo no Supabase.");
-      return produto;
-    }
-
+  } catch (erroAPI) {
+    console.warn("API pública não retornou produto.", erroAPI);
     produtoPreview.innerHTML = `
       <div class="card">
-        <p class="danger">Produto não encontrado.</p>
-        <p class="muted">Digite o nome manualmente ou peça para gerente/admin cadastrar o produto.</p>
+        <p class="danger">Não consegui puxar esse item pela API.</p>
+        <p class="muted">Você ainda pode digitar o nome manualmente e lançar normalmente.</p>
       </div>
     `;
-
-    return null;
-  } catch (erro) {
-    console.error(erro);
-
-    produtoPreview.innerHTML = `
-      <div class="card">
-        <p class="danger">Erro ao consultar Supabase/API.</p>
-        <p class="muted">${esc(erro.message)}</p>
-      </div>
-    `;
-
+    produtoAtual = null;
     return null;
   }
+
+  if (!produto) {
+    produtoPreview.innerHTML = `
+      <div class="card">
+        <p class="muted">Produto não encontrado na API.</p>
+        <p class="muted">Digite o nome manualmente e lance normalmente.</p>
+      </div>
+    `;
+    produtoAtual = null;
+    return null;
+  }
+
+  // Preenche a tela mesmo que o salvamento do produto no Supabase falhe.
+  produtoAtual = produto;
+  nomeInput.value = produto.nome || "";
+
+  try {
+    const produtoSalvo = await valisysDB.salvarProduto(produto);
+    produtoAtual = produtoSalvo || produto;
+    produtoPreview.innerHTML = cardProdutoHTML(produtoAtual, "Produto puxado da API e salvo no Supabase.");
+  } catch (erroSalvarProduto) {
+    console.warn("Produto puxado da API, mas não salvo em produtos. O lançamento ainda pode ser salvo.", erroSalvarProduto);
+    produtoPreview.innerHTML = cardProdutoHTML(produto, "Produto puxado da API. Se não salvou em produtos, o lançamento ainda funciona.");
+  }
+
+  return produtoAtual;
 }
 
 eanInput.addEventListener("blur", async () => {
@@ -383,6 +389,7 @@ btnCamera.addEventListener("click", async () => {
     return;
   }
 
+  document.body.classList.add("camera-aberta");
   btnCamera.style.display = "none";
   btnPararCamera.style.display = "block";
 
@@ -408,6 +415,7 @@ btnCamera.addEventListener("click", async () => {
   } catch (erro) {
     alert("Não foi possível abrir a câmera. Use Live Server, GitHub Pages ou HTTPS.");
     console.error(erro);
+    document.body.classList.remove("camera-aberta");
     btnCamera.style.display = "block";
     btnPararCamera.style.display = "none";
     atualizarStatusScanner("Não foi possível abrir a câmera. Verifique permissão e HTTPS.", "scanner-erro");

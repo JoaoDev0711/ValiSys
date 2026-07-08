@@ -208,8 +208,12 @@ const valisysDB = {
     let produtoId = null;
 
     if (item.ean) {
-      const produto = await this.buscarProdutoPorEAN(item.ean);
-      produtoId = produto?.id || null;
+      try {
+        const produto = await this.buscarProdutoPorEAN(item.ean);
+        produtoId = produto?.id || null;
+      } catch (erroProduto) {
+        console.warn("Não foi possível vincular produto_id. O lançamento será salvo mesmo assim.", erroProduto);
+      }
     }
 
     const { data, error } = await db

@@ -2441,3 +2441,91 @@ button[disabled] {
 #reader__camera_selection {
   display: none !important;
 }
+
+
+/* Camera fullscreen real */
+body.camera-aberta {
+  overflow: hidden;
+}
+
+body.camera-aberta #reader {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9998 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  overflow: hidden !important;
+}
+
+body.camera-aberta #reader video,
+body.camera-aberta #reader canvas {
+  width: 100vw !important;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  object-fit: cover !important;
+  border-radius: 0 !important;
+}
+
+body.camera-aberta #btn-parar-camera {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  z-index: 10000;
+  width: auto;
+  min-height: 54px;
+  border-radius: 18px;
+  background: #ffffff;
+  color: #111;
+  border: 0;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .28);
+}
+
+body.camera-aberta .scanner-ajuda {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  top: calc(16px + env(safe-area-inset-top));
+  z-index: 10000;
+  color: #fff;
+  background: rgba(0, 0, 0, .42);
+  border: 1px solid rgba(255, 255, 255, .18);
+  backdrop-filter: blur(10px);
+}
+
+body.camera-aberta .scanner-ajuda p,
+body.camera-aberta .scanner-ajuda small {
+  color: #fff;
+}
+
+/* Remove qualquer barra, linha ou moldura desenhada pelo html5-qrcode */
+#reader__scan_region,
+#reader__scan_region *,
+#reader__scan_region img,
+#qr-shaded-region,
+#qr-shaded-region *,
+body.camera-aberta #reader div[style*="border"],
+body.camera-aberta #reader span[style*="border"],
+body.camera-aberta #reader div[style*="box-shadow"],
+body.camera-aberta #reader span[style*="box-shadow"] {
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+  background: transparent !important;
+}
+
+#reader__scan_region img {
+  display: none !important;
+}
+
+body.camera-aberta #reader__dashboard_section,
+body.camera-aberta #reader__dashboard_section_csr,
+body.camera-aberta #reader__camera_selection,
+body.camera-aberta #reader__dashboard {
+  display: none !important;
+}
