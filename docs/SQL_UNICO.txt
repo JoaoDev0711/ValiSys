@@ -1,0 +1,23 @@
+SQL único do ValiSys
+
+Agora existe apenas um SQL para criar/atualizar a base:
+
+database/valisys-sql-unico.sql
+
+Use ele no SQL Editor.
+
+Ele já inclui:
+- lojas;
+- funcionários;
+- produtos;
+- lançamentos;
+- notificações;
+- imagem da loja;
+- região;
+- grupo/rede;
+- cor da rede;
+- ativar/desativar loja;
+- índices;
+- permissões para o front-end funcionar.
+
+Não precisa rodar os SQL antigos separados.

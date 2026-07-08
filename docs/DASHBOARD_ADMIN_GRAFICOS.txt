@@ -24,4 +24,4 @@ Fluxo recomendado:
 5. Pode voltar para a área admin quando quiser.
 
 Antes de testar região/grupo/status, rode:
-database/ajuste-lojas-regiao-grupo-status.sql
+database/valisys-sql-unico.sql

@@ -49,7 +49,7 @@ const valisysDB = {
     return (data || []).map(this.lojaDBParaApp);
   },
 
-  async criarLoja({ nome, responsavel, imagem = "", regiao = "", grupo = "" }) {
+  async criarLoja({ nome, responsavel, imagem = "", regiao = "", grupo = "", corTema = "" }) {
     const db = this.client();
 
     const payloadCompleto = {
@@ -58,6 +58,7 @@ const valisysDB = {
       imagem,
       regiao,
       grupo,
+      cor_tema: corTema,
       status: "ativa"
     };
 
@@ -72,7 +73,7 @@ const valisysDB = {
     if (resposta.error) {
       const mensagem = String(resposta.error.message || "");
 
-      if (mensagem.includes("imagem") || mensagem.includes("regiao") || mensagem.includes("grupo")) {
+      if (mensagem.includes("imagem") || mensagem.includes("regiao") || mensagem.includes("grupo") || mensagem.includes("cor_tema")) {
         const payloadBasico = {
           nome,
           responsavel,
@@ -122,6 +123,7 @@ const valisysDB = {
     if ("regiao" in dados) payload.regiao = dados.regiao;
     if ("grupo" in dados) payload.grupo = dados.grupo;
     if ("imagem" in dados) payload.imagem = dados.imagem;
+    if ("corTema" in dados) payload.cor_tema = dados.corTema;
 
     const { data, error } = await db
       .from("lojas")
@@ -563,6 +565,7 @@ const valisysDB = {
       imagem: data.imagem || "",
       regiao: data.regiao || "",
       grupo: data.grupo || "",
+      corTema: data.cor_tema || "",
       status: data.status || "ativa",
       criadaEm: data.criada_em || ""
     };

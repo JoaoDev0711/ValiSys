@@ -63,12 +63,38 @@
     </div>
   </section>
 
+  <section class="card admin-percent-card" id="admin-percentuais"></section>
+
   <section class="admin-grid">
     <article class="card">
       <div class="section-title">
         <div>
-          <h2>Visão por status</h2>
-          <p class="muted">Ativas x desativadas</p>
+          <h2>Pizza de status</h2>
+          <p class="muted">Percentual de lojas ativas e desativadas</p>
+        </div>
+        <span>🥧</span>
+      </div>
+      <div id="pizza-status-lojas" class="pie-chart-wrap"></div>
+    </article>
+
+    <article class="card">
+      <div class="section-title">
+        <div>
+          <h2>Pizza de vencimentos</h2>
+          <p class="muted">Percentual da situação geral dos produtos</p>
+        </div>
+        <span>🥧</span>
+      </div>
+      <div id="pizza-vencimentos-admin" class="pie-chart-wrap"></div>
+    </article>
+  </section>
+
+  <section class="admin-grid">
+    <article class="card">
+      <div class="section-title">
+        <div>
+          <h2>Barras de status</h2>
+          <p class="muted">Ativas x desativadas com porcentagem</p>
         </div>
         <span>📊</span>
       </div>
@@ -78,8 +104,8 @@
     <article class="card">
       <div class="section-title">
         <div>
-          <h2>Vencimentos</h2>
-          <p class="muted">Situação geral dos produtos</p>
+          <h2>Barras de vencimentos</h2>
+          <p class="muted">Situação geral dos produtos com porcentagem</p>
         </div>
         <span>⏳</span>
       </div>
@@ -138,6 +164,10 @@
 
       <label for="grupoLojaAdmin">Grupo/Rede</label>
       <input type="text" id="grupoLojaAdmin" placeholder="Ex: Bahamas, Frangolândia, GG">
+
+      <label for="corLojaAdmin">Cor da rede</label>
+      <input type="color" id="corLojaAdmin" value="#2f7d4f">
+      <p class="small muted">Essa cor será usada quando a loja estiver selecionada.</p>
 
       <label for="regiaoLojaAdmin">Região</label>
       <input type="text" id="regiaoLojaAdmin" placeholder="Ex: Fortaleza, Eusébio, Caucaia, Regional Sul">

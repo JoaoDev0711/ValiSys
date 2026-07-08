@@ -1,0 +1,27 @@
+Dashboard Admin profissional
+
+A Dashboard Admin agora tem:
+
+- gráficos de pizza;
+- gráficos de barras;
+- porcentagens nos gráficos;
+- cards de indicadores;
+- percentuais administrativos;
+- atalhos operacionais para continuar lançando;
+- cor da rede/grupo por loja.
+
+Cor da rede:
+- No cadastro de loja, escolha a cor da rede.
+- Ao administrar uma loja, o sistema aplica a cor dela no tema.
+- A cor também aparece nos cards da Dashboard Admin.
+
+Exemplo:
+- Bahamas pode usar vermelho.
+- Frangolândia pode usar verde.
+- GG pode usar azul.
+
+Use apenas:
+database/valisys-sql-unico.sql
+
+Use apenas:
+database/valisys-sql-unico.sql

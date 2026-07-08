@@ -117,3 +117,7 @@ Versão sistema-only:
 - localStorage fica apenas para sessão: usuário logado e loja atual.
 - Produto local foi desativado; cadastro e busca passam pelo sistema.
 - Se o sistema não estiver configurado ou a política bloquear acesso, a tela mostra erro em vez de salvar localmente.
+
+
+SQL único:
+Rode database/valisys-sql-unico.sql no SQL Editor.

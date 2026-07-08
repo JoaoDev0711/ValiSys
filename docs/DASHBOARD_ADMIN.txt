@@ -18,4 +18,4 @@ A tela escolher-loja.html ficou somente para seleção de loja.
 Funcionário comum não vê cadastro de loja.
 
 Antes de usar imagem da loja em uma base já criada, rode:
-database/ajuste-imagem-loja.sql
+database/valisys-sql-unico.sql

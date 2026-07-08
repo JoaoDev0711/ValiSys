@@ -4,6 +4,7 @@ function getLojaAtual() {
 
 function setLojaAtual(loja) {
   salvarJSONLocal("lojaAtual", loja);
+  aplicarTemaLoja(loja);
 }
 
 function limparLojaAtual() {
@@ -99,3 +100,53 @@ function comprimirImagemLoja(arquivo, larguraMaxima = 520, qualidade = 0.78) {
     leitor.readAsDataURL(arquivo);
   });
 }
+
+
+function normalizarHexCor(cor) {
+  const texto = String(cor || "").trim();
+
+  if (/^#[0-9a-f]{6}$/i.test(texto)) {
+    return texto;
+  }
+
+  return "";
+}
+
+function escurecerHex(cor, porcentagem = 24) {
+  const hex = normalizarHexCor(cor);
+
+  if (!hex) return "";
+
+  const num = parseInt(hex.slice(1), 16);
+  let r = (num >> 16) & 255;
+  let g = (num >> 8) & 255;
+  let b = num & 255;
+
+  const fator = Math.max(0, Math.min(100, 100 - porcentagem)) / 100;
+
+  r = Math.round(r * fator);
+  g = Math.round(g * fator);
+  b = Math.round(b * fator);
+
+  return "#" + [r, g, b].map(v => v.toString(16).padStart(2, "0")).join("");
+}
+
+function aplicarTemaLoja(loja) {
+  const cor = normalizarHexCor(loja?.corTema || loja?.cor || "");
+
+  if (!cor) return;
+
+  const forte = escurecerHex(cor, 26) || cor;
+
+  document.documentElement.style.setProperty("--primary", cor);
+  document.documentElement.style.setProperty("--primary-strong", forte);
+  document.documentElement.style.setProperty("--accent", `${cor}18`);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const loja = getLojaAtual();
+
+  if (loja) {
+    aplicarTemaLoja(loja);
+  }
+});

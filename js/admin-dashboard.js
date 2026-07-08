@@ -10,6 +10,7 @@ const nomeLojaAdmin = document.getElementById("nomeLojaAdmin");
 const responsavelLojaAdmin = document.getElementById("responsavelLojaAdmin");
 const grupoLojaAdmin = document.getElementById("grupoLojaAdmin");
 const regiaoLojaAdmin = document.getElementById("regiaoLojaAdmin");
+const corLojaAdmin = document.getElementById("corLojaAdmin");
 const imagemLojaAdmin = document.getElementById("imagemLojaAdmin");
 const previewImagemLojaAdmin = document.getElementById("previewImagemLojaAdmin");
 const listaLojasAdmin = document.getElementById("lista-lojas-admin");
@@ -26,6 +27,9 @@ const graficoStatusLojas = document.getElementById("grafico-status-lojas");
 const graficoVencimentosAdmin = document.getElementById("grafico-vencimentos-admin");
 const graficoGruposAdmin = document.getElementById("grafico-grupos-admin");
 const graficoRegioesAdmin = document.getElementById("grafico-regioes-admin");
+const pizzaStatusLojas = document.getElementById("pizza-status-lojas");
+const pizzaVencimentosAdmin = document.getElementById("pizza-vencimentos-admin");
+const adminPercentuais = document.getElementById("admin-percentuais");
 const adminLojaAtual = document.getElementById("admin-loja-atual");
 
 let imagemLojaBase64 = "";
@@ -51,6 +55,12 @@ function diasAteValidade(validadeISO) {
   const diff = validade.getTime() - hoje.getTime();
 
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
+}
+
+function porcentagem(valor, total) {
+  if (!total) return 0;
+
+  return Math.round((Number(valor || 0) / total) * 100);
 }
 
 function contarPorCampo(lista, campo, fallback) {
@@ -118,6 +128,8 @@ function renderizarGraficoBarras(container, dados, vazio = "Sem dados para mostr
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8);
 
+  const total = entradas.reduce((soma, [, valor]) => soma + Number(valor || 0), 0);
+
   if (entradas.length === 0) {
     container.innerHTML = `<p class="muted">${vazio}</p>`;
     return;
@@ -126,20 +138,74 @@ function renderizarGraficoBarras(container, dados, vazio = "Sem dados para mostr
   const max = Math.max(...entradas.map(([, valor]) => valor), 1);
 
   container.innerHTML = entradas.map(([label, valor]) => {
-    const pct = Math.max(6, Math.round((valor / max) * 100));
+    const pctBarra = Math.max(6, Math.round((valor / max) * 100));
+    const pctTotal = porcentagem(valor, total);
 
     return `
       <div class="bar-row">
         <div class="bar-row-top">
           <span>${esc(label)}</span>
-          <strong>${valor}</strong>
+          <strong>${valor} • ${pctTotal}%</strong>
         </div>
         <div class="bar-track">
-          <div class="bar-fill" style="width:${pct}%"></div>
+          <div class="bar-fill" style="width:${pctBarra}%"></div>
         </div>
       </div>
     `;
   }).join("");
+}
+
+function renderizarPizza(container, dados, vazio = "Sem dados para mostrar.") {
+  if (!container) return;
+
+  const entradas = Object.entries(dados)
+    .filter(([, valor]) => Number(valor) > 0);
+
+  const total = entradas.reduce((soma, [, valor]) => soma + Number(valor || 0), 0);
+
+  if (total === 0 || entradas.length === 0) {
+    container.innerHTML = `<p class="muted">${vazio}</p>`;
+    return;
+  }
+
+  const cores = [
+    "var(--primary)",
+    "var(--warning)",
+    "var(--danger)",
+    "var(--primary-strong)",
+    "#7b8f5a",
+    "#b9a64c",
+    "#8b6f47"
+  ];
+
+  let inicio = 0;
+
+  const fatias = entradas.map(([, valor], index) => {
+    const graus = (Number(valor) / total) * 360;
+    const fim = inicio + graus;
+    const trecho = `${cores[index % cores.length]} ${inicio}deg ${fim}deg`;
+    inicio = fim;
+    return trecho;
+  }).join(", ");
+
+  container.innerHTML = `
+    <div class="pie-chart" style="background: conic-gradient(${fatias})">
+      <div class="pie-hole">
+        <strong>${total}</strong>
+        <span>Total</span>
+      </div>
+    </div>
+
+    <div class="pie-legend">
+      ${entradas.map(([label, valor], index) => `
+        <div class="pie-legend-item">
+          <span class="pie-dot" style="background:${cores[index % cores.length]}"></span>
+          <p>${esc(label)}</p>
+          <strong>${porcentagem(valor, total)}%</strong>
+        </div>
+      `).join("")}
+    </div>
+  `;
 }
 
 function calcularResumoVencimentos() {
@@ -164,23 +230,59 @@ function calcularResumoVencimentos() {
   });
 }
 
+function renderizarPercentuaisAdmin() {
+  const totalLojas = lojasAdminCache.length;
+  const ativas = lojasAdminCache.filter(loja => (loja.status || "ativa") === "ativa").length;
+  const inativas = totalLojas - ativas;
+  const ativosLancamentos = lancamentosAdminCache.filter(item => item.status === "ativo");
+  const resumo = calcularResumoVencimentos();
+  const totalVencimentosCriticos = resumo.vencidos + resumo.hoje + resumo.seteDias;
+
+  adminPercentuais.innerHTML = `
+    <div class="admin-kpi-grid">
+      <div class="admin-kpi">
+        <span>Operação ativa</span>
+        <strong>${porcentagem(ativas, totalLojas)}%</strong>
+        <p>${ativas} de ${totalLojas || 0} lojas ativas</p>
+      </div>
+
+      <div class="admin-kpi">
+        <span>Serviço parado</span>
+        <strong>${porcentagem(inativas, totalLojas)}%</strong>
+        <p>${inativas} loja(s) desativada(s)</p>
+      </div>
+
+      <div class="admin-kpi">
+        <span>Itens críticos</span>
+        <strong>${porcentagem(totalVencimentosCriticos, ativosLancamentos.length)}%</strong>
+        <p>Vencidos, hoje ou até 7 dias</p>
+      </div>
+    </div>
+  `;
+}
+
 function renderizarGraficosAdmin() {
   const ativas = lojasAdminCache.filter(loja => (loja.status || "ativa") === "ativa").length;
   const inativas = lojasAdminCache.filter(loja => (loja.status || "ativa") !== "ativa").length;
   const resumo = calcularResumoVencimentos();
 
-  renderizarGraficoBarras(graficoStatusLojas, {
+  const dadosStatus = {
     "Ativas": ativas,
     "Desativadas": inativas
-  });
+  };
 
-  renderizarGraficoBarras(graficoVencimentosAdmin, {
+  const dadosVencimentos = {
     "Vencidos": resumo.vencidos,
     "Hoje": resumo.hoje,
     "Até 7 dias": resumo.seteDias,
     "Até 30 dias": resumo.trintaDias,
     "Normal": resumo.normal
-  });
+  };
+
+  renderizarPizza(pizzaStatusLojas, dadosStatus);
+  renderizarPizza(pizzaVencimentosAdmin, dadosVencimentos);
+  renderizarGraficoBarras(graficoStatusLojas, dadosStatus);
+  renderizarGraficoBarras(graficoVencimentosAdmin, dadosVencimentos);
 
   renderizarGraficoBarras(
     graficoGruposAdmin,
@@ -191,6 +293,8 @@ function renderizarGraficosAdmin() {
     graficoRegioesAdmin,
     contarPorCampo(lojasAdminCache, "regiao", "Sem região")
   );
+
+  renderizarPercentuaisAdmin();
 }
 
 function renderizarLojaAtualAdmin() {
@@ -206,6 +310,8 @@ function renderizarLojaAtualAdmin() {
     return;
   }
 
+  aplicarTemaLoja(lojaAtual);
+
   adminLojaAtual.innerHTML = `
     <div class="admin-current-store-card">
       ${logoLojaHTML(lojaAtual, "loja-logo-dashboard")}
@@ -213,6 +319,7 @@ function renderizarLojaAtualAdmin() {
         <strong>${esc(lojaAtual.nome)}</strong>
         <p>Grupo/Rede: ${esc(lojaAtual.grupo || "Sem grupo")}</p>
         <p>Região: ${esc(lojaAtual.regiao || "Sem região")}</p>
+        ${lojaAtual.corTema ? `<p>Cor da rede: <span class="color-mini" style="background:${esc(lojaAtual.corTema)}"></span></p>` : ""}
       </div>
     </div>
 
@@ -240,9 +347,10 @@ function renderizarListaFiltradaAdmin() {
   listaLojasAdmin.innerHTML = lojas.map(loja => {
     const status = loja.status || "ativa";
     const ativa = status === "ativa";
+    const cor = normalizarHexCor(loja.corTema) || "#2f7d4f";
 
     return `
-      <article class="card loja-card loja-card-com-logo ${ativa ? "" : "loja-inativa"}">
+      <article class="card loja-card loja-card-com-logo ${ativa ? "" : "loja-inativa"}" style="border-left: 5px solid ${esc(cor)}">
         ${logoLojaHTML(loja, "loja-logo-card")}
 
         <div class="loja-card-info">
@@ -256,6 +364,7 @@ function renderizarListaFiltradaAdmin() {
           <p class="muted">Responsável: ${esc(loja.responsavel || "Não informado")}</p>
           <p><strong>Grupo/Rede:</strong> ${esc(loja.grupo || "Sem grupo")}</p>
           <p><strong>Região:</strong> ${esc(loja.regiao || "Sem região")}</p>
+          <p><strong>Cor:</strong> <span class="color-mini" style="background:${esc(cor)}"></span></p>
           <p class="muted">Código interno: ${esc(String(loja.id).slice(0, 8))}</p>
         </div>
 
@@ -404,12 +513,21 @@ async function editarDadosLoja(id) {
   const regiao = prompt("Região:", loja.regiao || "");
   if (regiao === null) return;
 
+  const corTema = prompt("Cor da rede em hexadecimal. Exemplo: #2f7d4f", loja.corTema || "#2f7d4f");
+  if (corTema === null) return;
+
+  if (corTema.trim() && !normalizarHexCor(corTema.trim())) {
+    alert("Cor inválida. Use o formato #RRGGBB. Exemplo: #2f7d4f");
+    return;
+  }
+
   try {
     await valisysDB.atualizarDadosLoja(id, {
       nome: nome.trim(),
       responsavel: responsavel.trim(),
       grupo: grupo.trim(),
-      regiao: regiao.trim()
+      regiao: regiao.trim(),
+      corTema: corTema.trim()
     });
 
     alert("Dados da loja atualizados.");
@@ -458,6 +576,7 @@ formLojaAdmin.addEventListener("submit", async event => {
   const responsavel = responsavelLojaAdmin.value.trim();
   const grupo = grupoLojaAdmin.value.trim();
   const regiao = regiaoLojaAdmin.value.trim();
+  const corTema = normalizarHexCor(corLojaAdmin?.value || "") || "#2f7d4f";
 
   if (!nome) {
     alert("Informe o nome da loja.");
@@ -470,10 +589,12 @@ formLojaAdmin.addEventListener("submit", async event => {
       responsavel,
       grupo,
       regiao,
+      corTema,
       imagem: imagemLojaBase64
     });
 
     formLojaAdmin.reset();
+    if (corLojaAdmin) corLojaAdmin.value = "#2f7d4f";
     imagemLojaBase64 = "";
     previewImagemLojaAdmin.innerHTML = "";
 

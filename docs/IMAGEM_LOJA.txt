@@ -14,4 +14,4 @@ Loja São João = LS
 Atacadão Central = AC
 
 Antes de usar em uma base já criada, rode:
-database/ajuste-imagem-loja.sql
+database/valisys-sql-unico.sql
