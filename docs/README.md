@@ -402,3 +402,39 @@ NOVA
 Fonte
 Foto
 ```
+
+
+---
+
+## Navbar padrão e confirmação de saída
+
+A Dashboard Admin e a Gestão da Loja agora usam a mesma navegação das demais telas:
+
+```txt
+Botão ☰
+Menu lateral
+Overlay
+Links internos
+Botão Sair
+```
+
+A saída agora pede confirmação dentro do próprio sistema em todas as telas logadas.
+
+Também existe confirmação ao trocar de loja, porque isso limpa a sessão atual para evitar registros no mercado errado.
+
+
+---
+
+## Admin administrando loja como admin
+
+Existem dois fluxos diferentes:
+
+```txt
+Funcionário pela seleção pública:
+escolher-loja.html → clicar na loja → login da loja
+
+Admin pela Dashboard Admin:
+admin-dashboard.html → Administrar esta loja → entra na loja mantendo cargo Admin
+```
+
+Quando o admin administra uma loja pela Dashboard Admin, ele continua como admin e pode acessar a dashboard da loja, produtos, usuários, listas e gestão da loja.

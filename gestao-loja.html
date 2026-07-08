@@ -9,10 +9,34 @@
 <body>
 
 <header class="topbar">
-  <a href="dashboard.html" class="user-icon" aria-label="Voltar">←</a>
+  <button id="menu-btn" class="icon-btn" aria-label="Abrir menu">☰</button>
   <h1>Gestão</h1>
   <a href="#" onclick="sair()" class="user-icon" aria-label="Sair">🚪</a>
 </header>
+
+<nav id="sidebar" class="sidebar">
+  <div class="sidebar-user">
+    <div class="avatar">👤</div>
+    <div>
+      <strong id="sidebar-nome">Usuário</strong>
+      <p id="sidebar-cargo">Cargo</p>
+    </div>
+  </div>
+
+  <a href="dashboard.html">🏠 Dashboard</a>
+  <a href="gestao-loja.html">📊 Gestão da loja</a>
+  <a href="#gestao-resumo">📌 Resumo</a>
+  <a href="#gestao-vencimentos">⏳ Vencimentos</a>
+  <a href="#gestao-equipe" data-gestao="gerente">👥 Equipe</a>
+  <a href="#gestao-acoes">⚡ Ações</a>
+  <a href="lancar.html">📦 Lançar validade</a>
+  <a href="lista-geral.html">📅 Lista completa</a>
+  <a href="notificacoes.html">🔔 Notificações</a>
+  <a href="#" onclick="trocarLojaComConfirmacao()">🏪 Trocar loja</a>
+  <a href="#" onclick="sair()">🚪 Sair</a>
+</nav>
+
+<div id="overlay"></div>
 
 <main class="container">
   <section class="welcome-card">
@@ -21,12 +45,6 @@
     <p id="gestao-descricao">Visão operacional para gerente e encarregado.</p>
   </section>
 
-  <nav class="admin-navbar loja-gestao-navbar" aria-label="Navegação da gestão da loja">
-    <a href="#gestao-resumo">Resumo</a>
-    <a href="#gestao-vencimentos">Vencimentos</a>
-    <a href="#gestao-equipe" data-gestao="gerente">Equipe</a>
-    <a href="#gestao-acoes">Ações</a>
-  </nav>
 
   <section class="loja-atual-card compact">
     <div>

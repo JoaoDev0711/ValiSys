@@ -110,23 +110,21 @@ function limparUsuarioLogado() {
 }
 
 function bloquearAdminEmAreaLoja() {
-  const usuario = getUsuarioLogado();
-
-  if (usuario && usuario.cargo === "admin") {
-    alert("Admin não entra na área operacional da loja. Escolha a loja e entre como funcionário/gerente/encarregado/promotor.");
-    window.location.href = "admin-dashboard.html";
-    return true;
-  }
-
+  // Admin pode administrar uma loja quando veio pela Dashboard Admin.
+  // A seleção pública de loja continua limpando o usuário antes do login operacional.
   return false;
 }
 
 
 function podeVerGestaoLoja(cargo) {
-  return ["gerente", "encarregado"].includes(cargo);
+  return ["gerente", "encarregado", "admin"].includes(cargo);
 }
 
 function descricaoPermissaoGestao(cargo) {
+  if (cargo === "admin") {
+    return "Visão administrativa completa da loja selecionada.";
+  }
+
   if (cargo === "gerente") {
     return "Visão completa da loja, equipe, produtos e vencimentos.";
   }
@@ -136,4 +134,18 @@ function descricaoPermissaoGestao(cargo) {
   }
 
   return "Acesso operacional.";
+}
+
+
+async function trocarLojaComConfirmacao() {
+  const confirmar = await confirmarAcao(
+    "Ao trocar de loja, o usuário atual será desconectado para evitar registros no mercado errado.",
+    "Trocar loja?"
+  );
+
+  if (!confirmar) return;
+
+  localStorage.removeItem("usuarioLogado");
+  localStorage.removeItem("lojaAtual");
+  window.location.href = "escolher-loja.html";
 }

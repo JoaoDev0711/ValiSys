@@ -11,7 +11,7 @@
 <header class="topbar">
   <button id="menu-btn" class="icon-btn" aria-label="Abrir menu">☰</button>
   <h1>Vencimentos</h1>
-  <a href="login.html" class="user-icon" aria-label="Área de login">👤</a>
+  <a href="#" onclick="sair()" class="user-icon" aria-label="Sair">🚪</a>
 </header>
 
 <nav id="sidebar" class="sidebar">
@@ -32,7 +32,7 @@
   <a href="cadastrar-produto.html" data-role="produtos">➕ Cadastrar produto</a>
   <a href="usuarios.html" data-role="funcionarios">👥 Usuários</a>
   <a href="admin-dashboard.html" data-role="admin">⚙️ Dashboard Admin</a>
-  <a href="escolher-loja.html">🏪 Trocar loja</a>
+  <a href="#" onclick="trocarLojaComConfirmacao()">🏪 Trocar loja</a>
   <a href="#" onclick="sair()">🚪 Sair</a>
 </nav>
 
@@ -53,7 +53,7 @@
         <p>Todos os lançamentos serão vinculados a esta loja.</p>
       </div>
     </div>
-    <a href="escolher-loja.html">Trocar loja</a>
+    <a href="#" onclick="trocarLojaComConfirmacao()">Trocar loja</a>
   </section>
 
   <section class="resumo-vencimentos">

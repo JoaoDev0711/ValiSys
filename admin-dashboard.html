@@ -9,10 +9,32 @@
 <body>
 
 <header class="topbar">
-  <a href="index.html" class="user-icon" aria-label="Voltar">←</a>
+  <button id="menu-btn" class="icon-btn" aria-label="Abrir menu">☰</button>
   <h1>Admin</h1>
   <a href="#" onclick="sair()" class="user-icon" aria-label="Sair">🚪</a>
 </header>
+
+<nav id="sidebar" class="sidebar">
+  <div class="sidebar-user">
+    <div class="avatar">⚙️</div>
+    <div>
+      <strong id="sidebar-nome">Admin</strong>
+      <p id="sidebar-cargo">Dashboard Admin</p>
+    </div>
+  </div>
+
+  <a href="admin-dashboard.html">🏠 Dashboard Admin</a>
+  <a href="#visao-geral-admin">📌 Visão geral</a>
+  <a href="#graficos-admin">📊 Gráficos</a>
+  <a href="#loja-admin-atual">🏪 Loja atual</a>
+  <a href="#form-loja-admin">➕ Cadastrar loja</a>
+  <a href="#filtros-lojas-admin">🔎 Filtros</a>
+  <a href="#lista-lojas-admin">📋 Lojas</a>
+  <a href="#" onclick="trocarLojaComConfirmacao()">↪️ Entrar em loja</a>
+  <a href="#" onclick="sair()">🚪 Sair</a>
+</nav>
+
+<div id="overlay"></div>
 
 <main class="container">
   <section class="welcome-card admin-hero">
@@ -20,15 +42,6 @@
     <h2>Dashboard Admin</h2>
     <p>Visão administrativa das lojas, operação, vencimentos e gestão geral.</p>
 
-    <nav class="admin-navbar" aria-label="Navegação administrativa">
-      <a href="#visao-geral-admin">Visão geral</a>
-      <a href="#graficos-admin">Gráficos</a>
-      <a href="#loja-admin-atual">Loja atual</a>
-      <a href="#form-loja-admin">Cadastrar loja</a>
-      <a href="#filtros-lojas-admin">Filtros</a>
-      <a href="#lista-lojas-admin">Lojas</a>
-      <a href="escolher-loja.html">Entrar em loja</a>
-    </nav>
   </section>
 
   <section class="resumo-vencimentos admin-resumo" id="visao-geral-admin">

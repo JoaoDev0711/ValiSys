@@ -7,6 +7,40 @@ if (!podeVerGestaoLoja(usuario.cargo)) {
   throw new Error("Sem permissão para gestão da loja.");
 }
 
+
+function iniciarMenuLateralGestao() {
+  const sidebarNome = document.getElementById("sidebar-nome");
+  const sidebarCargo = document.getElementById("sidebar-cargo");
+
+  if (sidebarNome) sidebarNome.innerText = usuario.nome || "Usuário";
+  if (sidebarCargo) sidebarCargo.innerText = `${nomeCargo(usuario.cargo)}${usuario.setor ? " • " + usuario.setor : ""}`;
+
+  const menuBtn = document.getElementById("menu-btn");
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("overlay");
+
+  if (!menuBtn || !sidebar || !overlay) return;
+
+  menuBtn.addEventListener("click", () => {
+    sidebar.classList.add("active");
+    overlay.classList.add("active");
+  });
+
+  overlay.addEventListener("click", () => {
+    sidebar.classList.remove("active");
+    overlay.classList.remove("active");
+  });
+
+  sidebar.querySelectorAll("a[href^='#']").forEach(link => {
+    link.addEventListener("click", () => {
+      sidebar.classList.remove("active");
+      overlay.classList.remove("active");
+    });
+  });
+}
+
+iniciarMenuLateralGestao();
+
 const lojaAtual = protegerLojaSelecionada();
 
 const gestaoLojaAtual = document.getElementById("gestao-loja-atual");
@@ -25,7 +59,7 @@ gestaoTextoVencimentos.innerText = usuario.cargo === "encarregado" && usuario.se
   : "Resumo de vencimentos ativos da loja.";
 
 document.querySelectorAll("[data-gestao='gerente']").forEach(el => {
-  if (usuario.cargo !== "gerente") {
+  if (!["gerente", "admin"].includes(usuario.cargo)) {
     el.style.display = "none";
   }
 });
@@ -135,7 +169,7 @@ async function carregarGestao() {
       contarPorCampo(lancamentos, "setor", "Sem setor")
     );
 
-    if (usuario.cargo === "gerente") {
+    if (["gerente", "admin"].includes(usuario.cargo)) {
       const funcionarios = await valisysDB.listarFuncionarios(lojaAtual.id);
       document.getElementById("gestao-equipe-qtd").innerText = funcionarios.length;
 

@@ -6,6 +6,40 @@ if (!usuario || usuario.cargo !== "admin") {
   throw new Error("Área exclusiva do admin.");
 }
 
+
+function iniciarMenuLateralAdmin() {
+  const sidebarNome = document.getElementById("sidebar-nome");
+  const sidebarCargo = document.getElementById("sidebar-cargo");
+
+  if (sidebarNome) sidebarNome.innerText = usuario.nome || "Admin";
+  if (sidebarCargo) sidebarCargo.innerText = "Dashboard Admin";
+
+  const menuBtn = document.getElementById("menu-btn");
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("overlay");
+
+  if (!menuBtn || !sidebar || !overlay) return;
+
+  menuBtn.addEventListener("click", () => {
+    sidebar.classList.add("active");
+    overlay.classList.add("active");
+  });
+
+  overlay.addEventListener("click", () => {
+    sidebar.classList.remove("active");
+    overlay.classList.remove("active");
+  });
+
+  sidebar.querySelectorAll("a[href^='#']").forEach(link => {
+    link.addEventListener("click", () => {
+      sidebar.classList.remove("active");
+      overlay.classList.remove("active");
+    });
+  });
+}
+
+iniciarMenuLateralAdmin();
+
 const formLojaAdmin = document.getElementById("form-loja-admin");
 const nomeLojaAdmin = document.getElementById("nomeLojaAdmin");
 const responsavelLojaAdmin = document.getElementById("responsavelLojaAdmin");
@@ -475,93 +509,19 @@ async function administrarLoja(id) {
     }
 
     if ((loja.status || "ativa") !== "ativa") {
-      alert("Esta loja está desativada. Ative o serviço antes de entrar.");
+      alert("Esta loja está desativada. Ative o serviço antes de administrar.");
       return;
     }
 
+    // Admin vindo da Dashboard Admin continua como admin.
+    // Isso é diferente da seleção pública de loja, que limpa o usuário e abre login da loja.
     setLojaAtual(loja);
 
-    // Admin não entra como usuário da loja.
-    // Depois de escolher a loja, precisa fazer login operacional.
-    limparUsuarioLogado();
-
-    alert("Loja selecionada. Agora entre com um usuário da loja.");
-    window.location.href = "login.html";
+    alert("Loja selecionada para administração.");
+    window.location.href = "dashboard.html";
   } catch (erro) {
     alert("Erro ao abrir loja: " + erro.message);
   }
-}
-
-
-function abrirModalEdicaoLoja(loja) {
-  return new Promise(resolve => {
-    const modal = document.createElement("div");
-    modal.className = "site-modal active";
-    modal.innerHTML = `
-      <div class="site-modal-backdrop"></div>
-      <div class="site-modal-box" role="dialog" aria-modal="true">
-        <div class="site-modal-icon">✎</div>
-        <h2>Editar loja</h2>
-        <p>Atualize os dados administrativos da loja.</p>
-
-        <form class="edit-store-grid" id="form-editar-loja-modal">
-          <label>
-            Nome da loja
-            <input type="text" id="editNomeLoja" value="${esc(loja.nome || "")}">
-          </label>
-
-          <label>
-            Responsável
-            <input type="text" id="editResponsavelLoja" value="${esc(loja.responsavel || "")}">
-          </label>
-
-          <label>
-            Grupo/Rede
-            <input type="text" id="editGrupoLoja" value="${esc(loja.grupo || "")}">
-          </label>
-
-          <label>
-            Região
-            <input type="text" id="editRegiaoLoja" value="${esc(loja.regiao || "")}">
-          </label>
-
-          <label>
-            Cor da rede
-            <input type="color" id="editCorLoja" value="${esc(normalizarHexCor(loja.corTema) || "#2f7d4f")}">
-          </label>
-
-          <div class="site-modal-actions">
-            <button type="button" class="secondary" id="cancelarEditarLoja">Cancelar</button>
-            <button type="submit">Salvar</button>
-          </div>
-        </form>
-      </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    const fechar = resultado => {
-      modal.remove();
-      resolve(resultado);
-    };
-
-    modal.querySelector(".site-modal-backdrop").addEventListener("click", () => fechar(null));
-    modal.querySelector("#cancelarEditarLoja").addEventListener("click", () => fechar(null));
-
-    modal.querySelector("#form-editar-loja-modal").addEventListener("submit", event => {
-      event.preventDefault();
-
-      fechar({
-        nome: modal.querySelector("#editNomeLoja").value.trim(),
-        responsavel: modal.querySelector("#editResponsavelLoja").value.trim(),
-        grupo: modal.querySelector("#editGrupoLoja").value.trim(),
-        regiao: modal.querySelector("#editRegiaoLoja").value.trim(),
-        corTema: modal.querySelector("#editCorLoja").value.trim()
-      });
-    });
-
-    setTimeout(() => modal.querySelector("#editNomeLoja").focus(), 50);
-  });
 }
 
 async function editarDadosLoja(id) {
