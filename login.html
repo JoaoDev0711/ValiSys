@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - Vencimentos</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
@@ -14,6 +14,8 @@
     <div class="login-logo">📦</div>
     <h1>Entrar</h1>
     <p>Entre com seu nome e escolha sua função no mercado.</p>
+    <button type="button" id="btn-login-funcionario" class="btn-secondary-login">Preencher funcionário cadastrado</button>
+    <p class="small muted">O botão usa o funcionário separado na tela Usuários deste mesmo aparelho.</p>
 
     <form id="login-form">
       <label for="nome">Nome</label>
@@ -41,7 +43,12 @@
   </section>
 </main>
 
-<script src="cookies.js"></script>
-<script src="login.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/supabase-service.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/cookies.js"></script>
+<script src="js/loja.js"></script>
+<script src="js/login.js"></script>
 </body>
 </html>

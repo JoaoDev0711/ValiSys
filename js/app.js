@@ -48,7 +48,14 @@ if (usuario) {
     }
   });
 
+  document.querySelectorAll("[data-role='funcionarios']").forEach(el => {
+    if (!podeGerenciarFuncionarios(usuario.cargo)) {
+      el.style.display = "none";
+    }
+  });
+
   carregarResumoInicial();
+  carregarResumoNotificacoes();
 }
 
 function normalizarLancamentosDashboard() {
@@ -95,7 +102,7 @@ function carregarResumoInicial() {
   const lojaAtual = getLojaAtual();
 
   // Dashboard é da loja atual. Meus/Listas têm filtro para todas as lojas.
-  lancamentos = lancamentos.filter(item => item.lojaId === lojaAtual.id);
+  lancamentos = lancamentos.filter(item => item.lojaId === lojaAtual.id && (item.status || "ativo") === "ativo");
 
   if (!podeVerListaGeral(usuario.cargo)) {
     lancamentos = lancamentos.filter(item =>
@@ -281,4 +288,24 @@ function renderizarItemLembrete(item) {
       </div>
     </article>
   `;
+}
+
+
+function carregarResumoNotificacoes() {
+  const atalho = document.getElementById("atalho-notificacoes");
+  const contador = document.getElementById("qtd-notificacoes");
+
+  if (!atalho || !contador) return;
+
+  if (!podeVerNotificacoes(usuario.cargo)) {
+    atalho.style.display = "none";
+    return;
+  }
+
+  const lojaAtual = getLojaAtual();
+  const notificacoes = lerJSONLocal("notificacoes", [])
+    .filter(item => !item.lojaId || item.lojaId === lojaAtual.id)
+    .filter(item => !(item.lidaPor || []).includes(usuario.id));
+
+  contador.innerText = notificacoes.length;
 }

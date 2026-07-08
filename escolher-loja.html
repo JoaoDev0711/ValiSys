@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Escolher loja - Vencimentos</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
@@ -24,7 +24,7 @@
 
   <section class="card" id="form-nova-loja-area">
     <h2>Cadastrar loja</h2>
-    <p class="muted">Disponível para gerente e admin neste protótipo.</p>
+    <p class="muted">Cadastro disponível para gerente e admin. Exclusão disponível apenas para admin e somente sem lançamentos.</p>
 
     <form id="form-loja">
       <label for="nomeLoja">Nome da loja</label>
@@ -43,9 +43,12 @@
   </section>
 </main>
 
-<script src="auth.js"></script>
-<script src="cookies.js"></script>
-<script src="loja.js"></script>
-<script src="escolher-loja.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/supabase-service.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/cookies.js"></script>
+<script src="js/loja.js"></script>
+<script src="js/escolher-loja.js"></script>
 </body>
 </html>

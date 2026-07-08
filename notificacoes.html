@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meus Lançamentos - Vencimentos</title>
+  <title>Notificações - Vencimentos</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
 <header class="topbar">
   <a href="dashboard.html" class="user-icon" aria-label="Voltar">←</a>
-  <h1>Meus</h1>
+  <h1>Notificações</h1>
   <a href="login.html" class="user-icon" aria-label="Login">👤</a>
 </header>
 
@@ -19,21 +19,19 @@
     <div>
       <span>🏪</span>
       <div>
-        <strong id="loja-lista-atual">Loja não selecionada</strong>
-        <p>Lista filtrada pela loja atual.</p>
+        <strong id="loja-notificacao-atual">Loja não selecionada</strong>
+        <p>Avisos internos da loja atual.</p>
       </div>
     </div>
     <a href="escolher-loja.html">Trocar</a>
   </section>
 
   <section class="card">
-    <h2>Meus lançamentos</h2>
-    <p class="muted">Aqui aparece somente o que você lançou.</p>
-
-    <input type="search" id="filtro" placeholder="Buscar por produto, EAN ou setor">
+    <h2>Avisos internos</h2>
+    <p class="muted">Aqui aparecem avisos criados para gerente, encarregado e admin.</p>
   </section>
 
-  <div id="lista"></div>
+  <div id="lista-notificacoes"></div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -42,6 +40,6 @@
 <script src="js/auth.js"></script>
 <script src="js/cookies.js"></script>
 <script src="js/loja.js"></script>
-<script src="js/lista.js"></script>
+<script src="js/notificacoes-internas.js"></script>
 </body>
 </html>

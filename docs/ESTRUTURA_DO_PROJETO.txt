@@ -1,0 +1,46 @@
+ValiSys - Projeto organizado por pastas
+
+Estrutura:
+
+ValiSys/
+├── index.html
+├── login.html
+├── dashboard.html
+├── escolher-loja.html
+├── lancar.html
+├── meus-lancamentos.html
+├── lista-geral.html
+├── cadastrar-produto.html
+├── usuarios.html
+├── notificacoes.html
+├── css/
+│   └── styles.css
+├── js/
+│   ├── auth.js
+│   ├── loja.js
+│   ├── login.js
+│   ├── app.js
+│   ├── lancar.js
+│   ├── lista.js
+│   ├── produto.js
+│   ├── usuarios.js
+│   ├── notificacoes-internas.js
+│   ├── api-produtos.js
+│   ├── cookies.js
+│   ├── supabase-config.js
+│   └── supabase-service.js
+├── database/
+│   └── supabase-setup.sql
+└── docs/
+    ├── SUPABASE_GUIA.md
+    └── README.txt
+
+Observações:
+- Os HTML ficaram na raiz para facilitar publicar no GitHub Pages.
+- CSS ficou na pasta css.
+- JavaScript ficou na pasta js.
+- SQL do Supabase ficou na pasta database.
+- Documentação ficou na pasta docs.
+- A página separada funcionarios.html foi removida; funcionários ficam dentro de usuarios.html.
+- Para configurar Supabase, abra js/supabase-config.js.
+- Para criar as tabelas, rode database/supabase-setup.sql no SQL Editor do Supabase.

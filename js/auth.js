@@ -79,3 +79,42 @@ function lerJSONLocal(chave, fallback = []) {
 function salvarJSONLocal(chave, valor) {
   localStorage.setItem(chave, JSON.stringify(valor));
 }
+
+
+function podeExcluirLoja(cargo) {
+  return cargo === "admin";
+}
+
+function criarNotificacaoInterna(dados) {
+  const notificacoes = lerJSONLocal("notificacoes", []);
+
+  const nova = {
+    id: gerarIdLocal("notificacao"),
+    tipo: dados.tipo || "aviso",
+    lojaId: dados.lojaId || "",
+    lojaNome: dados.lojaNome || "",
+    titulo: dados.titulo || "Aviso",
+    mensagem: dados.mensagem || "",
+    lancamentoId: dados.lancamentoId || "",
+    produto: dados.produto || "",
+    setor: dados.setor || "",
+    validade: dados.validade || "",
+    criadoPor: dados.criadoPor || "",
+    criadoEm: new Date().toLocaleString("pt-BR"),
+    lidaPor: []
+  };
+
+  notificacoes.unshift(nova);
+  salvarJSONLocal("notificacoes", notificacoes);
+
+  return nova;
+}
+
+function podeVerNotificacoes(cargo) {
+  return ["encarregado", "gerente", "admin"].includes(cargo);
+}
+
+
+function podeGerenciarFuncionarios(cargo) {
+  return ["gerente", "admin"].includes(cargo);
+}

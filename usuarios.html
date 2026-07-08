@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Usuários - Vencimentos</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
@@ -15,16 +15,66 @@
 </header>
 
 <main class="container">
-  <section class="card">
-    <h2>Usuários cadastrados</h2>
-    <p class="muted">Apenas admin pode acessar esta tela.</p>
+  <section class="loja-atual-card compact">
+    <div>
+      <span>🏪</span>
+      <div>
+        <strong id="loja-usuarios-atual">Loja não selecionada</strong>
+        <p>Funcionários vinculados à loja atual.</p>
+      </div>
+    </div>
+    <a href="escolher-loja.html">Trocar</a>
   </section>
 
-  <div id="lista-usuarios"></div>
+  <section class="card">
+    <h2>Usuários e funcionários</h2>
+    <p class="muted">
+      Aqui ficam os usuários do sistema e os funcionários vinculados à loja atual.
+    </p>
+  </section>
+
+  <section class="card" id="area-cadastro-funcionario">
+    <h2>Cadastrar funcionário da loja</h2>
+    <p class="muted">
+      Disponível para gerente e admin. O funcionário fica vinculado à loja selecionada.
+    </p>
+
+    <form id="form-funcionario">
+      <label for="nomeFuncionario">Nome do funcionário</label>
+      <input type="text" id="nomeFuncionario" placeholder="Ex: João Silva">
+
+      <label for="cargoFuncionario">Cargo</label>
+      <select id="cargoFuncionario">
+        <option value="">Selecione o cargo</option>
+        <option value="promotor">Promotor</option>
+        <option value="encarregado">Encarregado</option>
+        <option value="gerente">Gerente</option>
+      </select>
+
+      <label for="codigoFuncionario">Código de acesso</label>
+      <input type="text" id="codigoFuncionario" placeholder="Ex: 1234 ou deixe vazio para gerar">
+
+      <button type="submit">Salvar funcionário</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Funcionários da loja</h2>
+    <div id="lista-funcionarios"></div>
+  </section>
+
+  <section id="area-usuarios-sistema">
+    <h2>Usuários que já entraram no sistema</h2>
+    <div id="lista-usuarios"></div>
+  </section>
 </main>
 
-<script src="auth.js"></script>
-<script src="cookies.js"></script>
-<script src="usuarios.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/supabase-service.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/cookies.js"></script>
+<script src="js/loja.js"></script>
+<script src="js/usuarios.js"></script>
 </body>
 </html>

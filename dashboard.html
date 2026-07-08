@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistema - Dashboard</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
@@ -27,8 +27,9 @@
   <a href="lancar.html">📦 Lançar validade</a>
   <a href="meus-lancamentos.html">📋 Meus lançamentos</a>
   <a href="lista-geral.html" data-role="lista-geral">📅 Lista completa</a>
+  <a href="notificacoes.html" data-role="lista-geral">🔔 Notificações</a>
   <a href="cadastrar-produto.html" data-role="produtos">➕ Cadastrar produto</a>
-  <a href="usuarios.html" data-role="usuarios">👥 Usuários</a>
+  <a href="usuarios.html" data-role="funcionarios">👥 Usuários</a>
   <a href="escolher-loja.html">🏪 Trocar loja</a>
   <a href="#" onclick="sair()">🚪 Sair</a>
 </nav>
@@ -124,6 +125,14 @@
       </div>
     </a>
 
+    <a href="notificacoes.html" class="action-card" id="atalho-notificacoes" data-role="lista-geral">
+      <span>🔔</span>
+      <div>
+        <strong>Notificações</strong>
+        <p><span id="qtd-notificacoes">0</span> aviso(s) novo(s)</p>
+      </div>
+    </a>
+
     <a href="cadastrar-produto.html" class="action-card" data-role="produtos">
       <span>➕</span>
       <div>
@@ -132,19 +141,22 @@
       </div>
     </a>
 
-    <a href="usuarios.html" class="action-card" data-role="usuarios">
+    <a href="usuarios.html" class="action-card" data-role="funcionarios">
       <span>👥</span>
       <div>
         <h3>Usuários</h3>
-        <p>Apenas admin pode visualizar usuários cadastrados.</p>
+        <p>Cadastre funcionários da loja e veja acessos do sistema.</p>
       </div>
     </a>
   </section>
 </main>
 
-<script src="auth.js"></script>
-<script src="cookies.js"></script>
-<script src="loja.js"></script>
-<script src="app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/supabase-service.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/cookies.js"></script>
+<script src="js/loja.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>

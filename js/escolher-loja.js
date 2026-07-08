@@ -19,11 +19,19 @@ function renderizarLojas() {
   listaLojas.innerHTML = lojas.map(loja => `
     <article class="card loja-card">
       <div>
-        <h3>🏪 ${esc(loja.nome)}</h3>
+        <h3>${esc(loja.nome)}</h3>
         <p class="muted">Responsável: ${esc(loja.responsavel || "Não informado")}</p>
+        <p class="muted">Criada em: ${esc(loja.criadaEm || "Não informado")}</p>
       </div>
 
-      <button onclick="selecionarLoja('${loja.id}')">Usar esta loja</button>
+      <div class="loja-actions">
+        <button onclick="selecionarLoja('${loja.id}')">Usar esta loja</button>
+        ${
+          podeExcluirLoja(usuario.cargo)
+            ? `<button class="btn-danger btn-outline" onclick="excluirLoja('${loja.id}')">Excluir loja</button>`
+            : ""
+        }
+      </div>
     </article>
   `).join("");
 }
@@ -43,6 +51,29 @@ function selecionarLoja(id) {
 
   setLojaAtual(loja);
   window.location.href = "dashboard.html";
+}
+
+function excluirLoja(id) {
+  if (!podeExcluirLoja(usuario.cargo)) {
+    alert("Somente admin pode excluir lojas.");
+    return;
+  }
+
+  const lojas = getLojas();
+  const loja = lojas.find(item => item.id === id);
+
+  if (!loja) {
+    alert("Loja não encontrada.");
+    return;
+  }
+
+  const confirmar = confirm(`Excluir loja?\n\n${loja.nome}\n\nA loja só será excluída se não tiver lançamentos vinculados.`);
+
+  if (!confirmar) return;
+
+  const resultado = excluirLojaPorId(id);
+  alert(resultado.mensagem);
+  renderizarLojas();
 }
 
 if (formLoja) {

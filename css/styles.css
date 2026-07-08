@@ -1980,3 +1980,372 @@ select {
     display: none;
   }
 }
+
+
+/* Home ValiSys bonita, mantendo o estilo anterior sem excesso de emoji */
+.valisys-home {
+  background:
+    radial-gradient(circle at top left, rgba(47, 125, 79, .16), transparent 34%),
+    linear-gradient(180deg, #f7f8f3 0%, #edf3ea 100%);
+}
+
+.valisys-brand {
+  gap: 10px;
+}
+
+.brand-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: white;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 18px !important;
+  box-shadow: 0 8px 20px rgba(47, 125, 79, .22);
+}
+
+.hero-valisys {
+  min-height: calc(100vh - 72px);
+  align-items: center;
+}
+
+.clean-badges span {
+  background: rgba(255, 255, 255, .82);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.app-showcase {
+  position: relative;
+  min-height: 540px;
+}
+
+.valisys-phone {
+  border: 8px solid #17251b;
+  background: #f7f9f4;
+  position: relative;
+  overflow: hidden;
+}
+
+.phone-speaker {
+  width: 70px;
+  height: 5px;
+  border-radius: 99px;
+  background: #d7dfd2;
+  margin: 2px auto 14px;
+}
+
+.clean-mock-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.clean-mock-top span {
+  font-weight: 900;
+}
+
+.clean-mock-top small {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.simple-img {
+  background: linear-gradient(135deg, #edf5e8, #ffffff);
+  border: 1px solid var(--line);
+  color: var(--primary-strong);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.soft-float {
+  min-width: 180px;
+}
+
+.float-label {
+  font-size: 12px !important;
+  color: var(--muted);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.soft-float strong {
+  font-size: 15px;
+}
+
+.valisys-demo-card {
+  min-height: 430px;
+}
+
+.valisys-demo-card .demo-phone-top {
+  width: auto;
+  height: auto;
+  border-radius: 999px;
+  padding: 8px 11px;
+  background: var(--accent);
+  color: var(--primary-strong);
+  border: 1px solid #d6e9cf;
+}
+
+.clean-mini {
+  background: #f7faf4;
+}
+
+.mini-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--accent);
+  border: 1px solid #d6e9cf;
+  color: var(--primary-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+}
+
+.valisys-flow article span {
+  background: var(--accent);
+  color: var(--primary-strong);
+  border: 1px solid #d6e9cf;
+}
+
+.valisys-feature-grid article span,
+.valisys-construction > span {
+  display: none !important;
+}
+
+.valisys-construction {
+  display: block;
+}
+
+.valisys-contact {
+  background:
+    linear-gradient(135deg, rgba(47, 125, 79, .08), rgba(255,255,255,.94)),
+    var(--surface);
+}
+
+@media (max-width: 759px) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .public-header {
+    height: 62px;
+    padding: 0 12px;
+  }
+
+  .public-nav {
+    display: none !important;
+  }
+
+  .brand-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .login-link {
+    min-height: 40px;
+    padding: 0 13px;
+    font-size: 14px;
+  }
+
+  .hero-valisys {
+    min-height: auto;
+    padding: 26px 14px 20px;
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .hero-content h1 {
+    font-size: 36px;
+    line-height: 1.02;
+    letter-spacing: -1px;
+  }
+
+  .hero-content p {
+    font-size: 15px;
+    line-height: 1.48;
+  }
+
+  .hero-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .primary-link,
+  .secondary-link {
+    width: 100%;
+  }
+
+  .app-showcase {
+    min-height: auto;
+    display: grid;
+    justify-items: center;
+  }
+
+  .valisys-phone {
+    width: min(100%, 350px);
+    border-width: 6px;
+    border-radius: 32px;
+  }
+
+  .soft-float {
+    position: static;
+    width: min(100%, 350px);
+    margin-top: 10px;
+  }
+
+  .public-section {
+    padding: 28px 14px;
+  }
+
+  .public-section h2 {
+    font-size: 29px;
+    line-height: 1.08;
+  }
+
+  .demo-grid,
+  .feature-grid,
+  .fluxo-linha,
+  .contact-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .valisys-demo-card {
+    min-height: auto;
+  }
+
+  .mini-screen {
+    min-height: 150px;
+  }
+}
+
+
+/* Loja, filtros, retirada e notificações */
+.loja-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.btn-outline {
+  background: transparent !important;
+  border: 1px solid currentColor !important;
+}
+
+.btn-warning {
+  background: var(--warning);
+  color: white;
+}
+
+.badges-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.badge.neutral {
+  background: #e8ece5;
+  color: #445044;
+}
+
+.lista-filtros {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.stack-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.item-retirado {
+  opacity: .76;
+  border-left: 5px solid #8b948b;
+}
+
+.item-retirado h3 {
+  text-decoration: line-through;
+}
+
+.notificacao-card {
+  border-left: 5px solid var(--warning);
+}
+
+.notificacao-lida {
+  opacity: .75;
+  border-left-color: #9aa49a;
+}
+
+@media (min-width: 700px) {
+  .lista-filtros {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .loja-card {
+    display: grid;
+    grid-template-columns: 1fr 190px;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .loja-actions {
+    margin-top: 0;
+  }
+
+  .stack-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .badges-line {
+    justify-content: flex-start;
+  }
+}
+
+
+/* Funcionários da loja */
+.funcionario-card {
+  border-left: 5px solid var(--primary);
+}
+
+.btn-secondary-login {
+  background: var(--surface-soft);
+  color: var(--text);
+  border: 1px solid var(--line);
+  margin-bottom: 12px;
+}
+
+.login-card .btn-secondary-login {
+  margin-top: 4px;
+}
+
+@media (min-width: 700px) {
+  .funcionario-card {
+    display: grid;
+    grid-template-columns: 1fr 210px;
+    gap: 12px;
+    align-items: center;
+  }
+}
+
+
+/* Usuários com funcionários integrados */
+#area-cadastro-funcionario {
+  border-left: 5px solid var(--primary);
+}
+
+#area-usuarios-sistema {
+  margin-top: 18px;
+}
