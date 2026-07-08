@@ -47,7 +47,7 @@ Contatos no site:
 
 Observação:
 Esta versão ainda usa localStorage, ideal para demonstração e GitHub Pages.
-Para várias lojas usando de verdade ao mesmo tempo, o próximo passo é banco online como Supabase.
+Para várias lojas usando de verdade ao mesmo tempo, o próximo passo é dados online como sistema.
 
 
 Atualização site público:
@@ -64,7 +64,7 @@ Correções e melhorias:
 - Lançamentos antigos sem lojaId também aparecem na loja atual para não sumirem do protótipo.
 - Lembretes agora são agrupados por vencidos, hoje, até 7 dias e até 30 dias.
 - Dentro de cada grupo, os itens são agrupados por quantidade de dias restantes.
-- API agora tenta puxar mais dados do Open Food Facts: embalagem, origem, países, lojas, ingredientes, alergênicos, porção, Nutri-Score, NOVA e Eco-Score quando disponíveis.
+- base de produtos agora tenta puxar mais dados do base pública de produtos: embalagem, origem, países, lojas, ingredientes, alergênicos, porção, Nutri-Score, NOVA e Eco-Score quando disponíveis.
 
 
 Correção final:
@@ -100,7 +100,7 @@ Atualização funcionários:
 - Tela de login ganhou botão para preencher funcionário cadastrado neste aparelho.
 - Quando entra como funcionário cadastrado, a loja dele já fica selecionada automaticamente.
 - Importante: no GitHub Pages/localStorage, isso funciona apenas no mesmo aparelho/navegador.
-- Lista completa ainda mostra somente dados salvos no aparelho atual. Para vários celulares compartilharem a mesma lista, precisa banco online como Supabase/Firebase.
+- Lista completa ainda mostra somente dados salvos no aparelho atual. Para vários celulares compartilharem a mesma lista, precisa dados online como sistema/Firebase.
 
 
 Correção funcionários:
@@ -111,9 +111,9 @@ Correção funcionários:
 - Admin também vê os usuários que já entraram no sistema.
 
 
-Versão Supabase-only:
+Versão sistema-only:
 - Removido salvamento local de lojas, funcionários, produtos, lançamentos e notificações.
-- Esses dados agora são carregados/salvos pelo Supabase.
+- Esses dados agora são carregados/salvos pelo sistema.
 - localStorage fica apenas para sessão: usuário logado e loja atual.
-- Produto local foi desativado; cadastro e busca passam pelo Supabase.
-- Se o Supabase não estiver configurado ou a política bloquear acesso, a tela mostra erro em vez de salvar localmente.
+- Produto local foi desativado; cadastro e busca passam pelo sistema.
+- Se o sistema não estiver configurado ou a política bloquear acesso, a tela mostra erro em vez de salvar localmente.

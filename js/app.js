@@ -8,13 +8,16 @@ if (usuario) {
   }
 
   document.getElementById("welcome-title").innerText = `Olá, ${usuario.nome}`;
-  document.getElementById("welcome-role").innerText = `Cargo: ${nomeCargo(usuario.cargo)}`;
+  document.getElementById("welcome-role").innerText = `Cargo: ${nomeCargo(usuario.cargo)}${usuario.setor ? " • Setor: " + usuario.setor : ""}`;
 
   document.getElementById("sidebar-nome").innerText = usuario.nome;
-  document.getElementById("sidebar-cargo").innerText = nomeCargo(usuario.cargo);
+  document.getElementById("sidebar-cargo").innerText = `${nomeCargo(usuario.cargo)}${usuario.setor ? " • " + usuario.setor : ""}`;
 
   const lojaNomeEl = document.getElementById("loja-atual-nome");
   if (lojaNomeEl) lojaNomeEl.innerText = lojaAtual.nome;
+
+  const lojaLogoEl = document.getElementById("loja-atual-logo");
+  if (lojaLogoEl) lojaLogoEl.innerHTML = logoLojaHTML(lojaAtual, "loja-logo-dashboard");
 
   const menuBtn = document.getElementById("menu-btn");
   const sidebar = document.getElementById("sidebar");
@@ -62,7 +65,7 @@ async function carregarResumoInicial() {
   const lembretesArea = document.getElementById("lembretes-vencimento");
   const textoLembrete = document.getElementById("texto-lembrete");
 
-  lembretesArea.innerHTML = `<div class="card"><p class="muted">Carregando vencimentos do Supabase...</p></div>`;
+  lembretesArea.innerHTML = `<div class="card"><p class="muted">Carregando vencimentos do sistema...</p></div>`;
 
   try {
     const lojaAtual = getLojaAtual();
@@ -77,9 +80,14 @@ async function carregarResumoInicial() {
         String(item.usuarioNome || "").toLowerCase() === String(usuario.nome || "").toLowerCase() &&
         item.usuarioCargo === usuario.cargo
       );
-      textoLembrete.innerText = "Mostrando somente os produtos lançados por você nesta loja. Dados vindos do Supabase.";
+      textoLembrete.innerText = "Mostrando somente os produtos lançados por você nesta loja.";
+    } else if (usuario.cargo === "encarregado" && usuario.setor) {
+      lancamentos = lancamentos.filter(item =>
+        String(item.setor || "").toLowerCase() === String(usuario.setor || "").toLowerCase()
+      );
+      textoLembrete.innerText = `Mostrando os produtos do setor ${usuario.setor}.`;
     } else {
-      textoLembrete.innerText = "Mostrando os produtos lançados pela equipe desta loja. Dados vindos do Supabase.";
+      textoLembrete.innerText = "Mostrando os produtos lançados pela equipe desta loja.";
     }
 
     const hoje = new Date();
@@ -144,7 +152,7 @@ async function carregarResumoInicial() {
         <div class="empty-state">
           <span>✅</span>
           <p>Nenhum vencimento urgente encontrado nesta loja.</p>
-          <p class="muted">Total de lançamentos ativos no Supabase nesta loja: ${lancamentos.length}</p>
+          <p class="muted">Total de lançamentos ativos nesta loja: ${lancamentos.length}</p>
           <a class="mini-link" href="meus-lancamentos.html">Ver meus lançamentos</a>
         </div>
       `;
@@ -156,7 +164,7 @@ async function carregarResumoInicial() {
     console.error(erro);
     lembretesArea.innerHTML = `
       <div class="card">
-        <p class="danger">Erro ao carregar resumo do Supabase.</p>
+        <p class="danger">Erro ao carregar resumo do sistema.</p>
         <p class="muted">${esc(erro.message)}</p>
       </div>
     `;

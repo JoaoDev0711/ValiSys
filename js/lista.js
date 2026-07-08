@@ -85,6 +85,12 @@ async function obterLancamentosFiltrados() {
     lancamentos = lancamentos.filter(pertenceAoUsuario);
   }
 
+  if (ehListaGeral && usuario.cargo === "encarregado" && usuario.setor) {
+    lancamentos = lancamentos.filter(item =>
+      String(item.setor || "").toLowerCase() === String(usuario.setor || "").toLowerCase()
+    );
+  }
+
   if (termo) {
     lancamentos = lancamentos.filter(item => {
       const texto = `
@@ -108,7 +114,7 @@ async function obterLancamentosFiltrados() {
 }
 
 async function renderizarLista() {
-  lista.innerHTML = `<div class="card"><p class="muted">Carregando lançamentos do Supabase...</p></div>`;
+  lista.innerHTML = `<div class="card"><p class="muted">Carregando lançamentos...</p></div>`;
 
   try {
     let lancamentos = await obterLancamentosFiltrados();
@@ -119,7 +125,7 @@ async function renderizarLista() {
 
       lista.innerHTML = `
         <div class="card">
-          <p><strong>Nenhum lançamento encontrado no Supabase.</strong></p>
+          <p><strong>Nenhum lançamento encontrado.</strong></p>
           <p class="muted">Filtro de loja: ${esc(nomeFiltroLoja(filtroLoja))}</p>
           <p class="muted">Filtro de status: ${esc(filtroStatus)}</p>
           <p class="muted">Troque para "Todas as lojas" ou "Todos" em status para conferir.</p>
@@ -135,8 +141,8 @@ async function renderizarLista() {
 
     lista.innerHTML = `
       <div class="card lista-resumo">
-        <strong>${lancamentos.length} lançamento(s) encontrado(s) no Supabase</strong>
-        <p class="muted">Esses dados vêm do banco online, não do celular.</p>
+        <strong>${lancamentos.length} lançamento(s) encontrado(s)</strong>
+        <p class="muted">Esses dados são compartilhados entre os aparelhos.</p>
       </div>
 
       ${lancamentos.map(item => {
@@ -203,7 +209,7 @@ async function renderizarLista() {
     console.error(erro);
     lista.innerHTML = `
       <div class="card">
-        <p class="danger">Erro ao carregar lançamentos do Supabase.</p>
+        <p class="danger">Erro ao carregar lançamentos do sistema.</p>
         <p class="muted">${esc(erro.message)}</p>
       </div>
     `;
@@ -253,7 +259,7 @@ async function notificarGerencia(id) {
     }
 
     const confirmar = confirm(
-      `Criar aviso interno no Supabase?\n\nProduto: ${item.nomeProduto}\nLoja: ${item.lojaNome}\nValidade: ${item.validade}`
+      `Criar aviso interno?\n\nProduto: ${item.nomeProduto}\nLoja: ${item.lojaNome}\nValidade: ${item.validade}`
     );
 
     if (!confirmar) return;
@@ -271,20 +277,20 @@ async function notificarGerencia(id) {
       criadoPor: `${usuario.nome} (${nomeCargo(usuario.cargo)})`
     });
 
-    alert("Aviso interno salvo no Supabase.");
+    alert("Aviso interno salvo.");
   } catch (erro) {
     alert("Erro ao notificar: " + erro.message);
   }
 }
 
 async function apagarLancamento(id) {
-  const confirmar = confirm("Apagar este lançamento do Supabase?\n\nEssa ação remove o registro do banco.");
+  const confirmar = confirm("Apagar este lançamento?\n\nEssa ação remove o registro do banco.");
 
   if (!confirmar) return;
 
   try {
     await valisysDB.apagarLancamento(id);
-    alert("Lançamento apagado do Supabase.");
+    alert("Lançamento apagado.");
     await renderizarLista();
   } catch (erro) {
     alert("Erro ao apagar lançamento: " + erro.message);

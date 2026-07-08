@@ -13,40 +13,51 @@
     <a href="index.html" class="voltar-site">← Voltar para o site</a>
     <div class="login-logo">📦</div>
     <h1>Entrar</h1>
-    <p>Entre com seu nome e escolha sua função no mercado.</p>
+    <p id="texto-login">Escolha sua função e entre no sistema.</p>
+
+    <div id="loja-login-card" class="mini-info-card"></div>
 
     <form id="login-form">
-      <label for="nome">Nome</label>
-      <input type="text" id="nome" placeholder="Ex: João" autocomplete="name" required>
-
-      <label for="cargo">Cargo</label>
+      <label for="cargo">Tipo de acesso</label>
       <select id="cargo" required>
-        <option value="">Selecione o cargo</option>
-        <option value="promotor">Promotor</option>
-        <option value="encarregado">Encarregado</option>
-        <option value="gerente">Gerente</option>
-        <option value="admin">Admin</option>
+        <option value="">Selecione</option>
+        <option value="promotor">Promotor da loja</option>
+        <option value="encarregado">Encarregado da loja</option>
+        <option value="gerente">Gerente da loja</option>
+        <option value="admin">Admin geral</option>
       </select>
 
+      <div id="nome-area">
+        <label for="nome">Nome</label>
+        <input type="text" id="nome" placeholder="Ex: João" autocomplete="name">
+      </div>
+
       <div id="senha-area" style="display:none;">
-        <label for="senha">Senha do cargo</label>
-        <input type="password" id="senha" placeholder="Digite a senha do cargo">
-        <p class="small muted">
-          A senha é exigida para encarregado, gerente e admin.
+        <label for="senha" id="senha-label">Código de acesso</label>
+        <input type="password" id="senha" placeholder="Digite o código">
+        <p class="small muted" id="senha-ajuda">
+          Gerente e encarregado usam o código cadastrado na loja.
         </p>
       </div>
 
       <button type="submit">Entrar</button>
     </form>
+
+    <div class="login-help">
+      <a href="escolher-loja.html">Escolher/trocar loja</a>
+    </div>
+
+    <p class="small muted">
+      Admin entra pelo acesso geral. Funcionários entram pela loja selecionada.
+    </p>
   </section>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-config.js"></script>
-<script src="js/supabase-service.js"></script>
+<script src="js/dados-config.js"></script>
 <script src="js/auth.js"></script>
-<script src="js/cookies.js"></script>
 <script src="js/loja.js"></script>
+<script src="js/dados-service.js"></script>
 <script src="js/login.js"></script>
 </body>
 </html>

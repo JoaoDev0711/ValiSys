@@ -36,7 +36,7 @@
   <section class="card" id="area-cadastro-funcionario">
     <h2>Cadastrar funcionário da loja</h2>
     <p class="muted">
-      Disponível para gerente e admin. O funcionário fica vinculado à loja selecionada.
+      Disponível para gerente e admin. O funcionário fica vinculado à loja selecionada e pode receber um setor.
     </p>
 
     <form id="form-funcionario">
@@ -50,6 +50,9 @@
         <option value="encarregado">Encarregado</option>
         <option value="gerente">Gerente</option>
       </select>
+
+      <label for="setorFuncionario">Setor</label>
+      <input type="text" id="setorFuncionario" placeholder="Ex: Frios, Padaria, Mercearia">
 
       <label for="codigoFuncionario">Código de acesso</label>
       <input type="text" id="codigoFuncionario" placeholder="Ex: 1234 ou deixe vazio para gerar">
@@ -70,8 +73,8 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-config.js"></script>
-<script src="js/supabase-service.js"></script>
+<script src="js/dados-config.js"></script>
+<script src="js/dados-service.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/cookies.js"></script>
 <script src="js/loja.js"></script>

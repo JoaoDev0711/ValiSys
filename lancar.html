@@ -28,7 +28,7 @@
 
   <section class="card">
     <h2>Novo lançamento</h2>
-    <p class="muted">Aponte para o código de barras inteiro. Se o produto não estiver salvo, o sistema tenta buscar nome e foto na API.</p>
+    <p class="muted">Aponte para o código de barras inteiro. Se o produto não estiver salvo, o sistema tenta buscar nome, marca, fabricante, sabor e foto em múltiplas fontes.</p>
 
     <div class="button-row">
       <button type="button" id="btn-camera">📷 Escanear EAN</button>
@@ -80,12 +80,12 @@
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-config.js"></script>
-<script src="js/supabase-service.js"></script>
+<script src="js/dados-config.js"></script>
+<script src="js/dados-service.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/cookies.js"></script>
 <script src="js/loja.js"></script>
-<script src="js/api-produtos.js"></script>
+<script src="js/produtos-fonte.js"></script>
 <script src="js/lancar.js"></script>
 </body>
 </html>

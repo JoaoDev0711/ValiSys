@@ -25,12 +25,12 @@ ValiSys/
 │   ├── produto.js
 │   ├── usuarios.js
 │   ├── notificacoes-internas.js
-│   ├── api-produtos.js
+│   ├── produtos-fonte.js
 │   ├── cookies.js
-│   ├── supabase-config.js
-│   └── supabase-service.js
+│   ├── dados_online-config.js
+│   └── dados_online-service.js
 ├── database/
-│   └── supabase-setup.sql
+│   └── dados_online-setup.sql
 └── docs/
     ├── SUPABASE_GUIA.md
     └── README.txt
@@ -39,8 +39,8 @@ Observações:
 - Os HTML ficaram na raiz para facilitar publicar no GitHub Pages.
 - CSS ficou na pasta css.
 - JavaScript ficou na pasta js.
-- SQL do Supabase ficou na pasta database.
+- SQL do sistema ficou na pasta database.
 - Documentação ficou na pasta docs.
 - A página separada funcionarios.html foi removida; funcionários ficam dentro de usuarios.html.
-- Para configurar Supabase, abra js/supabase-config.js.
-- Para criar as tabelas, rode database/supabase-setup.sql no SQL Editor do Supabase.
+- Para configurar sistema, abra js/dados_online-config.js.
+- Para criar as tabelas, rode database/dados_online-setup.sql no SQL Editor do sistema.

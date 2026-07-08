@@ -9,22 +9,22 @@
 <body>
 
 <header class="topbar">
-  <a href="dashboard.html" class="user-icon" aria-label="Voltar">←</a>
+  <a href="index.html" class="user-icon" aria-label="Voltar">←</a>
   <h1>Escolher loja</h1>
   <a href="login.html" class="user-icon" aria-label="Login">👤</a>
 </header>
 
 <main class="container">
   <section class="card">
-    <h2>Identifique a loja</h2>
+    <h2>Escolha a loja</h2>
     <p class="muted">
-      Antes de lançar vencimentos, escolha a loja correta. Isso evita registros no mercado errado.
+      Escolha a loja antes de entrar. Assim o sistema mostra os funcionários certos e evita registros no mercado errado.
     </p>
   </section>
 
   <section class="card" id="form-nova-loja-area">
     <h2>Cadastrar loja</h2>
-    <p class="muted">Cadastro disponível para gerente e admin. Exclusão disponível apenas para admin e somente sem lançamentos.</p>
+    <p class="muted">Cadastro disponível para gerente e admin. Remoção disponível apenas para admin.</p>
 
     <form id="form-loja">
       <label for="nomeLoja">Nome da loja</label>
@@ -32,6 +32,11 @@
 
       <label for="responsavelLoja">Responsável</label>
       <input type="text" id="responsavelLoja" placeholder="Ex: Carlos - Gerente">
+
+      <label for="imagemLoja">Imagem da loja</label>
+      <input type="file" id="imagemLoja" accept="image/*">
+      <p class="small muted">Pode escolher uma foto ou logo direto do celular. Se não colocar, o sistema mostra as iniciais da loja.</p>
+      <div id="previewImagemLoja" class="loja-preview"></div>
 
       <button type="submit">Salvar loja</button>
     </form>
@@ -44,8 +49,8 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-config.js"></script>
-<script src="js/supabase-service.js"></script>
+<script src="js/dados-config.js"></script>
+<script src="js/dados-service.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/cookies.js"></script>
 <script src="js/loja.js"></script>

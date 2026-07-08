@@ -308,36 +308,36 @@ async function buscarProdutoCompleto(ean) {
   nomeInput.value = "";
   produtoPreview.innerHTML = `
     <div class="card">
-      <p class="muted">Buscando produto no Supabase...</p>
+      <p class="muted">Buscando produto no sistema...</p>
     </div>
   `;
 
   try {
     produto = await valisysDB.buscarProdutoPorEAN(codigo);
-  } catch (erroSupabase) {
-    console.warn("Falha ao buscar produto no Supabase. Tentando API pública.", erroSupabase);
+  } catch (errosistema) {
+    console.warn("Falha ao buscar produto no sistema. Tentando base de produtos.", errosistema);
   }
 
   if (produto) {
     produtoAtual = produto;
     nomeInput.value = produto.nome || "";
-    produtoPreview.innerHTML = cardProdutoHTML(produto, "Produto encontrado no Supabase.");
+    produtoPreview.innerHTML = cardProdutoHTML(produto, "Produto encontrado no cadastro.");
     return produto;
   }
 
   produtoPreview.innerHTML = `
     <div class="card">
-      <p class="muted">Produto não estava no Supabase. Buscando na API pública...</p>
+      <p class="muted">Produto não estava cadastrado. Buscando na base de produtos...</p>
     </div>
   `;
 
   try {
-    produto = await buscarProdutoAPI(codigo);
-  } catch (erroAPI) {
-    console.warn("API pública não retornou produto.", erroAPI);
+    produto = await buscarProdutoFonteProdutos(codigo);
+  } catch (erroFonte) {
+    console.warn("base de produtos não retornou produto.", erroFonte);
     produtoPreview.innerHTML = `
       <div class="card">
-        <p class="danger">Não consegui puxar esse item pela API.</p>
+        <p class="danger">Não consegui puxar esse item pela base de produtos.</p>
         <p class="muted">Você ainda pode digitar o nome manualmente e lançar normalmente.</p>
       </div>
     `;
@@ -348,7 +348,7 @@ async function buscarProdutoCompleto(ean) {
   if (!produto) {
     produtoPreview.innerHTML = `
       <div class="card">
-        <p class="muted">Produto não encontrado na API.</p>
+        <p class="muted">Produto não encontrado na base de produtos.</p>
         <p class="muted">Digite o nome manualmente e lance normalmente.</p>
       </div>
     `;
@@ -356,17 +356,17 @@ async function buscarProdutoCompleto(ean) {
     return null;
   }
 
-  // Preenche a tela mesmo que o salvamento do produto no Supabase falhe.
+  // Preenche a tela mesmo que o salvamento do produto no sistema falhe.
   produtoAtual = produto;
   nomeInput.value = produto.nome || "";
 
   try {
     const produtoSalvo = await valisysDB.salvarProduto(produto);
     produtoAtual = produtoSalvo || produto;
-    produtoPreview.innerHTML = cardProdutoHTML(produtoAtual, "Produto puxado da API e salvo no Supabase.");
+    produtoPreview.innerHTML = cardProdutoHTML(produtoAtual, "Produto encontrado e cadastrado.");
   } catch (erroSalvarProduto) {
-    console.warn("Produto puxado da API, mas não salvo em produtos. O lançamento ainda pode ser salvo.", erroSalvarProduto);
-    produtoPreview.innerHTML = cardProdutoHTML(produto, "Produto puxado da API. Se não salvou em produtos, o lançamento ainda funciona.");
+    console.warn("Produto puxado da base de produtos, mas não salvo em produtos. O lançamento ainda pode ser salvo.", erroSalvarProduto);
+    produtoPreview.innerHTML = cardProdutoHTML(produto, "Produto encontrado. O lançamento já pode ser feito.");
   }
 
   return produtoAtual;
@@ -468,7 +468,7 @@ form.addEventListener("submit", async function(event) {
   };
 
   const confirmar = confirm(
-    `Confirmar lançamento no Supabase?\n\nLoja: ${lojaAtual.nome}\nProduto: ${nomeProduto}\nSetor: ${novo.setor}\nValidade: ${novo.validade}`
+    `Confirmar lançamento no sistema?\n\nLoja: ${lojaAtual.nome}\nProduto: ${nomeProduto}\nSetor: ${novo.setor}\nValidade: ${novo.validade}`
   );
 
   if (!confirmar) {
@@ -478,11 +478,11 @@ form.addEventListener("submit", async function(event) {
   try {
     await valisysDB.criarLancamento(novo);
 
-    alert("Lançamento salvo no Supabase!");
+    alert("Lançamento salvo!");
     form.reset();
     produtoAtual = null;
     produtoPreview.innerHTML = "";
   } catch (erro) {
-    alert("Erro ao salvar lançamento no Supabase: " + erro.message);
+    alert("Erro ao salvar lançamento: " + erro.message);
   }
 });

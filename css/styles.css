@@ -2529,3 +2529,149 @@ body.camera-aberta #reader__camera_selection,
 body.camera-aberta #reader__dashboard {
   display: none !important;
 }
+
+
+.mini-info-card {
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  margin: 14px 0;
+  color: var(--text);
+}
+
+.mini-info-card:empty {
+  display: none;
+}
+
+.mini-info-card strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.mini-info-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+
+/* Logo/imagem da loja */
+.loja-card-com-logo {
+  display: grid;
+  grid-template-columns: 74px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.loja-card-info h3 {
+  margin-top: 0;
+}
+
+.loja-logo {
+  width: 62px;
+  height: 62px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  letter-spacing: .5px;
+  border: 1px solid rgba(47, 125, 79, .22);
+  box-shadow: 0 10px 24px rgba(21, 32, 24, .10);
+  flex: 0 0 auto;
+}
+
+.loja-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.loja-logo-iniciais {
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, .28), transparent 42%),
+    linear-gradient(135deg, var(--primary), var(--primary-strong));
+  font-size: 20px;
+}
+
+.loja-logo-card {
+  grid-row: span 2;
+}
+
+.loja-logo-dashboard {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+}
+
+.loja-logo-mini {
+  width: 46px;
+  height: 46px;
+  border-radius: 15px;
+  font-size: 15px;
+}
+
+.loja-atual-info,
+.mini-info-loja {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.loja-preview {
+  margin: 10px 0 14px;
+}
+
+.loja-preview-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface-soft);
+}
+
+.loja-preview-box img {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.btn-file {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 13px 16px;
+  text-align: center;
+  background: var(--surface-soft);
+  color: var(--text);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-file input {
+  display: none;
+}
+
+@media (max-width: 520px) {
+  .loja-card-com-logo {
+    grid-template-columns: 58px 1fr;
+    gap: 12px;
+  }
+
+  .loja-logo {
+    width: 54px;
+    height: 54px;
+    border-radius: 17px;
+  }
+
+  .loja-actions {
+    grid-column: 1 / -1;
+  }
+}

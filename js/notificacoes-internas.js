@@ -12,7 +12,7 @@ if (lojaEl && lojaAtual) lojaEl.innerText = lojaAtual.nome;
 const lista = document.getElementById("lista-notificacoes");
 
 async function renderizarNotificacoes() {
-  lista.innerHTML = `<div class="card"><p class="muted">Carregando notificações do Supabase...</p></div>`;
+  lista.innerHTML = `<div class="card"><p class="muted">Carregando notificações...</p></div>`;
 
   try {
     const notificacoes = await valisysDB.listarNotificacoes(lojaAtual.id);
@@ -20,7 +20,7 @@ async function renderizarNotificacoes() {
     if (notificacoes.length === 0) {
       lista.innerHTML = `
         <div class="card">
-          <p>Nenhum aviso interno encontrado no Supabase para esta loja.</p>
+          <p>Nenhum aviso interno encontrado para esta loja.</p>
         </div>
       `;
       return;
@@ -59,7 +59,7 @@ async function renderizarNotificacoes() {
     console.error(erro);
     lista.innerHTML = `
       <div class="card">
-        <p class="danger">Erro ao carregar notificações do Supabase.</p>
+        <p class="danger">Erro ao carregar notificações.</p>
         <p class="muted">${esc(erro.message)}</p>
       </div>
     `;
@@ -81,7 +81,7 @@ async function apagarNotificacao(id) {
     return;
   }
 
-  const confirmar = confirm("Apagar este aviso interno do Supabase?");
+  const confirmar = confirm("Apagar este aviso interno?");
 
   if (!confirmar) return;
 

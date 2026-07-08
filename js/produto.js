@@ -361,23 +361,23 @@ async function preencherProdutoPorEAN(ean) {
 
   let produto = null;
 
-  previewFoto.innerHTML = `<div class="card"><p class="muted">Buscando produto no Supabase...</p></div>`;
+  previewFoto.innerHTML = `<div class="card"><p class="muted">Buscando produto no sistema...</p></div>`;
 
   try {
     produto = await valisysDB.buscarProdutoPorEAN(codigo);
-  } catch (erroSupabase) {
-    console.warn("Falha ao buscar produto no Supabase. Tentando API pública.", erroSupabase);
+  } catch (errosistema) {
+    console.warn("Falha ao buscar produto no sistema. Tentando base de produtos.", errosistema);
   }
 
   if (!produto) {
-    previewFoto.innerHTML = `<div class="card"><p class="muted">Produto não estava no Supabase. Buscando na API pública...</p></div>`;
+    previewFoto.innerHTML = `<div class="card"><p class="muted">Produto não estava cadastrado. Buscando na base de produtos...</p></div>`;
 
     try {
-      produto = await buscarProdutoAPI(codigo);
-    } catch (erroAPI) {
-      console.warn("API pública não retornou produto.", erroAPI);
+      produto = await buscarProdutoFonteProdutos(codigo);
+    } catch (erroFonte) {
+      console.warn("base de produtos não retornou produto.", erroFonte);
       produtoAtualCadastro = null;
-      previewFoto.innerHTML = `<p class="danger">Não consegui puxar pela API. Preencha manualmente e salve.</p>`;
+      previewFoto.innerHTML = `<p class="danger">Não consegui puxar pela base de produtos. Preencha manualmente e salve.</p>`;
       return;
     }
 
@@ -386,14 +386,14 @@ async function preencherProdutoPorEAN(ean) {
         const produtoSalvo = await valisysDB.salvarProduto(produto);
         produto = produtoSalvo || produto;
       } catch (erroSalvarProduto) {
-        console.warn("Produto puxado, mas não salvo automaticamente no Supabase.", erroSalvarProduto);
+        console.warn("Produto puxado, mas não salvo automaticamente no sistema.", erroSalvarProduto);
       }
     }
   }
 
   if (!produto) {
     produtoAtualCadastro = null;
-    previewFoto.innerHTML = `<p class="muted">Produto não encontrado. Preencha manualmente e salve no Supabase.</p>`;
+    previewFoto.innerHTML = `<p class="muted">Produto não encontrado. Preencha manualmente e salve no sistema.</p>`;
     return;
   }
 
@@ -419,13 +419,13 @@ async function preencherProdutoPorEAN(ean) {
 }
 
 async function carregarProdutos() {
-  lista.innerHTML = `<div class="card"><p class="muted">Carregando produtos do Supabase...</p></div>`;
+  lista.innerHTML = `<div class="card"><p class="muted">Carregando produtos...</p></div>`;
 
   try {
     const produtos = await valisysDB.listarProdutos();
 
     if (produtos.length === 0) {
-      lista.innerHTML = `<div class="card"><p>Nenhum produto cadastrado no Supabase.</p></div>`;
+      lista.innerHTML = `<div class="card"><p>Nenhum produto cadastrado.</p></div>`;
       return;
     }
 
@@ -448,7 +448,7 @@ async function carregarProdutos() {
     console.error(erro);
     lista.innerHTML = `
       <div class="card">
-        <p class="danger">Erro ao carregar produtos do Supabase.</p>
+        <p class="danger">Erro ao carregar produtos.</p>
         <p class="muted">${esc(erro.message)}</p>
       </div>
     `;
@@ -485,7 +485,7 @@ form.addEventListener("submit", async function(event) {
     ecoscore: produtoAtualCadastro?.ecoscore || "",
     nova: produtoAtualCadastro?.nova || "",
     foto: fotoBase64,
-    fonte: fotoBase64 && fotoBase64.startsWith("http") ? "Open Food Facts" : "Cadastro Supabase"
+    fonte: fotoBase64 && fotoBase64.startsWith("http") ? "base pública de produtos" : "Cadastro sistema"
   };
 
   if (!novoProduto.nome) {
@@ -496,7 +496,7 @@ form.addEventListener("submit", async function(event) {
   try {
     await valisysDB.salvarProduto(novoProduto);
 
-    alert("Produto salvo no Supabase!");
+    alert("Produto salvo!");
 
     form.reset();
     fotoBase64 = "";
@@ -505,7 +505,7 @@ form.addEventListener("submit", async function(event) {
 
     await carregarProdutos();
   } catch (erro) {
-    alert("Erro ao salvar produto no Supabase: " + erro.message);
+    alert("Erro ao salvar produto: " + erro.message);
   }
 });
 
