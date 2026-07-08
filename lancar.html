@@ -9,12 +9,23 @@
 <body>
 
 <header class="topbar">
-  <a href="index.html" class="user-icon" aria-label="Voltar">←</a>
+  <a href="dashboard.html" class="user-icon" aria-label="Voltar">←</a>
   <h1>Lançar</h1>
   <a href="login.html" class="user-icon" aria-label="Login">👤</a>
 </header>
 
 <main class="container">
+  <section class="loja-atual-card compact">
+    <div>
+      <span>🏪</span>
+      <div>
+        <strong id="loja-lancamento">Loja não selecionada</strong>
+        <p>Confira antes de salvar o produto.</p>
+      </div>
+    </div>
+    <a href="escolher-loja.html">Trocar</a>
+  </section>
+
   <section class="card">
     <h2>Novo lançamento</h2>
     <p class="muted">Aponte para o código de barras inteiro. Se o produto não estiver salvo, o sistema tenta buscar nome e foto na API.</p>
@@ -70,6 +81,7 @@
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="auth.js"></script>
 <script src="cookies.js"></script>
+<script src="loja.js"></script>
 <script src="api-produtos.js"></script>
 <script src="lancar.js"></script>
 </body>

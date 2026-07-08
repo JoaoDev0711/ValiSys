@@ -1,4 +1,4 @@
-const MAIN_PAGE = "index.html";
+const MAIN_PAGE = "dashboard.html";
 
 function getUsuarioLogado() {
   return JSON.parse(localStorage.getItem("usuarioLogado"));
@@ -17,6 +17,7 @@ function protegerPagina() {
 
 function sair() {
   localStorage.removeItem("usuarioLogado");
+  localStorage.removeItem("lojaAtual");
   window.location.href = "login.html";
 }
 

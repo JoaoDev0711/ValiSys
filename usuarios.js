@@ -2,7 +2,7 @@ const usuario = protegerPagina();
 
 if (!podeGerenciarUsuarios(usuario.cargo)) {
   alert("Apenas admin pode acessar usuários.");
-  window.location.href = "index.html";
+  window.location.href = "dashboard.html";
 }
 
 const listaUsuarios = document.getElementById("lista-usuarios");

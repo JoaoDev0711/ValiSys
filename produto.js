@@ -1,8 +1,9 @@
 const usuario = protegerPagina();
+protegerLojaSelecionada();
 
 if (!podeCadastrarProduto(usuario.cargo)) {
   alert("Você não tem permissão para cadastrar produtos.");
-  window.location.href = "index.html";
+  window.location.href = "dashboard.html";
 }
 
 const form = document.getElementById("form-produto");

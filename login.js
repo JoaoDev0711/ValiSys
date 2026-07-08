@@ -61,5 +61,5 @@ form.addEventListener("submit", function(event) {
   }
 
   localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
-  window.location.href = "index.html";
+  window.location.href = "escolher-loja.html";
 });

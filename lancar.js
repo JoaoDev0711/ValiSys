@@ -1,4 +1,10 @@
 const usuario = protegerPagina();
+const lojaAtual = protegerLojaSelecionada();
+
+if (lojaAtual) {
+  const lojaEl = document.getElementById("loja-lancamento");
+  if (lojaEl) lojaEl.innerText = lojaAtual.nome;
+}
 
 const form = document.getElementById("form-lancamento");
 const eanInput = document.getElementById("ean");
@@ -307,6 +313,8 @@ form.addEventListener("submit", function(event) {
 
   const novo = {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    lojaId: lojaAtual.id,
+    lojaNome: lojaAtual.nome,
     ean,
     nomeProduto,
     marca: produtoCadastrado ? (produtoCadastrado.marca || "") : (produtoAtual?.marca || ""),
@@ -322,6 +330,14 @@ form.addEventListener("submit", function(event) {
     usuarioCargo: usuario.cargo,
     criadoEm: new Date().toLocaleString("pt-BR")
   };
+
+  const confirmar = confirm(
+    `Confirmar lançamento?\n\nLoja: ${lojaAtual.nome}\nProduto: ${nomeProduto}\nSetor: ${novo.setor}\nValidade: ${novo.validade}`
+  );
+
+  if (!confirmar) {
+    return;
+  }
 
   lancamentos.push(novo);
   localStorage.setItem("lancamentos", JSON.stringify(lancamentos));

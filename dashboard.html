@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema - Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <button id="menu-btn" class="icon-btn" aria-label="Abrir menu">☰</button>
+  <h1>Vencimentos</h1>
+  <a href="login.html" class="user-icon" aria-label="Área de login">👤</a>
+</header>
+
+<nav id="sidebar" class="sidebar">
+  <div class="sidebar-user">
+    <div class="avatar">👤</div>
+    <div>
+      <strong id="sidebar-nome">Usuário</strong>
+      <p id="sidebar-cargo">Cargo</p>
+    </div>
+  </div>
+
+  <a href="dashboard.html">🏠 Dashboard</a>
+  <a href="lancar.html">📦 Lançar validade</a>
+  <a href="meus-lancamentos.html">📋 Meus lançamentos</a>
+  <a href="lista-geral.html" data-role="lista-geral">📅 Lista completa</a>
+  <a href="cadastrar-produto.html" data-role="produtos">➕ Cadastrar produto</a>
+  <a href="usuarios.html" data-role="usuarios">👥 Usuários</a>
+  <a href="escolher-loja.html">🏪 Trocar loja</a>
+  <a href="#" onclick="sair()">🚪 Sair</a>
+</nav>
+
+<div id="overlay"></div>
+
+<main class="container">
+  <section class="welcome-card">
+    <p class="muted">Controle do mercado</p>
+    <h2 id="welcome-title">Olá</h2>
+    <p id="welcome-role">Cargo</p>
+  </section>
+
+  <section class="loja-atual-card" id="loja-atual-card">
+    <div>
+      <span>🏪</span>
+      <div>
+        <strong id="loja-atual-nome">Loja não selecionada</strong>
+        <p>Todos os lançamentos serão vinculados a esta loja.</p>
+      </div>
+    </div>
+    <a href="escolher-loja.html">Trocar loja</a>
+  </section>
+
+  <section class="resumo-vencimentos">
+    <div class="resumo-card danger-soft">
+      <span>🚨</span>
+      <div>
+        <strong id="qtd-vencidos">0</strong>
+        <p>Vencidos</p>
+      </div>
+    </div>
+
+    <div class="resumo-card warning-soft">
+      <span>📅</span>
+      <div>
+        <strong id="qtd-hoje">0</strong>
+        <p>Vencem hoje</p>
+      </div>
+    </div>
+
+    <div class="resumo-card alert-soft">
+      <span>⏳</span>
+      <div>
+        <strong id="qtd-7dias">0</strong>
+        <p>Até 7 dias</p>
+      </div>
+    </div>
+
+    <div class="resumo-card ok-soft">
+      <span>🗓️</span>
+      <div>
+        <strong id="qtd-30dias">0</strong>
+        <p>Até 30 dias</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="section-title">
+      <div>
+        <h2>Lembretes de vencimento</h2>
+        <p class="muted" id="texto-lembrete">Produtos que merecem atenção.</p>
+      </div>
+      <span>🔔</span>
+    </div>
+
+    <div id="lembretes-vencimento"></div>
+  </section>
+
+  <section class="grid-actions">
+    <a href="lancar.html" class="action-card">
+      <span>📦</span>
+      <div>
+        <h3>Lançar validade</h3>
+        <p>Escaneie o código e registre itens perto da validade.</p>
+      </div>
+    </a>
+
+    <a href="meus-lancamentos.html" class="action-card">
+      <span>📋</span>
+      <div>
+        <h3>Meus lançamentos</h3>
+        <p>Veja os produtos que você lançou hoje e nos últimos dias.</p>
+      </div>
+    </a>
+
+    <a href="lista-geral.html" class="action-card" data-role="lista-geral">
+      <span>📅</span>
+      <div>
+        <h3>Lista completa</h3>
+        <p>Acompanhe tudo que foi lançado pela equipe.</p>
+      </div>
+    </a>
+
+    <a href="cadastrar-produto.html" class="action-card" data-role="produtos">
+      <span>➕</span>
+      <div>
+        <h3>Cadastrar produto</h3>
+        <p>Adicione produtos pequenos que não existem no sistema.</p>
+      </div>
+    </a>
+
+    <a href="usuarios.html" class="action-card" data-role="usuarios">
+      <span>👥</span>
+      <div>
+        <h3>Usuários</h3>
+        <p>Apenas admin pode visualizar usuários cadastrados.</p>
+      </div>
+    </a>
+  </section>
+</main>
+
+<script src="auth.js"></script>
+<script src="cookies.js"></script>
+<script src="loja.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

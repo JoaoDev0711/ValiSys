@@ -1,15 +1,22 @@
 const usuario = protegerPagina();
+const lojaAtual = protegerLojaSelecionada();
+
+const lojaListaEl = document.getElementById("loja-lista-atual");
+if (lojaListaEl && lojaAtual) lojaListaEl.innerText = lojaAtual.nome;
+
 const lista = document.getElementById("lista");
 const filtro = document.getElementById("filtro");
 
 let lancamentosBase = JSON.parse(localStorage.getItem("lancamentos")) || [];
+
+lancamentosBase = lancamentosBase.filter(item => item.lojaId === lojaAtual.id);
 
 const paginaAtual = window.location.pathname;
 
 if (paginaAtual.includes("lista-geral")) {
   if (!podeVerListaGeral(usuario.cargo)) {
     alert("Você não tem permissão para acessar a lista completa.");
-    window.location.href = "index.html";
+    window.location.href = "dashboard.html";
   }
 } else {
   lancamentosBase = lancamentosBase.filter(item => item.usuarioId === usuario.id);
@@ -59,6 +66,7 @@ function renderizarLista() {
     return `
       <article class="card">
         <h3>${esc(item.nomeProduto)}</h3>
+        <p><strong>Loja:</strong> ${esc(item.lojaNome || lojaAtual.nome)}</p>
         <p><strong>EAN:</strong> ${esc(item.ean)}</p>
         ${marcaFinal ? `<p><strong>Marca:</strong> ${esc(marcaFinal)}</p>` : ""}
         ${fabricanteFinal ? `<p><strong>Fabricante:</strong> ${esc(fabricanteFinal)}</p>` : ""}

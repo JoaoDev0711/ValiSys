@@ -1,11 +1,20 @@
 const usuario = protegerPagina();
 
 if (usuario) {
+  const lojaAtual = protegerLojaSelecionada();
+
+  if (!lojaAtual) {
+    throw new Error("Loja não selecionada.");
+  }
+
   document.getElementById("welcome-title").innerText = `Olá, ${usuario.nome}`;
   document.getElementById("welcome-role").innerText = `Cargo: ${nomeCargo(usuario.cargo)}`;
 
   document.getElementById("sidebar-nome").innerText = usuario.nome;
   document.getElementById("sidebar-cargo").innerText = nomeCargo(usuario.cargo);
+
+  const lojaNomeEl = document.getElementById("loja-atual-nome");
+  if (lojaNomeEl) lojaNomeEl.innerText = lojaAtual.nome;
 
   const menuBtn = document.getElementById("menu-btn");
   const sidebar = document.getElementById("sidebar");
@@ -47,6 +56,9 @@ function carregarResumoInicial() {
   const textoLembrete = document.getElementById("texto-lembrete");
 
   let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
+  const lojaAtual = getLojaAtual();
+
+  lancamentos = lancamentos.filter(item => item.lojaId === lojaAtual.id);
 
   // Promotor vê lembrete apenas dos produtos que ele lançou.
   // Encarregado, gerente e admin veem lembretes da equipe toda.
@@ -54,7 +66,7 @@ function carregarResumoInicial() {
     lancamentos = lancamentos.filter(item => item.usuarioId === usuario.id);
     textoLembrete.innerText = "Mostrando somente os produtos lançados por você.";
   } else {
-    textoLembrete.innerText = "Mostrando os produtos lançados pela equipe.";
+    textoLembrete.innerText = "Mostrando os produtos lançados pela equipe desta loja.";
   }
 
   const hoje = new Date();
