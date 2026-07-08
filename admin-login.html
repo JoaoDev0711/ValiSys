@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Admin - Vencimentos</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<main class="login-page">
+  <section class="login-card">
+    <a href="escolher-loja.html" class="voltar-site">← Voltar para lojas</a>
+
+    <div class="login-logo">⚙️</div>
+    <h1>Administração</h1>
+    <p>Entre para gerenciar lojas, grupos, regiões, cores e gráficos.</p>
+
+    <div class="mini-info-card">
+      <strong>Acesso administrativo</strong>
+      <p>Esse acesso não entra direto na loja. Para lançar, escolha uma loja e faça login operacional.</p>
+    </div>
+
+    <form id="admin-login-form">
+      <label for="senhaAdmin">Senha do admin</label>
+      <input type="password" id="senhaAdmin" placeholder="Digite a senha do admin" required>
+
+      <button type="submit">Entrar na administração</button>
+    </form>
+
+    <div class="login-help">
+      <a href="escolher-loja.html">Sou funcionário: escolher loja</a>
+    </div>
+  </section>
+</main>
+
+<script src="js/cookies.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/loja.js"></script>
+<script src="js/admin-login.js"></script>
+</body>
+</html>

@@ -2,7 +2,7 @@ const usuario = protegerPagina();
 
 if (usuario.cargo !== "admin") {
   alert("Área exclusiva do admin.");
-  window.location.href = "dashboard.html";
+  window.location.href = "admin-login.html";
 }
 
 const formLojaAdmin = document.getElementById("form-loja-admin");
@@ -23,12 +23,10 @@ const filtroGrupoAdmin = document.getElementById("filtroGrupoAdmin");
 const filtroRegiaoAdmin = document.getElementById("filtroRegiaoAdmin");
 const filtroStatusAdmin = document.getElementById("filtroStatusAdmin");
 
-const graficoStatusLojas = document.getElementById("grafico-status-lojas");
+const graficoSituacaoLojas = document.getElementById("grafico-situacao-lojas");
 const graficoVencimentosAdmin = document.getElementById("grafico-vencimentos-admin");
 const graficoGruposAdmin = document.getElementById("grafico-grupos-admin");
 const graficoRegioesAdmin = document.getElementById("grafico-regioes-admin");
-const pizzaStatusLojas = document.getElementById("pizza-status-lojas");
-const pizzaVencimentosAdmin = document.getElementById("pizza-vencimentos-admin");
 const adminPercentuais = document.getElementById("admin-percentuais");
 const adminLojaAtual = document.getElementById("admin-loja-atual");
 
@@ -266,23 +264,19 @@ function renderizarGraficosAdmin() {
   const inativas = lojasAdminCache.filter(loja => (loja.status || "ativa") !== "ativa").length;
   const resumo = calcularResumoVencimentos();
 
-  const dadosStatus = {
+  // Um indicador = um gráfico. Sem duplicar pizza e barra para o mesmo dado.
+  renderizarPizza(graficoSituacaoLojas, {
     "Ativas": ativas,
     "Desativadas": inativas
-  };
+  });
 
-  const dadosVencimentos = {
+  renderizarGraficoBarras(graficoVencimentosAdmin, {
     "Vencidos": resumo.vencidos,
-    "Hoje": resumo.hoje,
+    "Vencem hoje": resumo.hoje,
     "Até 7 dias": resumo.seteDias,
     "Até 30 dias": resumo.trintaDias,
-    "Normal": resumo.normal
-  };
-
-  renderizarPizza(pizzaStatusLojas, dadosStatus);
-  renderizarPizza(pizzaVencimentosAdmin, dadosVencimentos);
-  renderizarGraficoBarras(graficoStatusLojas, dadosStatus);
-  renderizarGraficoBarras(graficoVencimentosAdmin, dadosVencimentos);
+    "Sem urgência": resumo.normal
+  });
 
   renderizarGraficoBarras(
     graficoGruposAdmin,

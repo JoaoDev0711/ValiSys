@@ -14,39 +14,23 @@ const voltarLogin = document.getElementById("voltar-login");
 const lojaAtual = getLojaAtual();
 const usuarioAtual = getUsuarioLogado();
 
-if (lojaAtual && usuarioAtual?.cargo === "admin") {
+if (usuarioAtual?.cargo === "admin") {
   limparUsuarioLogado();
 }
 
-const senhaAdmin = "admin123";
-
 function configurarTiposDeAcesso() {
-  if (lojaAtual) {
-    cargoSelect.innerHTML = `
-      <option value="">Selecione</option>
-      <option value="promotor">Promotor da loja</option>
-      <option value="encarregado">Encarregado da loja</option>
-      <option value="gerente">Gerente da loja</option>
-    `;
-
-    if (linkTrocarLoja) linkTrocarLoja.innerText = "Trocar loja";
-    if (voltarLogin) {
-      voltarLogin.href = "escolher-loja.html";
-      voltarLogin.innerText = "← Trocar loja";
-    }
-
-    return;
-  }
-
   cargoSelect.innerHTML = `
-    <option value="admin">Admin geral</option>
+    <option value="">Selecione</option>
+    <option value="promotor">Promotor da loja</option>
+    <option value="encarregado">Encarregado da loja</option>
+    <option value="gerente">Gerente da loja</option>
   `;
-  cargoSelect.value = "admin";
 
-  if (linkTrocarLoja) linkTrocarLoja.innerText = "Sou funcionário: escolher loja";
+  if (linkTrocarLoja) linkTrocarLoja.innerText = "Trocar loja";
+
   if (voltarLogin) {
-    voltarLogin.href = "index.html";
-    voltarLogin.innerText = "← Voltar para o site";
+    voltarLogin.href = "escolher-loja.html";
+    voltarLogin.innerText = "← Trocar loja";
   }
 }
 
@@ -69,28 +53,14 @@ function renderizarLojaLogin() {
   }
 
   lojaLoginCard.innerHTML = `
-    <strong>Acesso administrativo</strong>
-    <p>Funcionário precisa clicar primeiro na loja desejada.</p>
+    <strong>Nenhuma loja selecionada</strong>
+    <p>Clique primeiro na loja desejada para abrir o login dela.</p>
   `;
-  textoLogin.innerText = "Área de acesso do admin geral.";
+  textoLogin.innerText = "Login operacional da loja.";
 }
 
 function atualizarCamposLogin() {
   const cargo = cargoSelect.value;
-
-  if (cargo === "admin") {
-    nomeArea.style.display = "none";
-    nomeInput.required = false;
-    nomeInput.value = "Admin";
-
-    senhaArea.style.display = "block";
-    senhaInput.required = true;
-    senhaLabel.innerText = "Senha do admin";
-    senhaInput.placeholder = "Digite a senha do admin";
-    senhaAjuda.innerText = "Admin entra apenas na área administrativa.";
-    textoLogin.innerText = "Área de acesso do admin geral.";
-    return;
-  }
 
   nomeArea.style.display = "block";
   nomeInput.required = true;
@@ -125,48 +95,28 @@ cargoSelect.addEventListener("change", atualizarCamposLogin);
 renderizarLojaLogin();
 atualizarCamposLogin();
 
+if (!lojaAtual) {
+  setTimeout(() => {
+    alert("Escolha uma loja antes de entrar.");
+    window.location.href = "escolher-loja.html";
+  }, 150);
+}
+
 form.addEventListener("submit", async function(event) {
   event.preventDefault();
 
   const cargo = cargoSelect.value;
-  const nome = cargo === "admin" ? "Admin" : nomeInput.value.trim();
+  const nome = nomeInput.value.trim();
   const senha = senhaInput.value.trim();
-
-  if (!cargo) {
-    alert("Selecione o tipo de acesso.");
-    return;
-  }
-
-  if (cargo === "admin") {
-    if (lojaAtual) {
-      alert("Admin não entra pelo login da loja. Troque para o acesso geral do admin.");
-      return;
-    }
-
-    if (senha !== senhaAdmin) {
-      alert("Senha do admin incorreta.");
-      senhaInput.focus();
-      return;
-    }
-
-    salvarJSONLocal("usuarioLogado", {
-      id: "admin-geral",
-      nome: "Admin",
-      cargo: "admin",
-      funcionarioId: "",
-      lojaIdPadrao: "",
-      lojaNomePadrao: "",
-      setor: "",
-      criadoEm: new Date().toLocaleString("pt-BR")
-    });
-
-    window.location.href = "admin-dashboard.html";
-    return;
-  }
 
   if (!lojaAtual) {
     alert("Clique primeiro na loja desejada para entrar.");
     window.location.href = "escolher-loja.html";
+    return;
+  }
+
+  if (!cargo) {
+    alert("Selecione o tipo de acesso.");
     return;
   }
 
