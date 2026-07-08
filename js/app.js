@@ -57,6 +57,12 @@ if (usuario) {
     }
   });
 
+  document.querySelectorAll("[data-role='admin']").forEach(el => {
+    if (usuario.cargo !== "admin") {
+      el.style.display = "none";
+    }
+  });
+
   carregarResumoInicial();
   carregarResumoNotificacoes();
 }

@@ -22,24 +22,23 @@
     </p>
   </section>
 
-  <section class="card" id="form-nova-loja-area">
-    <h2>Cadastrar loja</h2>
-    <p class="muted">Cadastro disponível para gerente e admin. Remoção disponível apenas para admin.</p>
+  <section class="card">
+    <h2>Filtrar lojas</h2>
+    <div class="lista-filtros">
+      <div>
+        <label for="filtroGrupoLoja">Grupo/Rede</label>
+        <select id="filtroGrupoLoja">
+          <option value="todos">Todos os grupos</option>
+        </select>
+      </div>
 
-    <form id="form-loja">
-      <label for="nomeLoja">Nome da loja</label>
-      <input type="text" id="nomeLoja" placeholder="Ex: Mercado São João">
-
-      <label for="responsavelLoja">Responsável</label>
-      <input type="text" id="responsavelLoja" placeholder="Ex: Carlos - Gerente">
-
-      <label for="imagemLoja">Imagem da loja</label>
-      <input type="file" id="imagemLoja" accept="image/*">
-      <p class="small muted">Pode escolher uma foto ou logo direto do celular. Se não colocar, o sistema mostra as iniciais da loja.</p>
-      <div id="previewImagemLoja" class="loja-preview"></div>
-
-      <button type="submit">Salvar loja</button>
-    </form>
+      <div>
+        <label for="filtroRegiaoLoja">Região</label>
+        <select id="filtroRegiaoLoja">
+          <option value="todas">Todas as regiões</option>
+        </select>
+      </div>
+    </div>
   </section>
 
   <section>

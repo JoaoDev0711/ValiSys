@@ -1,0 +1,27 @@
+Dashboard Admin avançada
+
+Esta versão melhora a área administrativa do admin.
+
+Incluído:
+- cards de resumo administrativo;
+- gráfico de lojas ativas x desativadas;
+- gráfico de vencimentos gerais;
+- gráfico por grupo/rede;
+- gráfico por região;
+- loja atualmente selecionada para administração;
+- atalhos para continuar operando:
+  - Dashboard da loja;
+  - Lançar validade;
+  - Lista completa;
+  - Usuários;
+  - Escolher loja.
+
+Fluxo recomendado:
+1. Admin entra.
+2. Cai na Dashboard Admin.
+3. Escolhe ou administra uma loja.
+4. Pode lançar validade normalmente pela loja selecionada.
+5. Pode voltar para a área admin quando quiser.
+
+Antes de testar região/grupo/status, rode:
+database/ajuste-lojas-regiao-grupo-status.sql

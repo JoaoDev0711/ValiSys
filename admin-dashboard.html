@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Admin - Vencimentos</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a href="index.html" class="user-icon" aria-label="Voltar">←</a>
+  <h1>Admin</h1>
+  <a href="#" onclick="sair()" class="user-icon" aria-label="Sair">🚪</a>
+</header>
+
+<main class="container">
+  <section class="welcome-card admin-hero">
+    <p class="muted">Painel geral</p>
+    <h2>Dashboard Admin</h2>
+    <p>Visão administrativa das lojas, operação, vencimentos e gestão geral.</p>
+
+    <div class="admin-quick-actions">
+      <a href="escolher-loja.html" class="quick-admin-btn">Escolher loja</a>
+      <a href="dashboard.html" class="quick-admin-btn">Dashboard da loja</a>
+      <a href="lancar.html" class="quick-admin-btn">Lançar validade</a>
+      <a href="lista-geral.html" class="quick-admin-btn">Lista completa</a>
+      <a href="usuarios.html" class="quick-admin-btn">Usuários</a>
+    </div>
+  </section>
+
+  <section class="resumo-vencimentos admin-resumo">
+    <div class="resumo-card ok-soft">
+      <span>🏪</span>
+      <div>
+        <strong id="qtd-lojas-admin">0</strong>
+        <p>Lojas ativas</p>
+      </div>
+    </div>
+
+    <div class="resumo-card warning-soft">
+      <span>⏸️</span>
+      <div>
+        <strong id="qtd-lojas-inativas-admin">0</strong>
+        <p>Lojas desativadas</p>
+      </div>
+    </div>
+
+    <div class="resumo-card alert-soft">
+      <span>📦</span>
+      <div>
+        <strong id="qtd-lancamentos-admin">0</strong>
+        <p>Lançamentos ativos</p>
+      </div>
+    </div>
+
+    <div class="resumo-card danger-soft">
+      <span>🚨</span>
+      <div>
+        <strong id="qtd-vencidos-admin">0</strong>
+        <p>Vencidos</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="admin-grid">
+    <article class="card">
+      <div class="section-title">
+        <div>
+          <h2>Visão por status</h2>
+          <p class="muted">Ativas x desativadas</p>
+        </div>
+        <span>📊</span>
+      </div>
+      <div id="grafico-status-lojas" class="bar-chart"></div>
+    </article>
+
+    <article class="card">
+      <div class="section-title">
+        <div>
+          <h2>Vencimentos</h2>
+          <p class="muted">Situação geral dos produtos</p>
+        </div>
+        <span>⏳</span>
+      </div>
+      <div id="grafico-vencimentos-admin" class="bar-chart"></div>
+    </article>
+  </section>
+
+  <section class="admin-grid">
+    <article class="card">
+      <div class="section-title">
+        <div>
+          <h2>Lojas por grupo</h2>
+          <p class="muted">Bahamas, Frangolândia, GG e outros</p>
+        </div>
+        <span>🏷️</span>
+      </div>
+      <div id="grafico-grupos-admin" class="bar-chart"></div>
+    </article>
+
+    <article class="card">
+      <div class="section-title">
+        <div>
+          <h2>Lojas por região</h2>
+          <p class="muted">Distribuição operacional</p>
+        </div>
+        <span>📍</span>
+      </div>
+      <div id="grafico-regioes-admin" class="bar-chart"></div>
+    </article>
+  </section>
+
+  <section class="card">
+    <div class="section-title">
+      <div>
+        <h2>Loja em administração</h2>
+        <p class="muted">Escolha uma loja ativa e use os atalhos operacionais.</p>
+      </div>
+      <span>🏪</span>
+    </div>
+
+    <div id="admin-loja-atual" class="admin-current-store"></div>
+  </section>
+
+  <section class="card">
+    <h2>Cadastrar loja</h2>
+    <p class="muted">
+      A imagem pode ser escolhida direto do celular. Se não colocar imagem, o sistema usa as iniciais do nome.
+    </p>
+
+    <form id="form-loja-admin">
+      <label for="nomeLojaAdmin">Nome da loja</label>
+      <input type="text" id="nomeLojaAdmin" placeholder="Ex: Mercado Demonstração" required>
+
+      <label for="responsavelLojaAdmin">Responsável</label>
+      <input type="text" id="responsavelLojaAdmin" placeholder="Ex: Carlos - Gerente">
+
+      <label for="grupoLojaAdmin">Grupo/Rede</label>
+      <input type="text" id="grupoLojaAdmin" placeholder="Ex: Bahamas, Frangolândia, GG">
+
+      <label for="regiaoLojaAdmin">Região</label>
+      <input type="text" id="regiaoLojaAdmin" placeholder="Ex: Fortaleza, Eusébio, Caucaia, Regional Sul">
+
+      <label for="imagemLojaAdmin">Imagem da loja</label>
+      <input type="file" id="imagemLojaAdmin" accept="image/*">
+      <p class="small muted">Aceita foto ou logo do celular.</p>
+
+      <div id="previewImagemLojaAdmin" class="loja-preview"></div>
+
+      <button type="submit">Salvar loja</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Filtrar lojas</h2>
+    <div class="lista-filtros">
+      <div>
+        <label for="filtroGrupoAdmin">Grupo/Rede</label>
+        <select id="filtroGrupoAdmin">
+          <option value="todos">Todos os grupos</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="filtroRegiaoAdmin">Região</label>
+        <select id="filtroRegiaoAdmin">
+          <option value="todas">Todas as regiões</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="filtroStatusAdmin">Status</label>
+        <select id="filtroStatusAdmin">
+          <option value="todos">Todas</option>
+          <option value="ativa">Ativas</option>
+          <option value="inativa">Desativadas</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Lojas cadastradas</h2>
+    <div id="lista-lojas-admin"></div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/dados-config.js"></script>
+<script src="js/dados-service.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/cookies.js"></script>
+<script src="js/loja.js"></script>
+<script src="js/admin-dashboard.js"></script>
+</body>
+</html>

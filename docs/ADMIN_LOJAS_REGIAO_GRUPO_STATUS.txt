@@ -1,0 +1,32 @@
+Dashboard Admin - lojas
+
+Agora a Dashboard Admin tem:
+
+- cadastro de loja com grupo/rede;
+- cadastro de região;
+- imagem da loja pelo celular;
+- filtro por grupo/rede;
+- filtro por região;
+- filtro por status;
+- ativar/desativar serviço da loja.
+
+Status:
+- Loja ativa aparece na seleção de loja e pode ser administrada.
+- Loja desativada fica guardada no admin, mas não aparece para funcionário escolher.
+
+Exemplos de grupo/rede:
+- Bahamas
+- Frangolândia
+- GG
+- Pinheiro
+- Cometa
+
+Exemplos de região:
+- Fortaleza
+- Caucaia
+- Eusébio
+- Regional Sul
+- Regional Norte
+
+Antes de usar, rode:
+database/ajuste-lojas-regiao-grupo-status.sql

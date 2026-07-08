@@ -1,0 +1,21 @@
+Dashboard Admin
+
+Agora existe uma tela própria para o admin:
+
+admin-dashboard.html
+
+Fluxo:
+1. Entrar como Admin geral.
+2. O sistema abre a Dashboard Admin.
+3. Nela o admin pode:
+   - cadastrar loja;
+   - colocar imagem da loja pelo arquivo do celular;
+   - trocar imagem;
+   - remover loja;
+   - escolher uma loja para administrar.
+
+A tela escolher-loja.html ficou somente para seleção de loja.
+Funcionário comum não vê cadastro de loja.
+
+Antes de usar imagem da loja em uma base já criada, rode:
+database/ajuste-imagem-loja.sql

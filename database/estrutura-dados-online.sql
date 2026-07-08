@@ -13,6 +13,8 @@ create table if not exists public.lojas (
   responsavel text,
   telefone text,
   imagem text,
+  regiao text,
+  grupo text,
   status text not null default 'ativa',
   criada_em timestamptz not null default now()
 );

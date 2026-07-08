@@ -112,12 +112,7 @@ form.addEventListener("submit", async function(event) {
       criadoEm: new Date().toLocaleString("pt-BR")
     });
 
-    if (!getLojaAtual()) {
-      window.location.href = "escolher-loja.html";
-      return;
-    }
-
-    window.location.href = "dashboard.html";
+    window.location.href = "admin-dashboard.html";
     return;
   }
 

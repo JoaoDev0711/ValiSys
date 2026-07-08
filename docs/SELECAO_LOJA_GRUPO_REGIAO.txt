@@ -1,0 +1,11 @@
+Seleção de loja
+
+A tela escolher-loja.html agora também mostra:
+
+- filtro por Grupo/Rede;
+- filtro por Região;
+- informação de Grupo/Rede no card da loja;
+- informação de Região no card da loja.
+
+A seleção continua mostrando somente lojas ativas.
+Lojas desativadas ficam visíveis apenas na Dashboard Admin.
