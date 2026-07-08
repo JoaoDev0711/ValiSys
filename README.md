@@ -324,3 +324,81 @@ Admin → Administração → admin-login.html → admin-dashboard.html
 ```
 
 As confirmações não usam mais a janela padrão do navegador.
+
+
+---
+
+## Dashboard Admin com navbar
+
+A Dashboard Admin possui uma navbar própria para navegar pela área administrativa:
+
+```txt
+Visão geral
+Gráficos
+Loja atual
+Cadastrar loja
+Filtros
+Lojas
+Entrar em loja
+```
+
+---
+
+## Gestão da loja para gerente e encarregado
+
+Além da Dashboard Admin geral, existe a área operacional administrativa da loja:
+
+```txt
+gestao-loja.html
+```
+
+Permissões:
+
+```txt
+Gerente:
+- vê resumo geral da loja;
+- vê vencimentos por prazo;
+- vê vencimentos por setor;
+- vê equipe ativa;
+- acessa produtos;
+- acessa funcionários;
+- acessa lista completa;
+- acessa notificações.
+
+Encarregado:
+- vê resumo operacional;
+- vê vencimentos filtrados por setor quando tiver setor configurado;
+- acessa lista completa conforme permissão;
+- acessa notificações;
+- não vê gestão de funcionários;
+- não vê cadastro de produtos.
+```
+
+---
+
+## Produtos completos
+
+A tela de produtos e os lançamentos agora trabalham com dados completos:
+
+```txt
+EAN
+Nome
+Marca
+Fabricante
+Sabor/variação
+Categoria
+Quantidade padrão
+Porção
+Embalagem
+Origem
+Países
+Lojas encontradas
+Ingredientes
+Alérgicos
+Pode conter / traços
+Nutri-Score
+Eco-Score
+NOVA
+Fonte
+Foto
+```

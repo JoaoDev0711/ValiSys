@@ -64,6 +64,12 @@ if (usuario) {
     }
   });
 
+  document.querySelectorAll("[data-role='gestao-loja']").forEach(el => {
+    if (!podeVerGestaoLoja(usuario.cargo)) {
+      el.style.display = "none";
+    }
+  });
+
   carregarResumoInicial();
   carregarResumoNotificacoes();
 }

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão da Loja - Vencimentos</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a href="dashboard.html" class="user-icon" aria-label="Voltar">←</a>
+  <h1>Gestão</h1>
+  <a href="#" onclick="sair()" class="user-icon" aria-label="Sair">🚪</a>
+</header>
+
+<main class="container">
+  <section class="welcome-card">
+    <p class="muted">Área administrativa da loja</p>
+    <h2 id="gestao-titulo">Gestão da loja</h2>
+    <p id="gestao-descricao">Visão operacional para gerente e encarregado.</p>
+  </section>
+
+  <nav class="admin-navbar loja-gestao-navbar" aria-label="Navegação da gestão da loja">
+    <a href="#gestao-resumo">Resumo</a>
+    <a href="#gestao-vencimentos">Vencimentos</a>
+    <a href="#gestao-equipe" data-gestao="gerente">Equipe</a>
+    <a href="#gestao-acoes">Ações</a>
+  </nav>
+
+  <section class="loja-atual-card compact">
+    <div>
+      <div>
+        <strong id="gestao-loja-atual">Loja não selecionada</strong>
+        <p id="gestao-loja-subtitulo">Dados administrativos da loja atual.</p>
+      </div>
+    </div>
+    <a href="escolher-loja.html">Trocar</a>
+  </section>
+
+  <section class="resumo-vencimentos" id="gestao-resumo">
+    <div class="resumo-card danger-soft">
+      <span>🚨</span>
+      <div>
+        <strong id="gestao-vencidos">0</strong>
+        <p>Vencidos</p>
+      </div>
+    </div>
+
+    <div class="resumo-card warning-soft">
+      <span>📅</span>
+      <div>
+        <strong id="gestao-hoje">0</strong>
+        <p>Vencem hoje</p>
+      </div>
+    </div>
+
+    <div class="resumo-card alert-soft">
+      <span>⏳</span>
+      <div>
+        <strong id="gestao-7dias">0</strong>
+        <p>Até 7 dias</p>
+      </div>
+    </div>
+
+    <div class="resumo-card ok-soft">
+      <span>👥</span>
+      <div>
+        <strong id="gestao-equipe-qtd">0</strong>
+        <p>Equipe ativa</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="admin-grid" id="gestao-vencimentos">
+    <article class="card">
+      <div class="section-title">
+        <div>
+          <h2>Vencimentos por prazo</h2>
+          <p class="muted" id="gestao-vencimentos-texto">Resumo da loja.</p>
+        </div>
+        <span>📊</span>
+      </div>
+      <div id="gestao-grafico-prazos" class="bar-chart"></div>
+    </article>
+
+    <article class="card">
+      <div class="section-title">
+        <div>
+          <h2>Vencimentos por setor</h2>
+          <p class="muted">Ranking dos setores com itens ativos.</p>
+        </div>
+        <span>🏷️</span>
+      </div>
+      <div id="gestao-grafico-setores" class="bar-chart"></div>
+    </article>
+  </section>
+
+  <section class="card" id="gestao-equipe" data-gestao="gerente">
+    <div class="section-title">
+      <div>
+        <h2>Equipe da loja</h2>
+        <p class="muted">Área disponível para gerente.</p>
+      </div>
+      <span>👥</span>
+    </div>
+
+    <div id="gestao-equipe-lista"></div>
+  </section>
+
+  <section class="card" id="gestao-acoes">
+    <h2>Ações administrativas</h2>
+    <div class="grid-actions gestao-actions">
+      <a href="lancar.html" class="action-card">
+        <span>📦</span>
+        <div>
+          <h3>Lançar validade</h3>
+          <p>Registrar produtos vencendo ou próximos do vencimento.</p>
+        </div>
+      </a>
+
+      <a href="lista-geral.html" class="action-card">
+        <span>📅</span>
+        <div>
+          <h3>Lista completa</h3>
+          <p>Gerente vê a loja; encarregado vê o setor quando configurado.</p>
+        </div>
+      </a>
+
+      <a href="notificacoes.html" class="action-card">
+        <span>🔔</span>
+        <div>
+          <h3>Notificações</h3>
+          <p>Acompanhar avisos internos e produtos críticos.</p>
+        </div>
+      </a>
+
+      <a href="cadastrar-produto.html" class="action-card" data-role="produtos">
+        <span>➕</span>
+        <div>
+          <h3>Produtos</h3>
+          <p>Cadastrar e completar dados de produtos.</p>
+        </div>
+      </a>
+
+      <a href="usuarios.html" class="action-card" data-role="funcionarios">
+        <span>👥</span>
+        <div>
+          <h3>Funcionários</h3>
+          <p>Gerenciar funcionários da loja.</p>
+        </div>
+      </a>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/dados-config.js"></script>
+<script src="js/dados-service.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/cookies.js"></script>
+<script src="js/loja.js"></script>
+<script src="js/site-dialog.js"></script>
+<script src="js/gestao-loja.js"></script>
+</body>
+</html>

@@ -493,31 +493,52 @@ function salvarProdutoLocalSeNovo(produto) {
   return produto || null;
 }
 
+function produtoCampoHTML(rotulo, valor, classe = "") {
+  const texto = String(valor || "").trim();
+
+  if (!texto) return "";
+
+  return `<p class="${classe}"><strong>${esc(rotulo)}:</strong> ${esc(texto)}</p>`;
+}
+
 function cardProdutoHTML(produto, mensagem = "") {
+  if (!produto) return "";
+
   return `
-    <div class="card produto-encontrado">
+    <div class="card produto-encontrado produto-card-completo">
       ${mensagem ? `<p class="api-status">${esc(mensagem)}</p>` : ""}
-      <h3>${esc(produto.nome)}</h3>
-      <p><strong>EAN:</strong> ${esc(produto.ean)}</p>
-      <p><strong>Marca:</strong> ${esc(produto.marca || "Não informada")}</p>
-      <p><strong>Fabricante:</strong> ${esc(produto.fabricante || "Não informado")}</p>
-      <p><strong>Sabor/variação:</strong> ${esc(produto.sabor || "Não informado")}</p>
-      <p><strong>Categoria:</strong> ${esc(produto.categoria || "Não informada")}</p>
-      ${produto.quantidadePadrao ? `<p><strong>Quantidade padrão:</strong> ${esc(produto.quantidadePadrao)}</p>` : ""}
-      ${produto.embalagem ? `<p><strong>Embalagem:</strong> ${esc(produto.embalagem)}</p>` : ""}
-      ${produto.origem ? `<p><strong>Origem:</strong> ${esc(produto.origem)}</p>` : ""}
-      ${produto.paises ? `<p><strong>Países:</strong> ${esc(produto.paises)}</p>` : ""}
-      ${produto.lojas ? `<p><strong>Lojas encontradas:</strong> ${esc(produto.lojas)}</p>` : ""}
-      ${produto.ingredientes ? `<p><strong>Ingredientes:</strong> ${esc(produto.ingredientes)}</p>` : ""}
-      ${produto.alergicos ? `<p><strong>Alérgicos:</strong> ${esc(produto.alergicos)}</p>` : ""}
-      ${produto.nutriscore ? `<p><strong>Nutri-Score:</strong> ${esc(produto.nutriscore)}</p>` : ""}
-      ${produto.nova ? `<p><strong>NOVA:</strong> ${esc(produto.nova)}</p>` : ""}
-      ${produto.fonte ? `<p><strong>Fonte:</strong> ${esc(produto.fonte)}</p>` : ""}
-      ${
-        produto.foto
-          ? `<img class="produto-img" src="${produto.foto}" alt="${esc(produto.nome)}">`
-          : `<p class="muted">Produto sem foto cadastrada.</p>`
-      }
+
+      <div class="produto-card-header">
+        <div>
+          <h3>${esc(produto.nome || "Produto sem nome")}</h3>
+          <p class="muted">EAN: ${esc(produto.ean || "Não informado")}</p>
+        </div>
+        ${
+          produto.foto
+            ? `<img class="produto-img produto-img-mini" src="${produto.foto}" alt="${esc(produto.nome)}">`
+            : `<div class="produto-img-mini produto-sem-foto">Sem foto</div>`
+        }
+      </div>
+
+      <div class="produto-detalhes-grid">
+        ${produtoCampoHTML("Marca", produto.marca || "Não informada")}
+        ${produtoCampoHTML("Fabricante", produto.fabricante || "Não informado")}
+        ${produtoCampoHTML("Sabor/variação", produto.sabor || "Não informado")}
+        ${produtoCampoHTML("Categoria", produto.categoria || "Não informada")}
+        ${produtoCampoHTML("Quantidade padrão", produto.quantidadePadrao)}
+        ${produtoCampoHTML("Porção", produto.porcao)}
+        ${produtoCampoHTML("Embalagem", produto.embalagem)}
+        ${produtoCampoHTML("Origem", produto.origem)}
+        ${produtoCampoHTML("Países", produto.paises)}
+        ${produtoCampoHTML("Lojas encontradas", produto.lojas)}
+        ${produtoCampoHTML("Ingredientes", produto.ingredientes, "produto-campo-longo")}
+        ${produtoCampoHTML("Alérgicos", produto.alergicos, "produto-campo-longo")}
+        ${produtoCampoHTML("Pode conter / traços", produto.rastros, "produto-campo-longo")}
+        ${produtoCampoHTML("Nutri-Score", produto.nutriscore)}
+        ${produtoCampoHTML("Eco-Score", produto.ecoscore)}
+        ${produtoCampoHTML("NOVA", produto.nova)}
+        ${produtoCampoHTML("Fonte", produto.fonte)}
+      </div>
     </div>
   `;
 }

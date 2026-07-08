@@ -20,14 +20,18 @@
     <h2>Dashboard Admin</h2>
     <p>Visão administrativa das lojas, operação, vencimentos e gestão geral.</p>
 
-    <div class="admin-quick-actions">
-      <a href="escolher-loja.html" class="quick-admin-btn">Entrar em uma loja</a>
-      <a href="#lista-lojas-admin" class="quick-admin-btn">Gerenciar lojas</a>
-      <a href="#form-loja-admin" class="quick-admin-btn">Cadastrar loja</a>
-    </div>
+    <nav class="admin-navbar" aria-label="Navegação administrativa">
+      <a href="#visao-geral-admin">Visão geral</a>
+      <a href="#graficos-admin">Gráficos</a>
+      <a href="#loja-admin-atual">Loja atual</a>
+      <a href="#form-loja-admin">Cadastrar loja</a>
+      <a href="#filtros-lojas-admin">Filtros</a>
+      <a href="#lista-lojas-admin">Lojas</a>
+      <a href="escolher-loja.html">Entrar em loja</a>
+    </nav>
   </section>
 
-  <section class="resumo-vencimentos admin-resumo">
+  <section class="resumo-vencimentos admin-resumo" id="visao-geral-admin">
     <div class="resumo-card ok-soft">
       <span>🏪</span>
       <div>
@@ -63,7 +67,7 @@
 
   <section class="card admin-percent-card" id="admin-percentuais"></section>
 
-  <section class="admin-grid">
+  <section class="admin-grid" id="graficos-admin">
     <article class="card">
       <div class="section-title">
         <div>
@@ -111,7 +115,7 @@
     </article>
   </section>
 
-  <section class="card">
+  <section class="card" id="loja-admin-atual">
     <div class="section-title">
       <div>
         <h2>Loja em administração</h2>
@@ -156,7 +160,7 @@
     </form>
   </section>
 
-  <section class="card">
+  <section class="card" id="filtros-lojas-admin">
     <h2>Filtrar lojas</h2>
     <div class="lista-filtros">
       <div>

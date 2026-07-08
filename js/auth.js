@@ -120,3 +120,20 @@ function bloquearAdminEmAreaLoja() {
 
   return false;
 }
+
+
+function podeVerGestaoLoja(cargo) {
+  return ["gerente", "encarregado"].includes(cargo);
+}
+
+function descricaoPermissaoGestao(cargo) {
+  if (cargo === "gerente") {
+    return "Visão completa da loja, equipe, produtos e vencimentos.";
+  }
+
+  if (cargo === "encarregado") {
+    return "Visão operacional da loja com foco no setor e nos vencimentos.";
+  }
+
+  return "Acesso operacional.";
+}

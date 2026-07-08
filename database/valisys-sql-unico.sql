@@ -217,6 +217,19 @@ create table if not exists public.lancamentos (
   fabricante text,
   sabor text,
   categoria text,
+  quantidade_padrao text,
+  porcao text,
+  embalagem text,
+  origem text,
+  paises text,
+  lojas_encontradas text,
+  ingredientes text,
+  alergicos text,
+  rastros text,
+  nutriscore text,
+  ecoscore text,
+  nova text,
+  fonte text,
   setor text,
   quantidade integer not null default 1,
   validade date not null,
@@ -252,6 +265,45 @@ add column if not exists sabor text;
 
 alter table public.lancamentos
 add column if not exists categoria text;
+
+alter table public.lancamentos
+add column if not exists quantidade_padrao text;
+
+alter table public.lancamentos
+add column if not exists porcao text;
+
+alter table public.lancamentos
+add column if not exists embalagem text;
+
+alter table public.lancamentos
+add column if not exists origem text;
+
+alter table public.lancamentos
+add column if not exists paises text;
+
+alter table public.lancamentos
+add column if not exists lojas_encontradas text;
+
+alter table public.lancamentos
+add column if not exists ingredientes text;
+
+alter table public.lancamentos
+add column if not exists alergicos text;
+
+alter table public.lancamentos
+add column if not exists rastros text;
+
+alter table public.lancamentos
+add column if not exists nutriscore text;
+
+alter table public.lancamentos
+add column if not exists ecoscore text;
+
+alter table public.lancamentos
+add column if not exists nova text;
+
+alter table public.lancamentos
+add column if not exists fonte text;
 
 alter table public.lancamentos
 add column if not exists setor text;

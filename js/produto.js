@@ -17,6 +17,20 @@ const fabricanteInput = document.getElementById("fabricante");
 const saborInput = document.getElementById("sabor");
 const categoriaInput = document.getElementById("categoria");
 
+const quantidadePadraoInput = document.getElementById("quantidadePadrao");
+const porcaoInput = document.getElementById("porcao");
+const embalagemInput = document.getElementById("embalagem");
+const origemInput = document.getElementById("origem");
+const paisesInput = document.getElementById("paises");
+const lojasEncontradasInput = document.getElementById("lojasEncontradas");
+const ingredientesInput = document.getElementById("ingredientes");
+const alergicosInput = document.getElementById("alergicos");
+const rastrosInput = document.getElementById("rastros");
+const nutriscoreInput = document.getElementById("nutriscore");
+const ecoscoreInput = document.getElementById("ecoscore");
+const novaInput = document.getElementById("nova");
+const fonteProdutoInput = document.getElementById("fonteProduto");
+
 const fotoArquivo = document.getElementById("fotoArquivo");
 const previewFoto = document.getElementById("preview-foto");
 
@@ -350,6 +364,43 @@ function compactarImagem(arquivo, larguraMaxima, qualidade) {
   });
 }
 
+
+function preencherCamposProduto(produto) {
+  preencherCamposProduto(produto);
+
+  if (quantidadePadraoInput) quantidadePadraoInput.value = produto.quantidadePadrao || "";
+  if (porcaoInput) porcaoInput.value = produto.porcao || "";
+  if (embalagemInput) embalagemInput.value = produto.embalagem || "";
+  if (origemInput) origemInput.value = produto.origem || "";
+  if (paisesInput) paisesInput.value = produto.paises || "";
+  if (lojasEncontradasInput) lojasEncontradasInput.value = produto.lojas || "";
+  if (ingredientesInput) ingredientesInput.value = produto.ingredientes || "";
+  if (alergicosInput) alergicosInput.value = produto.alergicos || "";
+  if (rastrosInput) rastrosInput.value = produto.rastros || "";
+  if (nutriscoreInput) nutriscoreInput.value = produto.nutriscore || "";
+  if (ecoscoreInput) ecoscoreInput.value = produto.ecoscore || "";
+  if (novaInput) novaInput.value = produto.nova || "";
+  if (fonteProdutoInput) fonteProdutoInput.value = produto.fonte || "";
+}
+
+function lerCamposExtrasProduto() {
+  return {
+    quantidadePadrao: quantidadePadraoInput?.value.trim() || "",
+    porcao: porcaoInput?.value.trim() || "",
+    embalagem: embalagemInput?.value.trim() || "",
+    origem: origemInput?.value.trim() || "",
+    paises: paisesInput?.value.trim() || "",
+    lojas: lojasEncontradasInput?.value.trim() || "",
+    ingredientes: ingredientesInput?.value.trim() || "",
+    alergicos: alergicosInput?.value.trim() || "",
+    rastros: rastrosInput?.value.trim() || "",
+    nutriscore: nutriscoreInput?.value.trim() || "",
+    ecoscore: ecoscoreInput?.value.trim() || "",
+    nova: novaInput?.value.trim() || "",
+    fonte: fonteProdutoInput?.value.trim() || ""
+  };
+}
+
 async function preencherProdutoPorEAN(ean) {
   const codigo = normalizarCodigo(ean);
 
@@ -400,23 +451,13 @@ async function preencherProdutoPorEAN(ean) {
 
   produtoAtualCadastro = produto;
 
-  nomeInput.value = produto.nome || "";
-  marcaInput.value = produto.marca || "";
-  fabricanteInput.value = produto.fabricante || "";
-  saborInput.value = produto.sabor || "";
-  categoriaInput.value = produto.categoria || "";
+  preencherCamposProduto(produto);
 
   if (produto.foto) {
     fotoBase64 = produto.foto;
-    previewFoto.innerHTML = `
-      <div class="card">
-        <p class="api-status">Produto puxado com sucesso.</p>
-        <img src="${produto.foto}" class="produto-img" alt="${esc(produto.nome)}">
-      </div>
-    `;
-  } else {
-    previewFoto.innerHTML = `<p class="muted">Produto encontrado, mas sem foto cadastrada.</p>`;
   }
+
+  previewFoto.innerHTML = cardProdutoHTML(produto, "Produto puxado com sucesso.");
 }
 
 async function carregarProdutos() {
@@ -430,21 +471,7 @@ async function carregarProdutos() {
       return;
     }
 
-    lista.innerHTML = produtos.map(produto => `
-      <article class="card">
-        <h3>${esc(produto.nome)}</h3>
-        <p><strong>EAN:</strong> ${esc(produto.ean)}</p>
-        <p><strong>Marca:</strong> ${esc(produto.marca || "Não informada")}</p>
-        <p><strong>Fabricante:</strong> ${esc(produto.fabricante || "Não informado")}</p>
-        <p><strong>Sabor/variação:</strong> ${esc(produto.sabor || "Não informado")}</p>
-        <p><strong>Categoria:</strong> ${esc(produto.categoria || "Não informada")}</p>
-        ${produto.quantidadePadrao ? `<p><strong>Quantidade padrão:</strong> ${esc(produto.quantidadePadrao)}</p>` : ""}
-        ${produto.embalagem ? `<p><strong>Embalagem:</strong> ${esc(produto.embalagem)}</p>` : ""}
-        ${produto.ingredientes ? `<p><strong>Ingredientes:</strong> ${esc(produto.ingredientes)}</p>` : ""}
-        ${produto.fonte ? `<p><strong>Fonte:</strong> ${esc(produto.fonte)}</p>` : ""}
-        ${produto.foto ? `<img class="produto-img" src="${produto.foto}" alt="${esc(produto.nome)}">` : `<p class="muted">Sem foto cadastrada.</p>`}
-      </article>
-    `).join("");
+    lista.innerHTML = produtos.map(produto => cardProdutoHTML(produto)).join("");
   } catch (erro) {
     console.error(erro);
     lista.innerHTML = `
@@ -473,20 +500,9 @@ form.addEventListener("submit", async function(event) {
     fabricante: fabricanteInput.value.trim(),
     sabor: saborInput.value.trim(),
     categoria: categoriaInput.value.trim(),
-    quantidadePadrao: produtoAtualCadastro?.quantidadePadrao || "",
-    porcao: produtoAtualCadastro?.porcao || "",
-    embalagem: produtoAtualCadastro?.embalagem || "",
-    origem: produtoAtualCadastro?.origem || "",
-    paises: produtoAtualCadastro?.paises || "",
-    lojas: produtoAtualCadastro?.lojas || "",
-    ingredientes: produtoAtualCadastro?.ingredientes || "",
-    alergicos: produtoAtualCadastro?.alergicos || "",
-    rastros: produtoAtualCadastro?.rastros || "",
-    nutriscore: produtoAtualCadastro?.nutriscore || "",
-    ecoscore: produtoAtualCadastro?.ecoscore || "",
-    nova: produtoAtualCadastro?.nova || "",
+    ...lerCamposExtrasProduto(),
     foto: fotoBase64,
-    fonte: fotoBase64 && fotoBase64.startsWith("http") ? "base pública de produtos" : "Cadastro sistema"
+    fonte: fonteProdutoInput?.value.trim() || produtoAtualCadastro?.fonte || "Cadastro sistema"
   };
 
   if (!novoProduto.nome) {

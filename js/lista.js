@@ -105,6 +105,19 @@ async function obterLancamentosFiltrados() {
         ${item.sabor || ""}
         ${item.categoria || ""}
         ${item.status || ""}
+        ${item.quantidadePadrao || ""}
+        ${item.porcao || ""}
+        ${item.embalagem || ""}
+        ${item.origem || ""}
+        ${item.paises || ""}
+        ${item.lojas || ""}
+        ${item.ingredientes || ""}
+        ${item.alergicos || ""}
+        ${item.rastros || ""}
+        ${item.nutriscore || ""}
+        ${item.ecoscore || ""}
+        ${item.nova || ""}
+        ${item.fonte || ""}
       `.toLowerCase();
 
       return texto.includes(termo);
