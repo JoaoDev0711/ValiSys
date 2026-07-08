@@ -28,10 +28,10 @@ async function renderizarLojas() {
         </div>
 
         <div class="loja-actions">
-          <button onclick="selecionarLoja('${loja.id}')">Usar esta loja</button>
+          <button type="button" onclick="selecionarLoja('${loja.id}')">Usar esta loja</button>
           ${
             podeExcluirLoja(usuario.cargo)
-              ? `<button class="btn-danger btn-outline" onclick="excluirLoja('${loja.id}')">Excluir loja</button>`
+              ? `<button type="button" class="btn-danger btn-outline" onclick="excluirLoja('${loja.id}')">Excluir loja</button>`
               : ""
           }
         </div>
@@ -76,13 +76,13 @@ async function excluirLoja(id) {
     return;
   }
 
-  const confirmar = confirm("Excluir loja do Supabase?\n\nA loja só será excluída se não tiver lançamentos vinculados.");
+  const confirmar = confirm("Remover loja da lista?\n\nEla ficará inativa no Supabase para não quebrar histórico.");
 
   if (!confirmar) return;
 
   try {
     await valisysDB.excluirLoja(id);
-    alert("Loja excluída com sucesso.");
+    alert("Loja removida da lista com sucesso.");
     await renderizarLojas();
   } catch (erro) {
     alert(erro.message);

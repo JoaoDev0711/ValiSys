@@ -43,7 +43,8 @@ const valisysDB = {
       .from("lojas")
       .insert({
         nome,
-        responsavel
+        responsavel,
+        status: "ativa"
       })
       .select()
       .single();
@@ -56,21 +57,11 @@ const valisysDB = {
   async excluirLoja(id) {
     const db = this.client();
 
-    const { data: lancamentos, error: erroLancamentos } = await db
-      .from("lancamentos")
-      .select("id")
-      .eq("loja_id", id)
-      .limit(1);
-
-    if (erroLancamentos) throw erroLancamentos;
-
-    if (lancamentos && lancamentos.length > 0) {
-      throw new Error("Essa loja possui lançamentos. Para evitar perder histórico, ela não foi excluída.");
-    }
-
+    // Evita erro de chave estrangeira quando a loja já tem funcionários/lançamentos.
+    // Em vez de apagar a linha, a loja fica inativa e some da lista.
     const { error } = await db
       .from("lojas")
-      .delete()
+      .update({ status: "inativa" })
       .eq("id", id);
 
     if (error) throw error;

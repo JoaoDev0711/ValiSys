@@ -190,10 +190,10 @@ async function renderizarLista() {
             </div>
 
             <div class="card-actions stack-actions">
-              ${podeRetirar ? `<button onclick="marcarRetirado('${item.id}')">Marcar como retirado</button>` : ""}
-              ${podeReativar ? `<button onclick="reativarItem('${item.id}')">Reativar item</button>` : ""}
-              ${podeNotificar ? `<button class="btn-warning" onclick="notificarGerencia('${item.id}')">Notificar gerente/encarregado</button>` : ""}
-              <button class="btn-danger" onclick="apagarLancamento('${item.id}')">Apagar lançamento</button>
+              ${podeRetirar ? `<button type="button" onclick="marcarRetirado('${item.id}')">Marcar como retirado</button>` : ""}
+              ${podeReativar ? `<button type="button" onclick="reativarItem('${item.id}')">Reativar item</button>` : ""}
+              ${podeNotificar ? `<button type="button" class="btn-warning" onclick="notificarGerencia('${item.id}')">Notificar gerente/encarregado</button>` : ""}
+              <button type="button" class="btn-danger" onclick="apagarLancamento('${item.id}')">Apagar lançamento</button>
             </div>
           </article>
         `;
@@ -278,12 +278,13 @@ async function notificarGerencia(id) {
 }
 
 async function apagarLancamento(id) {
-  const confirmar = confirm("Deseja apagar este lançamento do Supabase?");
+  const confirmar = confirm("Apagar este lançamento do Supabase?\n\nEssa ação remove o registro do banco.");
 
   if (!confirmar) return;
 
   try {
     await valisysDB.apagarLancamento(id);
+    alert("Lançamento apagado do Supabase.");
     await renderizarLista();
   } catch (erro) {
     alert("Erro ao apagar lançamento: " + erro.message);

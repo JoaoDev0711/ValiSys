@@ -32,6 +32,126 @@ let audioLiberado = false;
 
 const scannerStatus = document.getElementById("scanner-status");
 
+
+function cameraResolucaoDoCelular() {
+  const dpr = window.devicePixelRatio || 1;
+
+  const larguraTela = Math.round((window.screen?.width || window.innerWidth || 1280) * dpr);
+  const alturaTela = Math.round((window.screen?.height || window.innerHeight || 720) * dpr);
+
+  const maior = Math.max(larguraTela, alturaTela);
+  const menor = Math.min(larguraTela, alturaTela);
+
+  // Usa a resolução real aproximada do aparelho como "ideal".
+  // Não usamos "exact" porque alguns celulares recusam e a câmera nem abre.
+  return {
+    facingMode: { ideal: "environment" },
+    width: { ideal: maior },
+    height: { ideal: menor }
+  };
+}
+
+async function melhorarImagemCamera() {
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  const video = document.querySelector("#reader video");
+
+  if (!video || !video.srcObject) return;
+
+  video.setAttribute("playsinline", "true");
+  video.style.objectFit = "cover";
+
+  const tracks = video.srcObject.getVideoTracks ? video.srcObject.getVideoTracks() : [];
+  const track = tracks[0];
+
+  if (!track || !track.getCapabilities || !track.applyConstraints) return;
+
+  try {
+    const caps = track.getCapabilities();
+    const advanced = [];
+
+    if (caps.width && caps.height) {
+      const dpr = window.devicePixelRatio || 1;
+      const larguraTela = Math.round((window.screen?.width || window.innerWidth || 1280) * dpr);
+      const alturaTela = Math.round((window.screen?.height || window.innerHeight || 720) * dpr);
+
+      const larguraIdeal = Math.min(caps.width.max || larguraTela, Math.max(caps.width.min || 0, Math.max(larguraTela, alturaTela)));
+      const alturaIdeal = Math.min(caps.height.max || alturaTela, Math.max(caps.height.min || 0, Math.min(larguraTela, alturaTela)));
+
+      advanced.push({
+        width: larguraIdeal,
+        height: alturaIdeal
+      });
+    }
+
+    if (caps.focusMode && caps.focusMode.includes("continuous")) {
+      advanced.push({ focusMode: "continuous" });
+    }
+
+    if (caps.exposureMode && caps.exposureMode.includes("continuous")) {
+      advanced.push({ exposureMode: "continuous" });
+    }
+
+    if (caps.whiteBalanceMode && caps.whiteBalanceMode.includes("continuous")) {
+      advanced.push({ whiteBalanceMode: "continuous" });
+    }
+
+    if (caps.zoom) {
+      const min = caps.zoom.min || 1;
+      const max = caps.zoom.max || 1;
+      const zoomIdeal = Math.min(max, Math.max(min, 1.15));
+
+      if (zoomIdeal > min) {
+        advanced.push({ zoom: zoomIdeal });
+      }
+    }
+
+    if (advanced.length > 0) {
+      await track.applyConstraints({ advanced });
+    }
+  } catch (erro) {
+    console.warn("Não foi possível aplicar resolução/foco automático nesta câmera.", erro);
+  }
+
+  try {
+    const settings = track.getSettings ? track.getSettings() : null;
+
+    if (settings?.width && settings?.height) {
+      atualizarStatusScanner(`Câmera aberta em ${settings.width}x${settings.height}. Aproxime ou afaste até o código ficar nítido.`, "scanner-lendo");
+    }
+  } catch (erro) {
+    console.warn("Não foi possível ler a resolução da câmera.", erro);
+  }
+}
+
+async function iniciarCameraLeitura(callbackLeitura) {
+  leitorCamera = new Html5Qrcode("reader");
+
+  try {
+    await leitorCamera.start(
+      cameraResolucaoDoCelular(),
+      configScanner(),
+      callbackLeitura,
+      () => {}
+    );
+
+    await melhorarImagemCamera();
+  } catch (erroResolucaoCelular) {
+    console.warn("Resolução do celular não disponível. Tentando modo padrão.", erroResolucaoCelular);
+
+    await leitorCamera.start(
+      { facingMode: "environment" },
+      configScanner(),
+      callbackLeitura,
+      () => {}
+    );
+
+    await melhorarImagemCamera();
+    atualizarStatusScanner("Câmera aberta em modo padrão. Aproxime o código e mantenha o celular parado.", "scanner-lendo");
+  }
+}
+
+
 function atualizarStatusScanner(texto, tipo = "") {
   if (!scannerStatus) return;
 
@@ -134,25 +254,28 @@ function confirmarLeitura(codigo) {
 
 function configScanner() {
   const config = {
-    fps: 12,
+    fps: 18,
     qrbox: function(viewfinderWidth, viewfinderHeight) {
-      const largura = Math.floor(viewfinderWidth * 0.96);
-      const altura = Math.min(230, Math.max(150, Math.floor(viewfinderHeight * 0.34)));
+      const largura = Math.floor(viewfinderWidth * 0.98);
+      const altura = Math.min(300, Math.max(190, Math.floor(viewfinderHeight * 0.42)));
 
       return {
         width: largura,
         height: altura
       };
     },
-    aspectRatio: 1.7777778,
     rememberLastUsedCamera: true,
-    disableFlip: true
+    disableFlip: true,
+    videoConstraints: cameraResolucaoDoCelular()
   };
 
   if (window.Html5QrcodeSupportedFormats) {
     config.formatsToSupport = [
       Html5QrcodeSupportedFormats.EAN_13,
-      Html5QrcodeSupportedFormats.EAN_8
+      Html5QrcodeSupportedFormats.EAN_8,
+      Html5QrcodeSupportedFormats.CODE_128,
+      Html5QrcodeSupportedFormats.UPC_A,
+      Html5QrcodeSupportedFormats.UPC_E
     ].filter(Boolean);
   }
 
@@ -177,7 +300,7 @@ async function pararCamera() {
   btnCamera.style.display = "block";
   btnPararCamera.style.display = "none";
 
-  atualizarStatusScanner("Aponte a câmera para o código de barras inteiro.", "");
+  atualizarStatusScanner("Aponte a câmera para o código inteiro. Se ficar embaçado, afaste um pouco e use boa luz.", "");
 }
 
 
@@ -405,35 +528,28 @@ btnCamera.addEventListener("click", async () => {
     return;
   }
 
-  leitorCamera = new Html5Qrcode("reader");
-
   btnCamera.style.display = "none";
   btnPararCamera.style.display = "block";
 
   try {
-    await leitorCamera.start(
-      { facingMode: "environment" },
-      configScanner(),
-      async (codigoLido) => {
-        const eanConfirmado = confirmarLeitura(codigoLido);
+    await iniciarCameraLeitura(async (codigoLido) => {
+      const eanConfirmado = confirmarLeitura(codigoLido);
 
-        if (!eanConfirmado) {
-          return;
-        }
+      if (!eanConfirmado) {
+        return;
+      }
 
-        eanInput.value = eanConfirmado;
+      eanInput.value = eanConfirmado;
 
-        tocarSomLeitura();
+      tocarSomLeitura();
 
-        if (navigator.vibrate) {
-          navigator.vibrate([80, 40, 80]);
-        }
+      if (navigator.vibrate) {
+        navigator.vibrate([80, 40, 80]);
+      }
 
-        await pararCamera();
-        await preencherProdutoPorEAN(eanConfirmado);
-      },
-      () => {}
-    );
+      await pararCamera();
+      await preencherProdutoPorEAN(eanConfirmado);
+    });
   } catch (erro) {
     alert("Não foi possível abrir a câmera. Use Live Server, GitHub Pages ou HTTPS.");
     console.error(erro);

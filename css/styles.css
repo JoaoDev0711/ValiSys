@@ -2349,3 +2349,95 @@ select {
 #area-usuarios-sistema {
   margin-top: 18px;
 }
+
+
+/* Ajustes camera alta resolucao */
+#reader {
+  min-height: 260px;
+}
+
+#reader video,
+#reader canvas {
+  width: 100% !important;
+  min-height: 260px;
+  object-fit: cover;
+  image-rendering: auto;
+}
+
+#reader__scan_region {
+  background: rgba(0, 0, 0, .02);
+}
+
+#reader__dashboard_section_csr button,
+#reader__dashboard button {
+  border-radius: 14px;
+}
+
+.btn-danger,
+button.btn-danger {
+  background: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
+}
+
+.btn-danger.btn-outline,
+button.btn-danger.btn-outline {
+  background: #fff;
+  color: var(--danger);
+  border: 1px solid rgba(194, 65, 59, .45);
+  box-shadow: none;
+}
+
+.btn-danger.btn-outline:hover,
+button.btn-danger.btn-outline:hover {
+  background: rgba(194, 65, 59, .08);
+}
+
+button[disabled] {
+  opacity: .65;
+  cursor: not-allowed;
+}
+
+
+/* Remove barra visual do leitor */
+#reader {
+  min-height: 280px;
+  background: #fff;
+}
+
+#reader video,
+#reader canvas {
+  width: 100% !important;
+  min-height: 280px;
+  object-fit: cover;
+}
+
+#reader__scan_region {
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+  background: transparent !important;
+}
+
+#reader__scan_region img {
+  display: none !important;
+}
+
+#qr-shaded-region,
+#qr-shaded-region * {
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+#reader div[style*="border"],
+#reader span[style*="border"] {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+#reader__dashboard_section,
+#reader__dashboard_section_csr,
+#reader__camera_selection {
+  display: none !important;
+}
