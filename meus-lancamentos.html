@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meus Lançamentos - ValiSys</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a href="main.html" class="user-icon" aria-label="Voltar">←</a>
+  <h1>Meus</h1>
+  <a href="login.html" class="user-icon" aria-label="Login">👤</a>
+</header>
+
+<main class="container">
+  <section class="card">
+    <h2>Meus lançamentos</h2>
+    <p class="muted">Aqui aparece somente o que você lançou.</p>
+
+    <input type="search" id="filtro" placeholder="Buscar por produto, EAN ou setor">
+  </section>
+
+  <div id="lista"></div>
+</main>
+
+<script src="auth.js"></script>
+<script src="lista.js"></script>
+</body>
+</html>

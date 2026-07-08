@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lançar Validade - ValiSys</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a href="main.html" class="user-icon" aria-label="Voltar">←</a>
+  <h1>Lançar</h1>
+  <a href="login.html" class="user-icon" aria-label="Login">👤</a>
+</header>
+
+<main class="container">
+  <section class="card">
+    <h2>Novo lançamento</h2>
+    <p class="muted">Leia o código de barras pela câmera ou digite o EAN manualmente.</p>
+
+    <div class="button-row">
+      <button type="button" id="btn-camera">📷 Ler código</button>
+      <button type="button" id="btn-parar-camera" class="secondary" style="display:none;">Parar câmera</button>
+    </div>
+
+    <div id="reader"></div>
+
+    <form id="form-lancamento">
+      <label for="ean">Código EAN</label>
+      <input type="text" id="ean" placeholder="Ex: 789..." inputmode="numeric" required>
+
+      <label for="nomeProduto">Nome do produto</label>
+      <input type="text" id="nomeProduto" placeholder="Será preenchido se o produto estiver cadastrado" required>
+
+      <div id="produto-preview"></div>
+
+      <label for="setor">Setor</label>
+      <input type="text" id="setor" placeholder="Ex: Frios, Padaria, Mercearia" required>
+
+      <label for="quantidade">Quantidade</label>
+      <input type="number" id="quantidade" placeholder="Quantidade de itens" min="1" required>
+
+      <label for="validade">Data de validade</label>
+      <input type="date" id="validade" required>
+
+      <button type="submit">Salvar lançamento</button>
+    </form>
+  </section>
+</main>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="auth.js"></script>
+<script src="lancar.js"></script>
+</body>
+</html>

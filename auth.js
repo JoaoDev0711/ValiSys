@@ -1,0 +1,58 @@
+const MAIN_PAGE = "main.html";
+
+function getUsuarioLogado() {
+  return JSON.parse(localStorage.getItem("usuarioLogado"));
+}
+
+function protegerPagina() {
+  const usuario = getUsuarioLogado();
+
+  if (!usuario) {
+    window.location.href = "login.html";
+    return null;
+  }
+
+  return usuario;
+}
+
+function sair() {
+  localStorage.removeItem("usuarioLogado");
+  window.location.href = "login.html";
+}
+
+function podeVerListaGeral(cargo) {
+  return ["encarregado", "gerente", "admin"].includes(cargo);
+}
+
+function podeCadastrarProduto(cargo) {
+  return ["gerente", "admin"].includes(cargo);
+}
+
+function podeGerenciarUsuarios(cargo) {
+  return cargo === "admin";
+}
+
+function nomeCargo(cargo) {
+  const cargos = {
+    promotor: "Promotor",
+    encarregado: "Encarregado",
+    gerente: "Gerente",
+    admin: "Admin"
+  };
+
+  return cargos[cargo] || cargo;
+}
+
+function esc(valor) {
+  return String(valor || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function parseDataLocal(dataISO) {
+  const [ano, mes, dia] = dataISO.split("-").map(Number);
+  return new Date(ano, mes - 1, dia);
+}

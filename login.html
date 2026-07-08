@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - ValiSys</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<main class="login-page">
+  <section class="login-card">
+    <div class="login-logo">📦</div>
+    <h1>Entrar</h1>
+    <p>Informe seu nome e cargo para acessar o sistema.</p>
+
+    <form id="login-form">
+      <label for="nome">Nome</label>
+      <input type="text" id="nome" placeholder="Ex: João" autocomplete="name" required>
+
+      <label for="cargo">Cargo</label>
+      <select id="cargo" required>
+        <option value="">Selecione o cargo</option>
+        <option value="promotor">Promotor</option>
+        <option value="encarregado">Encarregado</option>
+        <option value="gerente">Gerente</option>
+        <option value="admin">Admin</option>
+      </select>
+
+      <button type="submit">Entrar</button>
+    </form>
+
+    <p class="small">
+      MVP com localStorage: não é login real com senha. Depois dá para migrar para Supabase/Firebase.
+    </p>
+  </section>
+</main>
+
+<script src="login.js"></script>
+</body>
+</html>

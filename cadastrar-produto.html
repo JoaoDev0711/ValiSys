@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastrar Produto - ValiSys</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a href="main.html" class="user-icon" aria-label="Voltar">←</a>
+  <h1>Produto</h1>
+  <a href="login.html" class="user-icon" aria-label="Login">👤</a>
+</header>
+
+<main class="container">
+  <section class="card">
+    <h2>Cadastrar produto</h2>
+    <p class="muted">Gerente e admin podem cadastrar produtos que ainda não existem.</p>
+
+    <div class="button-row">
+      <button type="button" id="btn-camera">📷 Ler EAN</button>
+      <button type="button" id="btn-parar-camera" class="secondary" style="display:none;">Parar câmera</button>
+    </div>
+
+    <div id="reader"></div>
+
+    <form id="form-produto">
+      <label for="ean">Código EAN</label>
+      <input type="text" id="ean" placeholder="Ex: 789..." inputmode="numeric" required>
+
+      <label for="nome">Nome do produto</label>
+      <input type="text" id="nome" placeholder="Ex: Leite Integral 1L" required>
+
+      <label for="marca">Marca</label>
+      <input type="text" id="marca" placeholder="Ex: Piracanjuba">
+
+      <label for="categoria">Categoria</label>
+      <input type="text" id="categoria" placeholder="Ex: Laticínios">
+
+      <label for="fotoArquivo">Foto do produto</label>
+      <input type="file" id="fotoArquivo" accept="image/*" capture="environment">
+
+      <div id="preview-foto"></div>
+
+      <button type="submit">Salvar produto</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Produtos cadastrados</h2>
+    <div id="lista-produtos"></div>
+  </section>
+</main>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="auth.js"></script>
+<script src="produto.js"></script>
+</body>
+</html>
