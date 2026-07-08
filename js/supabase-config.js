@@ -12,7 +12,7 @@
 */
 
 const VALISYS_SUPABASE_URL = "https://bwrgkzetsnglmkneqqzs.supabase.co";
-const VALISYS_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3cmdremV0c25nbG1rbmVxcXpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MzY0NjksImV4cCI6MjA5OTExMjQ2OX0.wWRV35Kr5fBLABalgYsvQAjG0Fsi66o6pGV9jRTUoKs";
+const VALISYS_SUPABASE_ANON_KEY = "sb_publishable_H57H-h2JxHhINQ9xt6PIEQ_nawq-V9b";
 
 function supabaseConfigurado() {
   return (
