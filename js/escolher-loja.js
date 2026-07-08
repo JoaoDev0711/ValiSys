@@ -135,12 +135,20 @@ async function selecionarLoja(id) {
 
     setLojaAtual(loja);
 
+    // Escolher loja nunca pode aproveitar login de admin.
+    // Depois de escolher a loja, entra pelo login operacional da loja.
+    if (usuario && usuario.cargo === "admin") {
+      limparUsuarioLogado();
+      window.location.href = "login.html";
+      return;
+    }
+
     if (!usuario) {
       window.location.href = "login.html";
       return;
     }
 
-    window.location.href = "dashboard.html";
+    window.location.href = "login.html";
   } catch (erro) {
     alert("Erro ao selecionar loja: " + erro.message);
   }

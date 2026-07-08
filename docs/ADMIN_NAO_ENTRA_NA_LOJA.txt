@@ -1,0 +1,12 @@
+Correção de divergência de acesso
+
+Admin não entra mais na área operacional da loja.
+
+Agora:
+- Admin entra somente na Dashboard Admin.
+- Ao selecionar uma loja como admin, o sistema limpa o login admin e abre o login da loja.
+- Para lançar, ver lista ou gerenciar usuários da loja, é necessário entrar como funcionário/gerente/encarregado/promotor daquela loja.
+- A tela dashboard.html bloqueia admin.
+- As telas lançar, lista, usuários, produtos e notificações também bloqueiam admin.
+
+Isso evita a divergência de selecionar uma loja e continuar logado como admin.

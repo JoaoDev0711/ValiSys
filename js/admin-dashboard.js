@@ -324,10 +324,9 @@ function renderizarLojaAtualAdmin() {
     </div>
 
     <div class="admin-current-actions">
-      <a href="dashboard.html" class="quick-admin-btn">Abrir dashboard da loja</a>
-      <a href="lancar.html" class="quick-admin-btn">Lançar validade</a>
-      <a href="lista-geral.html" class="quick-admin-btn">Ver lista completa</a>
-      <a href="usuarios.html" class="quick-admin-btn">Gerenciar usuários</a>
+      <a href="login.html" class="quick-admin-btn">Entrar na loja selecionada</a>
+      <a href="escolher-loja.html" class="quick-admin-btn">Trocar loja</a>
+      <a href="admin-dashboard.html" class="quick-admin-btn">Continuar no admin</a>
     </div>
   `;
 }
@@ -481,13 +480,18 @@ async function administrarLoja(id) {
     }
 
     if ((loja.status || "ativa") !== "ativa") {
-      alert("Esta loja está desativada. Ative o serviço antes de administrar.");
+      alert("Esta loja está desativada. Ative o serviço antes de entrar.");
       return;
     }
 
     setLojaAtual(loja);
-    renderizarLojaAtualAdmin();
-    window.location.href = "dashboard.html";
+
+    // Admin não entra como usuário da loja.
+    // Depois de escolher a loja, precisa fazer login operacional.
+    limparUsuarioLogado();
+
+    alert("Loja selecionada. Agora entre com um usuário da loja.");
+    window.location.href = "login.html";
   } catch (erro) {
     alert("Erro ao abrir loja: " + erro.message);
   }

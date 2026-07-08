@@ -1,4 +1,5 @@
 const usuario = protegerPagina();
+if (bloquearAdminEmAreaLoja()) throw new Error('Admin bloqueado na área da loja.');
 const lojaAtual = protegerLojaSelecionada();
 
 const lojaListaEl = document.getElementById("loja-lista-atual");

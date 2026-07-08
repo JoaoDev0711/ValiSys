@@ -93,3 +93,20 @@ function podeVerNotificacoes(cargo) {
 function podeGerenciarFuncionarios(cargo) {
   return ["gerente", "admin"].includes(cargo);
 }
+
+
+function limparUsuarioLogado() {
+  localStorage.removeItem("usuarioLogado");
+}
+
+function bloquearAdminEmAreaLoja() {
+  const usuario = getUsuarioLogado();
+
+  if (usuario && usuario.cargo === "admin") {
+    alert("Admin não entra na área operacional da loja. Escolha a loja e entre como funcionário/gerente/encarregado/promotor.");
+    window.location.href = "admin-dashboard.html";
+    return true;
+  }
+
+  return false;
+}

@@ -1,4 +1,5 @@
 const usuario = protegerPagina();
+if (bloquearAdminEmAreaLoja()) throw new Error('Admin bloqueado na área da loja.');
 protegerLojaSelecionada();
 
 if (!podeCadastrarProduto(usuario.cargo)) {
