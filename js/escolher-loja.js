@@ -72,7 +72,13 @@ function renderizarListaLojas() {
   }
 
   listaLojas.innerHTML = lojas.map(loja => `
-    <article class="card loja-card loja-card-com-logo">
+    <article
+      class="card loja-card loja-card-com-logo loja-card-clickable"
+      role="button"
+      tabindex="0"
+      onclick="selecionarLoja('${loja.id}')"
+      onkeydown="selecionarLojaTeclado(event, '${loja.id}')"
+    >
       ${logoLojaHTML(loja, "loja-logo-card")}
 
       <div class="loja-card-info">
@@ -80,11 +86,10 @@ function renderizarListaLojas() {
         <p class="muted">Responsável: ${esc(loja.responsavel || "Não informado")}</p>
         <p><strong>Grupo/Rede:</strong> ${esc(loja.grupo || "Sem grupo")}</p>
         <p><strong>Região:</strong> ${esc(loja.regiao || "Sem região")}</p>
+        <p class="small muted">Toque nesta loja para entrar.</p>
       </div>
 
-      <div class="loja-actions">
-        <button type="button" onclick="selecionarLoja('${loja.id}')">Usar esta loja</button>
-      </div>
+      <div class="loja-enter-indicator">Entrar →</div>
     </article>
   `).join("");
 }
@@ -120,6 +125,13 @@ async function renderizarLojas() {
   }
 }
 
+function selecionarLojaTeclado(event, id) {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    selecionarLoja(id);
+  }
+}
+
 async function selecionarLoja(id) {
   try {
     const loja = lojasCache.find(item => item.id === id);
@@ -129,24 +141,10 @@ async function selecionarLoja(id) {
       return;
     }
 
-    const confirmar = confirm(`Confirmar loja atual?\n\n${loja.nome}`);
-
-    if (!confirmar) return;
-
+    // Clicou na loja = seleciona a loja e vai direto para o login dela.
+    // Nunca reaproveita usuário/admin anterior.
     setLojaAtual(loja);
-
-    // Escolher loja nunca pode aproveitar login de admin.
-    // Depois de escolher a loja, entra pelo login operacional da loja.
-    if (usuario && usuario.cargo === "admin") {
-      limparUsuarioLogado();
-      window.location.href = "login.html";
-      return;
-    }
-
-    if (!usuario) {
-      window.location.href = "login.html";
-      return;
-    }
+    limparUsuarioLogado();
 
     window.location.href = "login.html";
   } catch (erro) {

@@ -8,10 +8,47 @@ const nomeInput = document.getElementById("nome");
 const nomeArea = document.getElementById("nome-area");
 const lojaLoginCard = document.getElementById("loja-login-card");
 const textoLogin = document.getElementById("texto-login");
+const linkTrocarLoja = document.getElementById("link-trocar-loja");
+const voltarLogin = document.getElementById("voltar-login");
 
 const lojaAtual = getLojaAtual();
+const usuarioAtual = getUsuarioLogado();
+
+if (lojaAtual && usuarioAtual?.cargo === "admin") {
+  limparUsuarioLogado();
+}
 
 const senhaAdmin = "admin123";
+
+function configurarTiposDeAcesso() {
+  if (lojaAtual) {
+    cargoSelect.innerHTML = `
+      <option value="">Selecione</option>
+      <option value="promotor">Promotor da loja</option>
+      <option value="encarregado">Encarregado da loja</option>
+      <option value="gerente">Gerente da loja</option>
+    `;
+
+    if (linkTrocarLoja) linkTrocarLoja.innerText = "Trocar loja";
+    if (voltarLogin) {
+      voltarLogin.href = "escolher-loja.html";
+      voltarLogin.innerText = "← Trocar loja";
+    }
+
+    return;
+  }
+
+  cargoSelect.innerHTML = `
+    <option value="admin">Admin geral</option>
+  `;
+  cargoSelect.value = "admin";
+
+  if (linkTrocarLoja) linkTrocarLoja.innerText = "Sou funcionário: escolher loja";
+  if (voltarLogin) {
+    voltarLogin.href = "index.html";
+    voltarLogin.innerText = "← Voltar para o site";
+  }
+}
 
 function renderizarLojaLogin() {
   if (!lojaLoginCard) return;
@@ -21,18 +58,21 @@ function renderizarLojaLogin() {
       <div class="mini-info-loja">
         ${logoLojaHTML(lojaAtual, "loja-logo-mini")}
         <div>
-          <strong>Loja selecionada</strong>
+          <strong>Login da loja</strong>
           <p>${esc(lojaAtual.nome)}</p>
+          <small>${esc(lojaAtual.grupo || "Sem grupo")} • ${esc(lojaAtual.regiao || "Sem região")}</small>
         </div>
       </div>
     `;
+    textoLogin.innerText = "Entre com um usuário desta loja.";
     return;
   }
 
   lojaLoginCard.innerHTML = `
-    <strong>Nenhuma loja selecionada</strong>
-    <p>Funcionários precisam escolher a loja antes de entrar.</p>
+    <strong>Acesso administrativo</strong>
+    <p>Funcionário precisa clicar primeiro na loja desejada.</p>
   `;
+  textoLogin.innerText = "Área de acesso do admin geral.";
 }
 
 function atualizarCamposLogin() {
@@ -47,14 +87,16 @@ function atualizarCamposLogin() {
     senhaInput.required = true;
     senhaLabel.innerText = "Senha do admin";
     senhaInput.placeholder = "Digite a senha do admin";
-    senhaAjuda.innerText = "Admin entra pelo acesso geral e depois escolhe a loja.";
-    textoLogin.innerText = "Acesso geral do sistema.";
+    senhaAjuda.innerText = "Admin entra apenas na área administrativa.";
+    textoLogin.innerText = "Área de acesso do admin geral.";
     return;
   }
 
   nomeArea.style.display = "block";
   nomeInput.required = true;
-  textoLogin.innerText = "Acesso de funcionário da loja.";
+  textoLogin.innerText = lojaAtual
+    ? `Login da loja ${lojaAtual.nome}`
+    : "Clique primeiro na loja desejada para entrar.";
 
   if (["gerente", "encarregado"].includes(cargo)) {
     senhaArea.style.display = "block";
@@ -78,6 +120,7 @@ function atualizarCamposLogin() {
   senhaInput.value = "";
 }
 
+configurarTiposDeAcesso();
 cargoSelect.addEventListener("change", atualizarCamposLogin);
 renderizarLojaLogin();
 atualizarCamposLogin();
@@ -95,6 +138,11 @@ form.addEventListener("submit", async function(event) {
   }
 
   if (cargo === "admin") {
+    if (lojaAtual) {
+      alert("Admin não entra pelo login da loja. Troque para o acesso geral do admin.");
+      return;
+    }
+
     if (senha !== senhaAdmin) {
       alert("Senha do admin incorreta.");
       senhaInput.focus();
@@ -117,7 +165,7 @@ form.addEventListener("submit", async function(event) {
   }
 
   if (!lojaAtual) {
-    alert("Escolha a loja antes de entrar como funcionário.");
+    alert("Clique primeiro na loja desejada para entrar.");
     window.location.href = "escolher-loja.html";
     return;
   }
@@ -161,6 +209,7 @@ form.addEventListener("submit", async function(event) {
           criadoEm: new Date().toLocaleString("pt-BR")
         });
 
+        setLojaAtual(lojaAtual);
         window.location.href = "dashboard.html";
         return;
       }
@@ -181,9 +230,9 @@ form.addEventListener("submit", async function(event) {
     });
 
     setLojaAtual({
+      ...lojaAtual,
       id: funcionario.lojaId || lojaAtual.id,
-      nome: funcionario.lojaNome || lojaAtual.nome,
-      responsavel: ""
+      nome: funcionario.lojaNome || lojaAtual.nome
     });
 
     window.location.href = "dashboard.html";
