@@ -295,6 +295,12 @@ btnPararCamera.addEventListener("click", pararCamera);
 form.addEventListener("submit", function(event) {
   event.preventDefault();
 
+  if (!lojaAtual) {
+    alert("Escolha uma loja antes de lançar.");
+    window.location.href = "escolher-loja.html";
+    return;
+  }
+
   const ean = normalizarCodigo(eanInput.value);
   const nomeProduto = nomeInput.value.trim();
 
@@ -308,11 +314,11 @@ form.addEventListener("submit", function(event) {
     return;
   }
 
-  const lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
+  const lancamentos = lerJSONLocal("lancamentos", []);
   const produtoCadastrado = buscarProdutoLocal(ean);
 
   const novo = {
-    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    id: gerarIdLocal("lancamento"),
     lojaId: lojaAtual.id,
     lojaNome: lojaAtual.nome,
     ean,
@@ -327,7 +333,7 @@ form.addEventListener("submit", function(event) {
     setor: document.getElementById("setor").value,
     quantidade: Number(document.getElementById("quantidade").value),
     validade: document.getElementById("validade").value,
-    foto: produtoCadastrado ? produtoCadastrado.foto : "",
+    foto: produtoCadastrado ? (produtoCadastrado.foto || "") : (produtoAtual?.foto || ""),
     produtoCadastrado: Boolean(produtoCadastrado),
     usuarioId: usuario.id,
     usuarioNome: usuario.nome,
@@ -344,7 +350,7 @@ form.addEventListener("submit", function(event) {
   }
 
   lancamentos.push(novo);
-  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+  salvarJSONLocal("lancamentos", lancamentos);
 
   alert("Lançamento salvo com sucesso!");
   form.reset();

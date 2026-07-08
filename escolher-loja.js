@@ -60,7 +60,7 @@ if (formLoja) {
     const lojas = getLojas();
 
     const novaLoja = {
-      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+      id: gerarIdLocal("loja"),
       nome,
       responsavel,
       criadaEm: new Date().toLocaleString("pt-BR")

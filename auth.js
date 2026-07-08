@@ -57,3 +57,25 @@ function parseDataLocal(dataISO) {
   const [ano, mes, dia] = dataISO.split("-").map(Number);
   return new Date(ano, mes - 1, dia);
 }
+
+function gerarIdLocal(prefixo = "id") {
+  if (window.crypto && typeof window.crypto.randomUUID === "function") {
+    return window.crypto.randomUUID();
+  }
+
+  return `${prefixo}-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+}
+
+function lerJSONLocal(chave, fallback = []) {
+  try {
+    const valor = JSON.parse(localStorage.getItem(chave));
+    return valor ?? fallback;
+  } catch (erro) {
+    console.warn(`Erro ao ler ${chave} do localStorage.`, erro);
+    return fallback;
+  }
+}
+
+function salvarJSONLocal(chave, valor) {
+  localStorage.setItem(chave, JSON.stringify(valor));
+}

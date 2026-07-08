@@ -1,5 +1,5 @@
 function getLojas() {
-  let lojas = JSON.parse(localStorage.getItem("lojas")) || [];
+  let lojas = lerJSONLocal("lojas", []);
 
   if (lojas.length === 0) {
     lojas = [
@@ -11,22 +11,22 @@ function getLojas() {
       }
     ];
 
-    localStorage.setItem("lojas", JSON.stringify(lojas));
+    salvarJSONLocal("lojas", lojas);
   }
 
   return lojas;
 }
 
 function salvarLojas(lojas) {
-  localStorage.setItem("lojas", JSON.stringify(lojas));
+  salvarJSONLocal("lojas", lojas);
 }
 
 function getLojaAtual() {
-  return JSON.parse(localStorage.getItem("lojaAtual"));
+  return lerJSONLocal("lojaAtual", null);
 }
 
 function setLojaAtual(loja) {
-  localStorage.setItem("lojaAtual", JSON.stringify(loja));
+  salvarJSONLocal("lojaAtual", loja);
 }
 
 function limparLojaAtual() {

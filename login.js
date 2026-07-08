@@ -42,7 +42,7 @@ form.addEventListener("submit", function(event) {
     return;
   }
 
-  const usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+  const usuarios = lerJSONLocal("usuarios", []);
 
   let usuario = usuarios.find(u =>
     u.nome.toLowerCase() === nome.toLowerCase() && u.cargo === cargo
@@ -50,14 +50,14 @@ form.addEventListener("submit", function(event) {
 
   if (!usuario) {
     usuario = {
-      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+      id: gerarIdLocal("usuario"),
       nome,
       cargo,
       criadoEm: new Date().toLocaleString("pt-BR")
     };
 
     usuarios.push(usuario);
-    localStorage.setItem("usuarios", JSON.stringify(usuarios));
+    salvarJSONLocal("usuarios", usuarios);
   }
 
   localStorage.setItem("usuarioLogado", JSON.stringify(usuario));

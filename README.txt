@@ -65,3 +65,11 @@ Correções e melhorias:
 - Lembretes agora são agrupados por vencidos, hoje, até 7 dias e até 30 dias.
 - Dentro de cada grupo, os itens são agrupados por quantidade de dias restantes.
 - API agora tenta puxar mais dados do Open Food Facts: embalagem, origem, países, lojas, ingredientes, alergênicos, porção, Nutri-Score, NOVA e Eco-Score quando disponíveis.
+
+
+Correção final:
+- Lista de lançamentos ficou mais tolerante a dados antigos e relogin.
+- "Meus lançamentos" agora tenta reconhecer pelo id do usuário e também por nome/cargo.
+- Filtro de loja na lista começa em "Todas as lojas deste aparelho" para o lançamento não parecer que sumiu.
+- Site público foi refeito com visual mais profissional, menos emoji e melhor responsividade mobile.
+- Demonstração pública agora parece tela de sistema e fluxo de operação, não card genérico.

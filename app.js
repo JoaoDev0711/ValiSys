@@ -51,19 +51,61 @@ if (usuario) {
   carregarResumoInicial();
 }
 
+function normalizarLancamentosDashboard() {
+  const lojaAtual = getLojaAtual();
+  const todos = lerJSONLocal("lancamentos", []);
+  let mudou = false;
+
+  const normalizados = todos.map(item => {
+    const copia = { ...item };
+
+    if (!copia.id) {
+      copia.id = gerarIdLocal("lancamento");
+      mudou = true;
+    }
+
+    if (!copia.lojaId && lojaAtual) {
+      copia.lojaId = lojaAtual.id;
+      copia.lojaNome = lojaAtual.nome;
+      mudou = true;
+    }
+
+    if (!copia.usuarioId && usuario) {
+      copia.usuarioId = usuario.id;
+      copia.usuarioNome = usuario.nome;
+      copia.usuarioCargo = usuario.cargo;
+      mudou = true;
+    }
+
+    return copia;
+  });
+
+  if (mudou) {
+    salvarJSONLocal("lancamentos", normalizados);
+  }
+
+  return normalizados;
+}
+
 function carregarResumoInicial() {
   const lembretesArea = document.getElementById("lembretes-vencimento");
   const textoLembrete = document.getElementById("texto-lembrete");
 
-  let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
+  let lancamentos = normalizarLancamentosDashboard();
   const lojaAtual = getLojaAtual();
 
-  // Compatibilidade com dados antigos sem lojaId.
-  lancamentos = lancamentos.filter(item => !item.lojaId || item.lojaId === lojaAtual.id);
+  // Dashboard é da loja atual. Meus/Listas têm filtro para todas as lojas.
+  lancamentos = lancamentos.filter(item => item.lojaId === lojaAtual.id);
 
   if (!podeVerListaGeral(usuario.cargo)) {
-    lancamentos = lancamentos.filter(item => item.usuarioId === usuario.id);
-    textoLembrete.innerText = "Mostrando somente os produtos lançados por você.";
+    lancamentos = lancamentos.filter(item =>
+      item.usuarioId === usuario.id ||
+      (
+        String(item.usuarioNome || "").toLowerCase() === String(usuario.nome || "").toLowerCase() &&
+        item.usuarioCargo === usuario.cargo
+      )
+    );
+    textoLembrete.innerText = "Mostrando somente os produtos lançados por você nesta loja.";
   } else {
     textoLembrete.innerText = "Mostrando os produtos lançados pela equipe desta loja.";
   }
@@ -71,7 +113,7 @@ function carregarResumoInicial() {
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
 
-  const produtos = JSON.parse(localStorage.getItem("produtos")) || [];
+  const produtos = lerJSONLocal("produtos", []);
 
   const lancamentosComDias = lancamentos.map(item => {
     const validade = parseDataLocal(item.validade);
@@ -84,7 +126,7 @@ function carregarResumoInicial() {
       marcaFinal: item.marca || produtoLocal?.marca || "",
       fabricanteFinal: item.fabricante || produtoLocal?.fabricante || "",
       saborFinal: item.sabor || produtoLocal?.sabor || "",
-      categoriaFinal: produtoLocal?.categoria || "",
+      categoriaFinal: item.categoria || produtoLocal?.categoria || "",
       fotoFinal: item.foto || produtoLocal?.foto || ""
     };
   });
@@ -104,39 +146,38 @@ function carregarResumoInicial() {
       titulo: "🚨 Vencidos",
       descricao: "Produtos que já passaram da validade",
       itens: vencidos.sort((a, b) => a.dias - b.dias),
-      classe: "danger",
-      vazio: "Nenhum produto vencido."
+      classe: "danger"
     },
     {
       titulo: "📅 Vencem hoje",
       descricao: "Itens que precisam de ação imediata",
       itens: hojeLista.sort((a, b) => a.nomeProduto.localeCompare(b.nomeProduto)),
-      classe: "danger",
-      vazio: "Nenhum produto vence hoje."
+      classe: "danger"
     },
     {
       titulo: "⏳ Até 7 dias",
       descricao: "Produtos próximos do vencimento",
       itens: seteDias.sort((a, b) => a.dias - b.dias),
-      classe: "warning",
-      vazio: "Nenhum produto vence em até 7 dias."
+      classe: "warning"
     },
     {
       titulo: "🗓️ Até 30 dias",
       descricao: "Produtos para acompanhar com calma",
       itens: trintaDias.sort((a, b) => a.dias - b.dias),
-      classe: "success",
-      vazio: "Nenhum produto vence em até 30 dias."
+      classe: "success"
     }
   ];
 
   const gruposComItens = grupos.filter(grupo => grupo.itens.length > 0);
 
   if (gruposComItens.length === 0) {
+    const totalNaLoja = lancamentos.length;
     lembretesArea.innerHTML = `
       <div class="empty-state">
         <span>✅</span>
-        <p>Nenhum vencimento urgente encontrado.</p>
+        <p>Nenhum vencimento urgente encontrado nesta loja.</p>
+        <p class="muted">Total de lançamentos salvos nesta loja: ${totalNaLoja}</p>
+        <a class="mini-link" href="meus-lancamentos.html">Ver meus lançamentos</a>
       </div>
     `;
     return;
