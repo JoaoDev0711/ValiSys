@@ -48,3 +48,20 @@ Contatos no site:
 Observação:
 Esta versão ainda usa localStorage, ideal para demonstração e GitHub Pages.
 Para várias lojas usando de verdade ao mesmo tempo, o próximo passo é banco online como Supabase.
+
+
+Atualização site público:
+- Página pública agora tem apresentação comercial completa.
+- Inclui hero com mockup do app.
+- Inclui demonstração visual de escolha da loja, leitura de EAN, produto automático e lembretes.
+- Inclui passo a passo de funcionamento.
+- Inclui seção de permissões por cargo.
+- Planos continuam em construção.
+
+
+Correções e melhorias:
+- Corrigido erro que impedia lançamentos de aparecerem em "Meus lançamentos" e "Lista geral".
+- Lançamentos antigos sem lojaId também aparecem na loja atual para não sumirem do protótipo.
+- Lembretes agora são agrupados por vencidos, hoje, até 7 dias e até 30 dias.
+- Dentro de cada grupo, os itens são agrupados por quantidade de dias restantes.
+- API agora tenta puxar mais dados do Open Food Facts: embalagem, origem, países, lojas, ingredientes, alergênicos, porção, Nutri-Score, NOVA e Eco-Score quando disponíveis.

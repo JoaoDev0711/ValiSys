@@ -23,6 +23,7 @@ const btnCamera = document.getElementById("btn-camera");
 const btnPararCamera = document.getElementById("btn-parar-camera");
 
 let fotoBase64 = "";
+let produtoAtualCadastro = null;
 
 let leitorCamera = null;
 let ultimoCodigoLido = "";
@@ -257,9 +258,12 @@ async function preencherProdutoPorEAN(ean) {
   }
 
   if (!produto) {
+    produtoAtualCadastro = null;
     previewFoto.innerHTML = `<p class="muted">Produto não encontrado na API. Preencha manualmente.</p>`;
     return;
   }
+
+  produtoAtualCadastro = produto;
 
   nomeInput.value = produto.nome || "";
   marcaInput.value = produto.marca || "";
@@ -293,6 +297,9 @@ function carregarProdutos() {
       <p><strong>Fabricante:</strong> ${esc(produto.fabricante || "Não informado")}</p>
       <p><strong>Sabor/variação:</strong> ${esc(produto.sabor || "Não informado")}</p>
       <p><strong>Categoria:</strong> ${esc(produto.categoria || "Não informada")}</p>
+      ${produto.quantidadePadrao ? `<p><strong>Quantidade padrão:</strong> ${esc(produto.quantidadePadrao)}</p>` : ""}
+      ${produto.embalagem ? `<p><strong>Embalagem:</strong> ${esc(produto.embalagem)}</p>` : ""}
+      ${produto.ingredientes ? `<p><strong>Ingredientes:</strong> ${esc(produto.ingredientes)}</p>` : ""}
       ${produto.fonte ? `<p><strong>Fonte:</strong> ${esc(produto.fonte)}</p>` : ""}
       ${
         produto.foto
@@ -337,6 +344,18 @@ form.addEventListener("submit", function(event) {
     fabricante: fabricanteInput.value.trim(),
     sabor: saborInput.value.trim(),
     categoria: categoriaInput.value.trim(),
+    quantidadePadrao: produtoAtualCadastro?.quantidadePadrao || "",
+    porcao: produtoAtualCadastro?.porcao || "",
+    embalagem: produtoAtualCadastro?.embalagem || "",
+    origem: produtoAtualCadastro?.origem || "",
+    paises: produtoAtualCadastro?.paises || "",
+    lojas: produtoAtualCadastro?.lojas || "",
+    ingredientes: produtoAtualCadastro?.ingredientes || "",
+    alergicos: produtoAtualCadastro?.alergicos || "",
+    rastros: produtoAtualCadastro?.rastros || "",
+    nutriscore: produtoAtualCadastro?.nutriscore || "",
+    ecoscore: produtoAtualCadastro?.ecoscore || "",
+    nova: produtoAtualCadastro?.nova || "",
     foto: fotoBase64,
     fonte: fotoBase64 && fotoBase64.startsWith("http") ? "Open Food Facts" : "Cadastro local",
     cadastradoPor: usuario.nome,
@@ -362,6 +381,7 @@ form.addEventListener("submit", function(event) {
 
   form.reset();
   fotoBase64 = "";
+  produtoAtualCadastro = null;
   previewFoto.innerHTML = "";
 
   carregarProdutos();

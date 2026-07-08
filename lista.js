@@ -9,7 +9,9 @@ const filtro = document.getElementById("filtro");
 
 let lancamentosBase = JSON.parse(localStorage.getItem("lancamentos")) || [];
 
-lancamentosBase = lancamentosBase.filter(item => item.lojaId === lojaAtual.id);
+// Compatibilidade com lançamentos antigos que ainda não tinham lojaId.
+// Eles aparecem na loja atual para não "sumirem" do protótipo.
+lancamentosBase = lancamentosBase.filter(item => !item.lojaId || item.lojaId === lojaAtual.id);
 
 const paginaAtual = window.location.pathname;
 
@@ -27,11 +29,18 @@ function renderizarLista() {
   const produtos = JSON.parse(localStorage.getItem("produtos")) || [];
 
   let lancamentos = lancamentosBase.filter(item => {
+    const produtoLocal = produtos.find(p => p.ean === item.ean);
+
     const texto = `
       ${item.nomeProduto}
       ${item.ean}
       ${item.setor}
       ${item.usuarioNome}
+      ${item.lojaNome}
+      ${item.marca || produtoLocal?.marca || ""}
+      ${item.fabricante || produtoLocal?.fabricante || ""}
+      ${item.sabor || produtoLocal?.sabor || ""}
+      ${produtoLocal?.categoria || ""}
     `.toLowerCase();
 
     return texto.includes(termo);
@@ -48,8 +57,16 @@ function renderizarLista() {
   hoje.setHours(0, 0, 0, 0);
 
   lista.innerHTML = lancamentos.map(item => {
+    const produtoLocal = produtos.find(p => p.ean === item.ean);
     const validade = parseDataLocal(item.validade);
     const diff = Math.ceil((validade - hoje) / (1000 * 60 * 60 * 24));
+
+    const marcaFinal = item.marca || produtoLocal?.marca || "";
+    const fabricanteFinal = item.fabricante || produtoLocal?.fabricante || "";
+    const saborFinal = item.sabor || produtoLocal?.sabor || "";
+    const categoriaFinal = produtoLocal?.categoria || "";
+    const quantidadePadrao = produtoLocal?.quantidadePadrao || "";
+    const fotoFinal = item.foto || produtoLocal?.foto || "";
 
     let status = "";
 
@@ -71,17 +88,14 @@ function renderizarLista() {
         ${marcaFinal ? `<p><strong>Marca:</strong> ${esc(marcaFinal)}</p>` : ""}
         ${fabricanteFinal ? `<p><strong>Fabricante:</strong> ${esc(fabricanteFinal)}</p>` : ""}
         ${saborFinal ? `<p><strong>Sabor/variação:</strong> ${esc(saborFinal)}</p>` : ""}
+        ${categoriaFinal ? `<p><strong>Categoria:</strong> ${esc(categoriaFinal)}</p>` : ""}
+        ${quantidadePadrao ? `<p><strong>Quantidade padrão:</strong> ${esc(quantidadePadrao)}</p>` : ""}
         <p><strong>Setor:</strong> ${esc(item.setor)}</p>
-        <p><strong>Quantidade:</strong> ${esc(item.quantidade)}</p>
+        <p><strong>Quantidade lançada:</strong> ${esc(item.quantidade)}</p>
         <p><strong>Validade:</strong> ${esc(item.validade)}</p>
         <p><strong>Lançado por:</strong> ${esc(item.usuarioNome)} (${esc(nomeCargo(item.usuarioCargo))})</p>
         <p>${status}</p>
-        ${
-          (() => {
-            const fotoFinal = item.foto || produtoLocalLista?.foto || "";
-            return fotoFinal ? `<img class="produto-img" src="${fotoFinal}" alt="${esc(item.nomeProduto)}">` : "";
-          })()
-        }
+        ${fotoFinal ? `<img class="produto-img" src="${fotoFinal}" alt="${esc(item.nomeProduto)}">` : ""}
         <div class="card-actions">
           <button class="btn-danger" onclick="apagarLancamento('${item.id}')">Apagar lançamento</button>
         </div>
@@ -96,7 +110,6 @@ function apagarLancamento(id) {
   if (!confirmar) return;
 
   let todos = JSON.parse(localStorage.getItem("lancamentos")) || [];
-
   const item = todos.find(l => l.id === id);
 
   if (!item) return;
@@ -113,7 +126,7 @@ function apagarLancamento(id) {
   todos = todos.filter(l => l.id !== id);
   localStorage.setItem("lancamentos", JSON.stringify(todos));
 
-  lancamentosBase = todos;
+  lancamentosBase = todos.filter(item => !item.lojaId || item.lojaId === lojaAtual.id);
 
   if (!window.location.pathname.includes("lista-geral")) {
     lancamentosBase = lancamentosBase.filter(item => item.usuarioId === usuario.id);

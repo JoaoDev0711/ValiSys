@@ -14,17 +14,35 @@ async function buscarProdutoAPI(ean) {
     "brands",
     "categories",
     "main_category",
+    "category_properties",
     "quantity",
+    "product_quantity",
+    "product_quantity_unit",
+    "serving_size",
     "labels",
     "labels_tags",
     "categories_tags",
     "ingredients_text",
+    "ingredients_text_pt",
+    "allergens",
+    "allergens_tags",
+    "traces",
+    "traces_tags",
     "manufacturing_places",
     "manufacturing_places_tags",
     "producer",
     "producers",
     "owner",
+    "origins",
+    "origins_tags",
+    "countries",
+    "countries_tags",
+    "stores",
+    "packaging",
     "packaging_text",
+    "nutriscore_grade",
+    "nova_group",
+    "ecoscore_grade",
     "image_front_url",
     "image_url",
     "selected_images",
@@ -55,6 +73,7 @@ async function buscarProdutoAPI(ean) {
   const nome =
     produto.product_name_pt ||
     produto.product_name ||
+    produto.abbreviated_product_name ||
     produto.generic_name ||
     "";
 
@@ -62,15 +81,29 @@ async function buscarProdutoAPI(ean) {
     return null;
   }
 
+  const marca = limparMarca(produto.brands || "");
+  const quantidadePadrao = montarQuantidade(produto);
+
   return {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
     ean: codigo,
     nome: limparTexto(nome),
-    marca: limparMarca(produto.brands || ""),
-    fabricante: identificarFabricante(produto, limparMarca(produto.brands || "")),
+    marca,
+    fabricante: identificarFabricante(produto, marca),
     sabor: identificarSabor(produto),
     categoria: limparCategoria(produto.categories || produto.main_category || ""),
-    quantidadePadrao: limparTexto(produto.quantity || ""),
+    quantidadePadrao,
+    porcao: limparTexto(produto.serving_size || ""),
+    embalagem: limparLista(produto.packaging || produto.packaging_text || ""),
+    origem: limparLista(produto.origins || ""),
+    paises: limparLista(produto.countries || ""),
+    lojas: limparLista(produto.stores || ""),
+    ingredientes: resumirTexto(produto.ingredients_text_pt || produto.ingredients_text || "", 180),
+    alergicos: limparAlergicos(produto.allergens || produto.allergens_tags || ""),
+    rastros: limparAlergicos(produto.traces || produto.traces_tags || ""),
+    nutriscore: normalizarNota(produto.nutriscore_grade),
+    ecoscore: normalizarNota(produto.ecoscore_grade),
+    nova: produto.nova_group ? String(produto.nova_group) : "",
     foto: obterFotoProduto(produto),
     fonte: "Open Food Facts",
     criadoEm: new Date().toLocaleString("pt-BR")
@@ -81,6 +114,63 @@ function limparTexto(texto) {
   return String(texto || "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function resumirTexto(texto, limite) {
+  const limpo = limparTexto(texto);
+
+  if (limpo.length <= limite) return limpo;
+
+  return limpo.slice(0, limite).trim() + "...";
+}
+
+function limparLista(texto) {
+  return limparTexto(texto)
+    .replaceAll("en:", "")
+    .replaceAll("pt:", "")
+    .replaceAll("_", " ")
+    .split(",")
+    .map(item => item.trim())
+    .filter(Boolean)
+    .slice(0, 5)
+    .join(", ");
+}
+
+function limparAlergicos(valor) {
+  if (Array.isArray(valor)) {
+    return valor
+      .map(item => String(item).replaceAll("en:", "").replaceAll("pt:", "").replaceAll("_", " "))
+      .map(item => item.trim())
+      .filter(Boolean)
+      .slice(0, 5)
+      .join(", ");
+  }
+
+  return limparLista(valor);
+}
+
+function normalizarNota(valor) {
+  const texto = limparTexto(valor);
+
+  if (!texto || texto === "unknown" || texto === "not-applicable") return "";
+
+  return texto.toUpperCase();
+}
+
+function montarQuantidade(produto) {
+  const quantidade = limparTexto(produto.quantity || "");
+
+  if (quantidade) return quantidade;
+
+  if (produto.product_quantity && produto.product_quantity_unit) {
+    return `${produto.product_quantity}${produto.product_quantity_unit}`;
+  }
+
+  if (produto.product_quantity) {
+    return String(produto.product_quantity);
+  }
+
+  return "";
 }
 
 function limparCategoria(categoria) {
@@ -115,40 +205,34 @@ function salvarProdutoLocalSeNovo(produto) {
   if (existente) {
     let mudou = false;
 
-    if (!existente.nome && produto.nome) {
-      existente.nome = produto.nome;
-      mudou = true;
-    }
+    const campos = [
+      "nome",
+      "marca",
+      "fabricante",
+      "sabor",
+      "categoria",
+      "quantidadePadrao",
+      "porcao",
+      "embalagem",
+      "origem",
+      "paises",
+      "lojas",
+      "ingredientes",
+      "alergicos",
+      "rastros",
+      "nutriscore",
+      "ecoscore",
+      "nova",
+      "foto",
+      "fonte"
+    ];
 
-    if (!existente.marca && produto.marca) {
-      existente.marca = produto.marca;
-      mudou = true;
-    }
-
-    if (!existente.fabricante && produto.fabricante) {
-      existente.fabricante = produto.fabricante;
-      mudou = true;
-    }
-
-    if (!existente.sabor && produto.sabor) {
-      existente.sabor = produto.sabor;
-      mudou = true;
-    }
-
-    if (!existente.categoria && produto.categoria) {
-      existente.categoria = produto.categoria;
-      mudou = true;
-    }
-
-    if (!existente.foto && produto.foto) {
-      existente.foto = produto.foto;
-      mudou = true;
-    }
-
-    if (!existente.fonte && produto.fonte) {
-      existente.fonte = produto.fonte;
-      mudou = true;
-    }
+    campos.forEach(campo => {
+      if (!existente[campo] && produto[campo]) {
+        existente[campo] = produto[campo];
+        mudou = true;
+      }
+    });
 
     if (mudou) {
       localStorage.setItem("produtos", JSON.stringify(produtos));
@@ -173,6 +257,14 @@ function cardProdutoHTML(produto, mensagem = "") {
       <p><strong>Sabor/variação:</strong> ${esc(produto.sabor || "Não informado")}</p>
       <p><strong>Categoria:</strong> ${esc(produto.categoria || "Não informada")}</p>
       ${produto.quantidadePadrao ? `<p><strong>Quantidade padrão:</strong> ${esc(produto.quantidadePadrao)}</p>` : ""}
+      ${produto.embalagem ? `<p><strong>Embalagem:</strong> ${esc(produto.embalagem)}</p>` : ""}
+      ${produto.origem ? `<p><strong>Origem:</strong> ${esc(produto.origem)}</p>` : ""}
+      ${produto.paises ? `<p><strong>Países:</strong> ${esc(produto.paises)}</p>` : ""}
+      ${produto.lojas ? `<p><strong>Lojas encontradas:</strong> ${esc(produto.lojas)}</p>` : ""}
+      ${produto.ingredientes ? `<p><strong>Ingredientes:</strong> ${esc(produto.ingredientes)}</p>` : ""}
+      ${produto.alergicos ? `<p><strong>Alérgicos:</strong> ${esc(produto.alergicos)}</p>` : ""}
+      ${produto.nutriscore ? `<p><strong>Nutri-Score:</strong> ${esc(produto.nutriscore)}</p>` : ""}
+      ${produto.nova ? `<p><strong>NOVA:</strong> ${esc(produto.nova)}</p>` : ""}
       ${produto.fonte ? `<p><strong>Fonte:</strong> ${esc(produto.fonte)}</p>` : ""}
       ${
         produto.foto
@@ -182,29 +274,6 @@ function cardProdutoHTML(produto, mensagem = "") {
     </div>
   `;
 }
-
-
-function obterFotoProduto(produto) {
-  if (!produto) return "";
-
-  if (produto.image_front_url) return produto.image_front_url;
-  if (produto.image_url) return produto.image_url;
-
-  if (produto.selected_images?.front?.display?.pt) {
-    return produto.selected_images.front.display.pt;
-  }
-
-  if (produto.selected_images?.front?.display?.br) {
-    return produto.selected_images.front.display.br;
-  }
-
-  if (produto.selected_images?.front?.display?.en) {
-    return produto.selected_images.front.display.en;
-  }
-
-  return "";
-}
-
 
 function limparMarca(marcas) {
   const texto = limparTexto(marcas);
@@ -227,6 +296,7 @@ function identificarSabor(produto) {
     produto.labels,
     Array.isArray(produto.categories_tags) ? produto.categories_tags.join(" ") : "",
     Array.isArray(produto.labels_tags) ? produto.labels_tags.join(" ") : "",
+    produto.ingredients_text_pt,
     produto.ingredients_text
   ];
 
@@ -252,7 +322,6 @@ function identificarSabor(produto) {
     { chave: "manga", nome: "Manga" },
     { chave: "goiaba", nome: "Goiaba" },
     { chave: "frutas vermelhas", nome: "Frutas vermelhas" },
-    { chave: "frutas", nome: "Frutas" },
     { chave: "natural", nome: "Natural" },
     { chave: "integral", nome: "Integral" },
     { chave: "desnatado", nome: "Desnatado" },
@@ -279,7 +348,6 @@ function identificarSabor(produto) {
 
   return encontrado ? encontrado.nome : "";
 }
-
 
 function identificarFabricante(produto, marcaPrincipal) {
   const camposDiretos = [
@@ -316,8 +384,6 @@ function identificarFabricante(produto, marcaPrincipal) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
 
-  // Mapeamento manual para marcas conhecidas.
-  // Isso ajuda quando a API traz a marca, mas não traz o fabricante/dono.
   const mapaFabricantes = [
     {
       fabricante: "M. Dias Branco",
@@ -377,6 +443,27 @@ function identificarFabricante(produto, marcaPrincipal) {
     if (encontrou) {
       return item.fabricante;
     }
+  }
+
+  return "";
+}
+
+function obterFotoProduto(produto) {
+  if (!produto) return "";
+
+  if (produto.image_front_url) return produto.image_front_url;
+  if (produto.image_url) return produto.image_url;
+
+  if (produto.selected_images?.front?.display?.pt) {
+    return produto.selected_images.front.display.pt;
+  }
+
+  if (produto.selected_images?.front?.display?.br) {
+    return produto.selected_images.front.display.br;
+  }
+
+  if (produto.selected_images?.front?.display?.en) {
+    return produto.selected_images.front.display.en;
   }
 
   return "";

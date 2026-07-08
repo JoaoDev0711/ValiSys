@@ -15,6 +15,8 @@
   </a>
 
   <nav class="public-nav">
+    <a href="#demonstracao">Demonstração</a>
+    <a href="#como-funciona">Como funciona</a>
     <a href="#funcionalidades">Funcionalidades</a>
     <a href="#planos">Planos</a>
     <a href="#contato">Contato</a>
@@ -24,46 +26,224 @@
 </header>
 
 <main>
-  <section class="hero">
+  <section class="hero hero-apresentacao">
     <div class="hero-content">
       <p class="eyebrow">Sistema para mercados, mercearias e lojas</p>
-      <h1>Controle produtos próximos do vencimento antes de virar prejuízo.</h1>
+      <h1>Controle vencimentos pelo celular, sem planilha bagunçada.</h1>
       <p>
-        Leia o código de barras, puxe dados do produto automaticamente, organize por setor
-        e acompanhe os vencimentos por loja, usuário e cargo.
+        O funcionário lê o código de barras, o sistema puxa os dados do produto,
+        registra a loja, setor, quantidade e validade. Depois, tudo aparece organizado
+        em listas e lembretes para evitar perda de mercadoria.
       </p>
 
+      <div class="hero-badges">
+        <span>📷 Leitura por câmera</span>
+        <span>🏪 Controle por loja</span>
+        <span>📅 Lembretes automáticos</span>
+      </div>
+
       <div class="hero-actions">
-        <a href="login.html" class="primary-link">Entrar no sistema</a>
-        <a href="#contato" class="secondary-link">Falar comigo</a>
+        <a href="login.html" class="primary-link">Testar o sistema</a>
+        <a href="#demonstracao" class="secondary-link">Ver demonstração</a>
       </div>
     </div>
 
-    <div class="hero-card">
-      <div class="phone-mock">
+    <div class="hero-showcase">
+      <div class="phone-mock principal">
+        <div class="mock-statusbar">
+          <span>9:41</span>
+          <span>📶 🔋</span>
+        </div>
+
         <div class="mock-top">📦 Vencimentos</div>
-        <div class="mock-item danger-soft">
-          <span>🚨</span>
-          <div>
-            <strong>3 vencidos</strong>
-            <p>Verificar hoje</p>
+
+        <div class="mock-welcome">
+          <small>Controle do mercado</small>
+          <strong>Olá, João</strong>
+          <span>Gerente</span>
+        </div>
+
+        <div class="mock-grid">
+          <div class="mock-box danger-soft">
+            <strong>3</strong>
+            <span>Vencidos</span>
+          </div>
+
+          <div class="mock-box warning-soft">
+            <strong>5</strong>
+            <span>Hoje</span>
+          </div>
+
+          <div class="mock-box alert-soft">
+            <strong>12</strong>
+            <span>7 dias</span>
+          </div>
+
+          <div class="mock-box ok-soft">
+            <strong>21</strong>
+            <span>30 dias</span>
           </div>
         </div>
-        <div class="mock-item warning-soft">
-          <span>⏳</span>
-          <div>
-            <strong>8 até 7 dias</strong>
-            <p>Separar por setor</p>
+
+        <div class="mock-list">
+          <div class="mock-product">
+            <div class="mock-product-img">🥛</div>
+            <div>
+              <strong>Leite Integral</strong>
+              <p>Frios • vence em 2 dias</p>
+            </div>
           </div>
-        </div>
-        <div class="mock-item ok-soft">
-          <span>🏪</span>
-          <div>
-            <strong>Loja selecionada</strong>
-            <p>Mercado Demonstração</p>
+
+          <div class="mock-product">
+            <div class="mock-product-img">🍪</div>
+            <div>
+              <strong>Biscoito Recheado</strong>
+              <p>Mercearia • vence hoje</p>
+            </div>
           </div>
         </div>
       </div>
+
+      <div class="floating-card card-scan">
+        <span>📷</span>
+        <strong>EAN lido</strong>
+        <p>7890000000000</p>
+      </div>
+
+      <div class="floating-card card-store">
+        <span>🏪</span>
+        <strong>Loja atual</strong>
+        <p>Mercado São João</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="demonstracao" class="public-section demo-section">
+    <p class="eyebrow">Demonstração visual</p>
+    <h2>Veja como o sistema aparece no celular</h2>
+    <p class="section-intro">
+      A interface foi pensada para uso rápido dentro da loja: botões grandes,
+      leitura por câmera, confirmação da loja e informações organizadas por prioridade.
+    </p>
+
+    <div class="demo-grid">
+      <article class="demo-phone">
+        <div class="demo-phone-top">1</div>
+        <h3>Escolha da loja</h3>
+
+        <div class="mini-screen">
+          <div class="mini-card">
+            <span>🏪</span>
+            <div>
+              <strong>Mercado São João</strong>
+              <p>Responsável: Carlos</p>
+            </div>
+          </div>
+
+          <button>Usar esta loja</button>
+        </div>
+
+        <p>
+          Antes de lançar, o funcionário confirma a loja para não registrar produto no mercado errado.
+        </p>
+      </article>
+
+      <article class="demo-phone">
+        <div class="demo-phone-top">2</div>
+        <h3>Leitura do EAN</h3>
+
+        <div class="mini-screen scanner-preview">
+          <div class="scanner-frame">
+            <span></span>
+          </div>
+          <p>EAN confirmado: 789...</p>
+          <button>📷 Escanear EAN</button>
+        </div>
+
+        <p>
+          O código de barras é lido pela câmera do celular, com som e vibração ao confirmar.
+        </p>
+      </article>
+
+      <article class="demo-phone">
+        <div class="demo-phone-top">3</div>
+        <h3>Produto automático</h3>
+
+        <div class="mini-screen">
+          <div class="produto-mini">
+            <div class="produto-foto">🍝</div>
+            <div>
+              <strong>Farinha de Trigo</strong>
+              <p>Marca: Finna</p>
+              <p>Fabricante: M. Dias Branco</p>
+            </div>
+          </div>
+        </div>
+
+        <p>
+          Quando a API encontra, o sistema puxa nome, marca, fabricante, sabor e foto.
+        </p>
+      </article>
+
+      <article class="demo-phone">
+        <div class="demo-phone-top">4</div>
+        <h3>Lembretes</h3>
+
+        <div class="mini-screen">
+          <div class="mini-alert danger-soft">
+            <span>🚨</span>
+            <strong>Vencidos</strong>
+            <em>3 itens</em>
+          </div>
+
+          <div class="mini-alert warning-soft">
+            <span>⏳</span>
+            <strong>Até 7 dias</strong>
+            <em>12 itens</em>
+          </div>
+        </div>
+
+        <p>
+          A tela inicial mostra rapidamente o que precisa ser verificado primeiro.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section id="como-funciona" class="public-section fluxo-section">
+    <p class="eyebrow">Como funciona</p>
+    <h2>Do código de barras ao controle de vencimento</h2>
+
+    <div class="fluxo-linha">
+      <article>
+        <span>1</span>
+        <h3>Login por cargo</h3>
+        <p>Promotor, encarregado, gerente e admin entram com permissões diferentes.</p>
+      </article>
+
+      <article>
+        <span>2</span>
+        <h3>Escolha da loja</h3>
+        <p>O usuário confirma a loja antes de lançar qualquer produto.</p>
+      </article>
+
+      <article>
+        <span>3</span>
+        <h3>Leitura do produto</h3>
+        <p>A câmera lê o EAN e tenta buscar dados e foto automaticamente.</p>
+      </article>
+
+      <article>
+        <span>4</span>
+        <h3>Lançamento</h3>
+        <p>O usuário informa setor, quantidade e data de validade.</p>
+      </article>
+
+      <article>
+        <span>5</span>
+        <h3>Acompanhamento</h3>
+        <p>O sistema organiza vencidos, vencem hoje e próximos vencimentos.</p>
+      </article>
     </div>
   </section>
 
@@ -106,6 +286,37 @@
         <span>📋</span>
         <h3>Listas organizadas</h3>
         <p>Promotor vê seus lançamentos; cargos acima veem a lista da loja.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="public-section cargos-section">
+    <p class="eyebrow">Permissões</p>
+    <h2>Cada cargo vê o que precisa</h2>
+
+    <div class="cargo-grid">
+      <article>
+        <span>🧑‍💼</span>
+        <h3>Promotor</h3>
+        <p>Lança produtos e acompanha apenas os próprios lançamentos na loja selecionada.</p>
+      </article>
+
+      <article>
+        <span>📋</span>
+        <h3>Encarregado</h3>
+        <p>Consegue acompanhar todos os lançamentos feitos pela equipe da loja.</p>
+      </article>
+
+      <article>
+        <span>🏪</span>
+        <h3>Gerente</h3>
+        <p>Cadastra produtos, acompanha a loja e organiza a rotina de vencimentos.</p>
+      </article>
+
+      <article>
+        <span>👑</span>
+        <h3>Admin</h3>
+        <p>Gerencia usuários, lojas e acessos dentro do protótipo.</p>
       </article>
     </div>
   </section>
