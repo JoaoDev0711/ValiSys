@@ -3,7 +3,7 @@ if (bloquearAdminEmAreaLoja()) throw new Error('Admin bloqueado na área da loja
 const lojaAtual = protegerLojaSelecionada();
 
 const lojaListaEl = document.getElementById("loja-lista-atual");
-if (lojaListaEl && lojaAtual) lojaListaEl.innerText = lojaAtual.nome;
+if (lojaListaEl && lojaAtual) lojaListaEl.innerHTML = lojaInlineHTML(lojaAtual);
 
 const lista = document.getElementById("lista");
 const filtro = document.getElementById("filtro");
@@ -173,7 +173,11 @@ async function renderizarLista() {
             <div class="lancamento-topo">
               <div>
                 <h3>${esc(item.nomeProduto)}</h3>
-                <p class="muted">${esc(item.lojaNome || "Loja não informada")}</p>
+                <p class="muted">${lojaInlineHTML({
+                  nome: item.lojaNome || "Loja não informada",
+                  imagem: item.lojaImagem || "",
+                  corTema: item.lojaCorTema || ""
+                }, "loja-inline-small")}</p>
               </div>
               <div class="badges-line">
                 ${statusPrazo}
@@ -224,7 +228,7 @@ function nomeFiltroLoja(id) {
 }
 
 async function marcarRetirado(id) {
-  const confirmar = confirm("Marcar este item como retirado da área de venda?");
+  const confirmar = await confirmarAcao("Marcar este item como retirado da área de venda?");
 
   if (!confirmar) return;
 
@@ -237,7 +241,7 @@ async function marcarRetirado(id) {
 }
 
 async function reativarItem(id) {
-  const confirmar = confirm("Reativar este item na lista de ativos?");
+  const confirmar = await confirmarAcao("Reativar este item na lista de ativos?");
 
   if (!confirmar) return;
 
@@ -259,8 +263,9 @@ async function notificarGerencia(id) {
       return;
     }
 
-    const confirmar = confirm(
-      `Criar aviso interno?\n\nProduto: ${item.nomeProduto}\nLoja: ${item.lojaNome}\nValidade: ${item.validade}`
+    const confirmar = await confirmarAcao(
+      `Produto: ${item.nomeProduto}\nLoja: ${item.lojaNome}\nValidade: ${item.validade}`,
+      "Criar aviso interno?"
     );
 
     if (!confirmar) return;
@@ -285,7 +290,7 @@ async function notificarGerencia(id) {
 }
 
 async function apagarLancamento(id) {
-  const confirmar = confirm("Apagar este lançamento?\n\nEssa ação remove o registro do banco.");
+  const confirmar = await confirmarAcao("Essa ação remove o registro do banco.", "Apagar este lançamento?", "perigo");
 
   if (!confirmar) return;
 

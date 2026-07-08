@@ -15,10 +15,20 @@ function protegerPagina() {
   return usuario;
 }
 
-function sair() {
+async function sair() {
+  const confirmar = await confirmarAcao(
+    "Você realmente quer sair do sistema?",
+    "Sair do sistema"
+  );
+
+  if (!confirmar) return;
+
+  const usuario = getUsuarioLogado();
+
   localStorage.removeItem("usuarioLogado");
   localStorage.removeItem("lojaAtual");
-  window.location.href = "login.html";
+
+  window.location.href = usuario?.cargo === "admin" ? "admin-login.html" : "escolher-loja.html";
 }
 
 function podeVerListaGeral(cargo) {

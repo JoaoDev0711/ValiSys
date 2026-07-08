@@ -150,3 +150,14 @@ document.addEventListener("DOMContentLoaded", () => {
     aplicarTemaLoja(loja);
   }
 });
+
+
+function lojaInlineHTML(loja, classe = "") {
+  const extra = classe ? ` ${classe}` : "";
+  return `
+    <span class="loja-inline-info${extra}">
+      ${logoLojaHTML(loja, "loja-logo-inline")}
+      <span>${esc(loja?.nome || "Loja não selecionada")}</span>
+    </span>
+  `;
+}

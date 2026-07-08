@@ -175,7 +175,7 @@ const valisysDB = {
 
     const { data, error } = await db
       .from("funcionarios")
-      .select("*, lojas(nome, grupo, regiao)")
+      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
       .eq("loja_id", lojaId)
       .eq("ativo", true)
       .order("nome", { ascending: true });
@@ -199,7 +199,7 @@ const valisysDB = {
     let resposta = await db
       .from("funcionarios")
       .insert(payload)
-      .select("*, lojas(nome, grupo, regiao)")
+      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
       .single();
 
     if (resposta.error && String(resposta.error.message || "").includes("setor")) {
@@ -208,7 +208,7 @@ const valisysDB = {
       resposta = await db
         .from("funcionarios")
         .insert(payload)
-        .select("*, lojas(nome, grupo, regiao)")
+        .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
         .single();
     }
 
@@ -376,7 +376,7 @@ const valisysDB = {
         usuario_nome: item.usuarioNome || "",
         usuario_cargo: item.usuarioCargo || ""
       })
-      .select("*, lojas(nome, grupo, regiao)")
+      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
       .single();
 
     if (error) throw error;
@@ -389,7 +389,7 @@ const valisysDB = {
 
     let query = db
       .from("lancamentos")
-      .select("*, lojas(nome, grupo, regiao)")
+      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
       .order("validade", { ascending: true });
 
     if (status && status !== "todos") {
@@ -421,7 +421,7 @@ const valisysDB = {
 
     let query = db
       .from("lancamentos")
-      .select("*, lojas(nome, grupo, regiao)")
+      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
       .order("validade", { ascending: true });
 
     if (lojaId && lojaId !== "todas") {
@@ -450,7 +450,7 @@ const valisysDB = {
         retirado_por: usuarioNome
       })
       .eq("id", id)
-      .select("*, lojas(nome, grupo, regiao)")
+      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
       .single();
 
     if (error) throw error;
@@ -469,7 +469,7 @@ const valisysDB = {
         retirado_por: ""
       })
       .eq("id", id)
-      .select("*, lojas(nome, grupo, regiao)")
+      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
       .single();
 
     if (error) throw error;
@@ -506,7 +506,7 @@ const valisysDB = {
         validade: dados.validade || null,
         criado_por: dados.criadoPor || ""
       })
-      .select("*, lojas(nome, grupo, regiao)")
+      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
       .single();
 
     if (error) throw error;
@@ -519,7 +519,7 @@ const valisysDB = {
 
     const { data, error } = await db
       .from("notificacoes")
-      .select("*, lojas(nome, grupo, regiao)")
+      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
       .eq("loja_id", lojaId)
       .order("criado_em", { ascending: false });
 
@@ -535,7 +535,7 @@ const valisysDB = {
       .from("notificacoes")
       .update({ lida: true })
       .eq("id", id)
-      .select("*, lojas(nome, grupo, regiao)")
+      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
       .single();
 
     if (error) throw error;
@@ -618,6 +618,8 @@ const valisysDB = {
       lojaNome: data.lojas?.nome || "",
       lojaGrupo: data.lojas?.grupo || "",
       lojaRegiao: data.lojas?.regiao || "",
+      lojaImagem: data.lojas?.imagem || "",
+      lojaCorTema: data.lojas?.cor_tema || "",
       ean: data.ean || "",
       nomeProduto: data.nome_produto,
       marca: data.marca || "",
@@ -644,6 +646,8 @@ const valisysDB = {
       lojaNome: data.lojas?.nome || "",
       lojaGrupo: data.lojas?.grupo || "",
       lojaRegiao: data.lojas?.regiao || "",
+      lojaImagem: data.lojas?.imagem || "",
+      lojaCorTema: data.lojas?.cor_tema || "",
       tipo: data.tipo || "aviso",
       titulo: data.titulo || "Aviso",
       mensagem: data.mensagem || "",

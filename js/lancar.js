@@ -4,7 +4,7 @@ const lojaAtual = protegerLojaSelecionada();
 
 if (lojaAtual) {
   const lojaEl = document.getElementById("loja-lancamento");
-  if (lojaEl) lojaEl.innerText = lojaAtual.nome;
+  if (lojaEl) lojaEl.innerHTML = lojaInlineHTML(lojaAtual);
 }
 
 const form = document.getElementById("form-lancamento");
@@ -468,8 +468,9 @@ form.addEventListener("submit", async function(event) {
     usuarioCargo: usuario.cargo
   };
 
-  const confirmar = confirm(
-    `Confirmar lançamento no sistema?\n\nLoja: ${lojaAtual.nome}\nProduto: ${nomeProduto}\nSetor: ${novo.setor}\nValidade: ${novo.validade}`
+  const confirmar = await confirmarAcao(
+    `Loja: ${lojaAtual.nome}\nProduto: ${nomeProduto}\nSetor: ${novo.setor}\nValidade: ${novo.validade}`,
+    "Confirmar lançamento?"
   );
 
   if (!confirmar) {

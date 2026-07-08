@@ -8,7 +8,7 @@ if (!podeVerNotificacoes(usuario.cargo)) {
 }
 
 const lojaEl = document.getElementById("loja-notificacao-atual");
-if (lojaEl && lojaAtual) lojaEl.innerText = lojaAtual.nome;
+if (lojaEl && lojaAtual) lojaEl.innerHTML = lojaInlineHTML(lojaAtual);
 
 const lista = document.getElementById("lista-notificacoes");
 
@@ -35,7 +35,14 @@ async function renderizarNotificacoes() {
           <div class="lancamento-topo">
             <div>
               <h3>${esc(item.titulo)}</h3>
-              <p class="muted">${esc(item.lojaNome || lojaAtual.nome)} • ${esc(item.criadoEm)}</p>
+              <p class="muted">
+                ${lojaInlineHTML({
+                  nome: item.lojaNome || lojaAtual.nome,
+                  imagem: item.lojaImagem || lojaAtual.imagem || "",
+                  corTema: item.lojaCorTema || lojaAtual.corTema || ""
+                }, "loja-inline-small")}
+                <span>• ${esc(item.criadoEm)}</span>
+              </p>
             </div>
             ${lida ? `<span class="badge neutral">Lida</span>` : `<span class="badge warning">Nova</span>`}
           </div>
@@ -82,7 +89,7 @@ async function apagarNotificacao(id) {
     return;
   }
 
-  const confirmar = confirm("Apagar este aviso interno?");
+  const confirmar = await confirmarAcao("Apagar este aviso interno?", "Apagar aviso?", "perigo");
 
   if (!confirmar) return;
 

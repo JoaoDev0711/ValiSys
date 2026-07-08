@@ -1,8 +1,9 @@
-const usuario = protegerPagina();
+const usuario = getUsuarioLogado();
 
-if (usuario.cargo !== "admin") {
+if (!usuario || usuario.cargo !== "admin") {
   alert("Área exclusiva do admin.");
   window.location.href = "admin-login.html";
+  throw new Error("Área exclusiva do admin.");
 }
 
 const formLojaAdmin = document.getElementById("form-loja-admin");
@@ -491,6 +492,78 @@ async function administrarLoja(id) {
   }
 }
 
+
+function abrirModalEdicaoLoja(loja) {
+  return new Promise(resolve => {
+    const modal = document.createElement("div");
+    modal.className = "site-modal active";
+    modal.innerHTML = `
+      <div class="site-modal-backdrop"></div>
+      <div class="site-modal-box" role="dialog" aria-modal="true">
+        <div class="site-modal-icon">✎</div>
+        <h2>Editar loja</h2>
+        <p>Atualize os dados administrativos da loja.</p>
+
+        <form class="edit-store-grid" id="form-editar-loja-modal">
+          <label>
+            Nome da loja
+            <input type="text" id="editNomeLoja" value="${esc(loja.nome || "")}">
+          </label>
+
+          <label>
+            Responsável
+            <input type="text" id="editResponsavelLoja" value="${esc(loja.responsavel || "")}">
+          </label>
+
+          <label>
+            Grupo/Rede
+            <input type="text" id="editGrupoLoja" value="${esc(loja.grupo || "")}">
+          </label>
+
+          <label>
+            Região
+            <input type="text" id="editRegiaoLoja" value="${esc(loja.regiao || "")}">
+          </label>
+
+          <label>
+            Cor da rede
+            <input type="color" id="editCorLoja" value="${esc(normalizarHexCor(loja.corTema) || "#2f7d4f")}">
+          </label>
+
+          <div class="site-modal-actions">
+            <button type="button" class="secondary" id="cancelarEditarLoja">Cancelar</button>
+            <button type="submit">Salvar</button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const fechar = resultado => {
+      modal.remove();
+      resolve(resultado);
+    };
+
+    modal.querySelector(".site-modal-backdrop").addEventListener("click", () => fechar(null));
+    modal.querySelector("#cancelarEditarLoja").addEventListener("click", () => fechar(null));
+
+    modal.querySelector("#form-editar-loja-modal").addEventListener("submit", event => {
+      event.preventDefault();
+
+      fechar({
+        nome: modal.querySelector("#editNomeLoja").value.trim(),
+        responsavel: modal.querySelector("#editResponsavelLoja").value.trim(),
+        grupo: modal.querySelector("#editGrupoLoja").value.trim(),
+        regiao: modal.querySelector("#editRegiaoLoja").value.trim(),
+        corTema: modal.querySelector("#editCorLoja").value.trim()
+      });
+    });
+
+    setTimeout(() => modal.querySelector("#editNomeLoja").focus(), 50);
+  });
+}
+
 async function editarDadosLoja(id) {
   const loja = lojasAdminCache.find(item => item.id === id);
 
@@ -499,34 +572,17 @@ async function editarDadosLoja(id) {
     return;
   }
 
-  const nome = prompt("Nome da loja:", loja.nome || "");
-  if (nome === null) return;
+  const dados = await abrirModalEdicaoLoja(loja);
 
-  const responsavel = prompt("Responsável:", loja.responsavel || "");
-  if (responsavel === null) return;
+  if (!dados) return;
 
-  const grupo = prompt("Grupo/Rede:", loja.grupo || "");
-  if (grupo === null) return;
-
-  const regiao = prompt("Região:", loja.regiao || "");
-  if (regiao === null) return;
-
-  const corTema = prompt("Cor da rede em hexadecimal. Exemplo: #2f7d4f", loja.corTema || "#2f7d4f");
-  if (corTema === null) return;
-
-  if (corTema.trim() && !normalizarHexCor(corTema.trim())) {
+  if (dados.corTema && !normalizarHexCor(dados.corTema)) {
     alert("Cor inválida. Use o formato #RRGGBB. Exemplo: #2f7d4f");
     return;
   }
 
   try {
-    await valisysDB.atualizarDadosLoja(id, {
-      nome: nome.trim(),
-      responsavel: responsavel.trim(),
-      grupo: grupo.trim(),
-      regiao: regiao.trim(),
-      corTema: corTema.trim()
-    });
+    await valisysDB.atualizarDadosLoja(id, dados);
 
     alert("Dados da loja atualizados.");
     await renderizarLojasAdmin();
@@ -554,7 +610,7 @@ async function trocarImagemLojaAdmin(id, input) {
 
 async function alterarStatusLojaAdmin(id, status) {
   const texto = status === "ativa" ? "ativar" : "desativar";
-  const confirmar = confirm(`Deseja ${texto} o serviço desta loja?`);
+  const confirmar = await confirmarAcao(`Deseja ${texto} o serviço desta loja?`, "Alterar status da loja");
 
   if (!confirmar) return;
 

@@ -8,7 +8,7 @@ if (!podeGerenciarFuncionarios(usuario.cargo)) {
 }
 
 const lojaEl = document.getElementById("loja-usuarios-atual");
-if (lojaEl && lojaAtual) lojaEl.innerText = lojaAtual.nome;
+if (lojaEl && lojaAtual) lojaEl.innerHTML = lojaInlineHTML(lojaAtual);
 
 const formFuncionario = document.getElementById("form-funcionario");
 const listaFuncionarios = document.getElementById("lista-funcionarios");
@@ -43,7 +43,7 @@ async function renderizarFuncionarios() {
           <h3>${esc(func.nome)}</h3>
           <p><strong>Cargo:</strong> ${esc(nomeCargo(func.cargo))}</p>
           <p><strong>Setor:</strong> ${esc(func.setor || "Geral")}</p>
-          <p><strong>Loja:</strong> ${esc(func.lojaNome || lojaAtual.nome)}</p>
+          <p><strong>Loja:</strong> ${lojaInlineHTML({ ...lojaAtual, nome: func.lojaNome || lojaAtual.nome }, "loja-inline-small")}</p>
           <p><strong>Código de acesso:</strong> ${esc(func.codigoAcesso || "Não informado")}</p>
           <p class="muted">Código interno: ${esc(String(func.id).slice(0, 8))}</p>
         </div>
@@ -65,7 +65,7 @@ async function renderizarFuncionarios() {
 }
 
 async function removerFuncionario(id) {
-  const confirmar = confirm("Remover funcionário desta loja?");
+  const confirmar = await confirmarAcao("Remover funcionário desta loja?", "Remover funcionário?", "perigo");
 
   if (!confirmar) return;
 

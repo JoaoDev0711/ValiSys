@@ -3083,3 +3083,265 @@ input[type="color"] {
     min-width: 210px;
   }
 }
+
+
+/* ValiSys refinamento final: modais, animações e loja com logo */
+@keyframes fadeUpSoft {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleInSoft {
+  from {
+    opacity: 0;
+    transform: scale(.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmerSoft {
+  0% {
+    background-position: -180px 0;
+  }
+
+  100% {
+    background-position: 180px 0;
+  }
+}
+
+.card,
+.welcome-card,
+.loja-atual-card,
+.resumo-card,
+.login-card,
+.admin-grid .card {
+  animation: fadeUpSoft .32s ease both;
+}
+
+.loja-card-clickable,
+.action-card,
+.quick-admin-btn,
+button,
+.user-icon,
+.icon-btn {
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.loja-card-clickable:hover,
+.action-card:hover,
+.quick-admin-btn:hover,
+button:hover,
+.user-icon:hover,
+.icon-btn:hover {
+  transform: translateY(-1px);
+}
+
+.loja-inline-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  vertical-align: middle;
+  font-weight: 800;
+}
+
+.loja-inline-small {
+  font-weight: 700;
+}
+
+.loja-logo-inline {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  font-size: 11px;
+  box-shadow: none;
+}
+
+.loja-atual-card.compact > div {
+  align-items: center;
+}
+
+.loja-atual-card.compact strong .loja-inline-info {
+  font-size: 16px;
+}
+
+.site-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.site-modal.active {
+  display: flex;
+}
+
+.site-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(21, 32, 24, .38);
+  backdrop-filter: blur(5px);
+}
+
+.site-modal-box {
+  position: relative;
+  width: min(430px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 22px;
+  box-shadow: 0 24px 70px rgba(21, 32, 24, .24);
+  animation: scaleInSoft .22s ease both;
+}
+
+.site-modal-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  color: var(--primary-strong);
+  border: 1px solid rgba(47, 125, 79, .18);
+  font-weight: 900;
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+
+.site-modal-icon.modal-perigo {
+  color: var(--danger);
+  border-color: rgba(194, 65, 59, .24);
+}
+
+.site-modal-icon.modal-sucesso {
+  color: var(--success);
+  border-color: rgba(47, 125, 79, .24);
+}
+
+.site-modal-box h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.site-modal-box p {
+  margin: 0;
+  color: var(--muted);
+  white-space: pre-line;
+  line-height: 1.45;
+}
+
+.site-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.site-modal-actions button {
+  min-width: 110px;
+}
+
+.admin-access-details {
+  margin: 28px auto 0;
+  max-width: 720px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.admin-access-details summary {
+  width: max-content;
+  cursor: pointer;
+  list-style: none;
+  border-bottom: 1px dashed currentColor;
+  margin-left: auto;
+}
+
+.admin-access-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-access-panel {
+  margin-top: 10px;
+  margin-left: auto;
+  max-width: 420px;
+  padding: 14px;
+  border: 1px dashed var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .56);
+  animation: fadeUpSoft .2s ease both;
+}
+
+.admin-access-panel p {
+  margin: 0 0 8px;
+}
+
+.admin-login-text-link {
+  color: var(--primary-strong);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.section-title > span,
+.resumo-card > span,
+.action-card > span,
+.mock-box > span,
+.lembrete-foto > span {
+  background: transparent !important;
+  box-shadow: none !important;
+  filter: saturate(.82);
+}
+
+.loading-shimmer {
+  background: linear-gradient(90deg, var(--surface-soft), rgba(255,255,255,.9), var(--surface-soft));
+  background-size: 360px 100%;
+  animation: shimmerSoft 1.2s linear infinite;
+}
+
+.edit-store-grid {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.edit-store-grid label {
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.edit-store-grid input {
+  margin-top: 5px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .site-modal-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .site-modal-actions button {
+    width: 100%;
+  }
+}

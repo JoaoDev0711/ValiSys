@@ -299,3 +299,28 @@ Admin → escolher-loja.html → bloco Administração → admin-login.html
 ```
 
 O login operacional da loja não mostra opção Admin.
+
+
+---
+
+## Refinamentos finais de interface
+
+Esta versão inclui:
+
+```txt
+Animações suaves nos cards, botões e modais
+Modais internos para avisos e confirmações
+Logout com confirmação dentro do site
+Área administrativa mais discreta na seleção de loja
+Logo/iniciais junto ao nome da loja nas áreas operacionais
+Ícones/emojis sem fundo pesado, com visual mais limpo
+```
+
+A área administrativa fica separada:
+
+```txt
+Funcionário → escolher-loja.html → clicar na loja → login.html
+Admin → Administração → admin-login.html → admin-dashboard.html
+```
+
+As confirmações não usam mais a janela padrão do navegador.

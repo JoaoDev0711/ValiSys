@@ -142,8 +142,9 @@ form.addEventListener("submit", async function(event) {
 
     if (!funcionario) {
       if (cargo === "promotor") {
-        const confirmar = confirm(
-          "Promotor não encontrado no cadastro desta loja.\n\nDeseja entrar mesmo assim como promotor temporário?"
+        const confirmar = await confirmarAcao(
+          "Promotor não encontrado no cadastro desta loja.\n\nDeseja entrar mesmo assim como promotor temporário?",
+          "Promotor temporário"
         );
 
         if (!confirmar) return;
