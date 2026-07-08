@@ -8,76 +8,89 @@ if (!podeCadastrarLoja(usuario.cargo)) {
   formNovaLojaArea.style.display = "none";
 }
 
-function renderizarLojas() {
-  const lojas = getLojas();
+async function renderizarLojas() {
+  listaLojas.innerHTML = `<div class="card"><p class="muted">Carregando lojas do Supabase...</p></div>`;
 
-  if (lojas.length === 0) {
-    listaLojas.innerHTML = `<div class="card"><p>Nenhuma loja cadastrada.</p></div>`;
-    return;
+  try {
+    const lojas = await valisysDB.listarLojas();
+
+    if (lojas.length === 0) {
+      listaLojas.innerHTML = `<div class="card"><p>Nenhuma loja cadastrada no Supabase.</p></div>`;
+      return;
+    }
+
+    listaLojas.innerHTML = lojas.map(loja => `
+      <article class="card loja-card">
+        <div>
+          <h3>${esc(loja.nome)}</h3>
+          <p class="muted">Responsável: ${esc(loja.responsavel || "Não informado")}</p>
+          <p class="muted">ID Supabase: ${esc(loja.id)}</p>
+        </div>
+
+        <div class="loja-actions">
+          <button onclick="selecionarLoja('${loja.id}')">Usar esta loja</button>
+          ${
+            podeExcluirLoja(usuario.cargo)
+              ? `<button class="btn-danger btn-outline" onclick="excluirLoja('${loja.id}')">Excluir loja</button>`
+              : ""
+          }
+        </div>
+      </article>
+    `).join("");
+  } catch (erro) {
+    console.error(erro);
+    listaLojas.innerHTML = `
+      <div class="card">
+        <p class="danger">Erro ao carregar lojas do Supabase.</p>
+        <p class="muted">${esc(erro.message)}</p>
+        <p class="muted">Confira a URL/chave em js/supabase-config.js e se as tabelas foram criadas.</p>
+      </div>
+    `;
   }
-
-  listaLojas.innerHTML = lojas.map(loja => `
-    <article class="card loja-card">
-      <div>
-        <h3>${esc(loja.nome)}</h3>
-        <p class="muted">Responsável: ${esc(loja.responsavel || "Não informado")}</p>
-        <p class="muted">Criada em: ${esc(loja.criadaEm || "Não informado")}</p>
-      </div>
-
-      <div class="loja-actions">
-        <button onclick="selecionarLoja('${loja.id}')">Usar esta loja</button>
-        ${
-          podeExcluirLoja(usuario.cargo)
-            ? `<button class="btn-danger btn-outline" onclick="excluirLoja('${loja.id}')">Excluir loja</button>`
-            : ""
-        }
-      </div>
-    </article>
-  `).join("");
 }
 
-function selecionarLoja(id) {
-  const lojas = getLojas();
-  const loja = lojas.find(item => item.id === id);
+async function selecionarLoja(id) {
+  try {
+    const lojas = await valisysDB.listarLojas();
+    const loja = lojas.find(item => item.id === id);
 
-  if (!loja) {
-    alert("Loja não encontrada.");
-    return;
+    if (!loja) {
+      alert("Loja não encontrada no Supabase.");
+      return;
+    }
+
+    const confirmar = confirm(`Confirmar loja atual?\n\n${loja.nome}\n\nTodos os próximos lançamentos serão vinculados a ela.`);
+
+    if (!confirmar) return;
+
+    setLojaAtual(loja);
+    window.location.href = "dashboard.html";
+  } catch (erro) {
+    alert("Erro ao selecionar loja: " + erro.message);
   }
-
-  const confirmar = confirm(`Confirmar loja atual?\n\n${loja.nome}\n\nTodos os próximos lançamentos serão vinculados a ela.`);
-
-  if (!confirmar) return;
-
-  setLojaAtual(loja);
-  window.location.href = "dashboard.html";
 }
 
-function excluirLoja(id) {
+async function excluirLoja(id) {
   if (!podeExcluirLoja(usuario.cargo)) {
     alert("Somente admin pode excluir lojas.");
     return;
   }
 
-  const lojas = getLojas();
-  const loja = lojas.find(item => item.id === id);
-
-  if (!loja) {
-    alert("Loja não encontrada.");
-    return;
-  }
-
-  const confirmar = confirm(`Excluir loja?\n\n${loja.nome}\n\nA loja só será excluída se não tiver lançamentos vinculados.`);
+  const confirmar = confirm("Excluir loja do Supabase?\n\nA loja só será excluída se não tiver lançamentos vinculados.");
 
   if (!confirmar) return;
 
-  const resultado = excluirLojaPorId(id);
-  alert(resultado.mensagem);
-  renderizarLojas();
+  try {
+    await valisysDB.excluirLoja(id);
+    alert("Loja excluída com sucesso.");
+    await renderizarLojas();
+  } catch (erro) {
+    alert(erro.message);
+  }
 }
 
 if (formLoja) {
-  formLoja.addEventListener("submit", event => {
+  formLoja.addEventListener("submit", async event => {
     event.preventDefault();
 
     const nome = document.getElementById("nomeLoja").value.trim();
@@ -88,20 +101,14 @@ if (formLoja) {
       return;
     }
 
-    const lojas = getLojas();
-
-    const novaLoja = {
-      id: gerarIdLocal("loja"),
-      nome,
-      responsavel,
-      criadaEm: new Date().toLocaleString("pt-BR")
-    };
-
-    lojas.push(novaLoja);
-    salvarLojas(lojas);
-
-    formLoja.reset();
-    renderizarLojas();
+    try {
+      await valisysDB.criarLoja({ nome, responsavel });
+      formLoja.reset();
+      await renderizarLojas();
+      alert("Loja salva no Supabase.");
+    } catch (erro) {
+      alert("Erro ao salvar loja no Supabase: " + erro.message);
+    }
   });
 }
 

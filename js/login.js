@@ -4,8 +4,8 @@ const senhaArea = document.getElementById("senha-area");
 const senhaInput = document.getElementById("senha");
 const btnLoginFuncionario = document.getElementById("btn-login-funcionario");
 
-// Senhas do MVP localStorage.
-// Depois, em banco real, isso NÃO deve ficar no front-end.
+// Senhas do MVP front-end.
+// Na versão final com Supabase Auth, isso deve virar login real.
 const senhasPorCargo = {
   encarregado: "enc123",
   gerente: "ger123",
@@ -28,36 +28,10 @@ function atualizarSenhaCargo() {
 cargoSelect.addEventListener("change", atualizarSenhaCargo);
 
 if (btnLoginFuncionario) {
-  btnLoginFuncionario.addEventListener("click", () => {
-    const funcionario = lerJSONLocal("funcionarioLoginRapido", null);
-
-    if (!funcionario) {
-      alert("Nenhum funcionário separado para login rápido. Cadastre/selecione um funcionário na tela Usuários.");
-      return;
-    }
-
-    document.getElementById("nome").value = funcionario.nome;
-    cargoSelect.value = funcionario.cargo;
-    atualizarSenhaCargo();
-
-    if (senhasPorCargo[funcionario.cargo]) {
-      alert(`Funcionário preenchido.\n\nCargo com senha geral do protótipo.\nCódigo do funcionário: ${funcionario.codigoAcesso}`);
-    } else {
-      alert(`Funcionário preenchido.\n\nCódigo do funcionário: ${funcionario.codigoAcesso}`);
-    }
-  });
+  btnLoginFuncionario.style.display = "none";
 }
 
-function buscarFuncionarioLocal(nome, cargo) {
-  const funcionarios = lerJSONLocal("funcionarios", []);
-
-  return funcionarios.find(func =>
-    func.nome.toLowerCase() === nome.toLowerCase() &&
-    func.cargo === cargo
-  ) || null;
-}
-
-form.addEventListener("submit", function(event) {
+form.addEventListener("submit", async function(event) {
   event.preventDefault();
 
   const nome = document.getElementById("nome").value.trim();
@@ -75,44 +49,35 @@ form.addEventListener("submit", function(event) {
     return;
   }
 
-  const funcionario = buscarFuncionarioLocal(nome, cargo);
-  const usuarios = lerJSONLocal("usuarios", []);
+  try {
+    const funcionario = await valisysDB.buscarFuncionarioPorNomeCargo(nome, cargo);
 
-  let usuario = usuarios.find(u =>
-    u.nome.toLowerCase() === nome.toLowerCase() && u.cargo === cargo
-  );
-
-  if (!usuario) {
-    usuario = {
-      id: gerarIdLocal("usuario"),
+    const usuario = {
+      id: funcionario?.id || gerarIdLocal("usuario-sessao"),
       nome,
       cargo,
+      funcionarioId: funcionario?.id || "",
+      lojaIdPadrao: funcionario?.lojaId || "",
+      lojaNomePadrao: funcionario?.lojaNome || "",
       criadoEm: new Date().toLocaleString("pt-BR")
     };
 
-    usuarios.push(usuario);
-  }
+    salvarJSONLocal("usuarioLogado", usuario);
 
-  if (funcionario) {
-    usuario.funcionarioId = funcionario.id;
-    usuario.lojaIdPadrao = funcionario.lojaId;
-    usuario.lojaNomePadrao = funcionario.lojaNome;
-    usuario.codigoAcesso = funcionario.codigoAcesso;
+    if (funcionario?.lojaId) {
+      setLojaAtual({
+        id: funcionario.lojaId,
+        nome: funcionario.lojaNome || "Loja vinculada",
+        responsavel: ""
+      });
 
-    // Se ele é funcionário vinculado a uma loja, já deixa a loja selecionada.
-    setLojaAtual({
-      id: funcionario.lojaId,
-      nome: funcionario.lojaNome,
-      responsavel: ""
-    });
-  }
+      window.location.href = "dashboard.html";
+      return;
+    }
 
-  salvarJSONLocal("usuarios", usuarios);
-  salvarJSONLocal("usuarioLogado", usuario);
-
-  if (funcionario) {
-    window.location.href = "dashboard.html";
-  } else {
     window.location.href = "escolher-loja.html";
+  } catch (erro) {
+    console.error(erro);
+    alert("Erro ao consultar funcionário no Supabase: " + erro.message);
   }
 });

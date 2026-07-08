@@ -243,23 +243,37 @@ async function preencherProdutoPorEAN(ean) {
 
   eanInput.value = codigo;
 
-  let produto = buscarProdutoLocal(codigo);
+  let produto = null;
+
+  previewFoto.innerHTML = `<div class="card"><p class="muted">Buscando produto no Supabase...</p></div>`;
+
+  try {
+    produto = await valisysDB.buscarProdutoPorEAN(codigo);
+  } catch (erro) {
+    console.error(erro);
+    previewFoto.innerHTML = `<p class="danger">Erro ao buscar produto no Supabase: ${esc(erro.message)}</p>`;
+    return;
+  }
 
   if (!produto) {
-    previewFoto.innerHTML = `<div class="card"><p class="muted">Buscando produto na API...</p></div>`;
+    previewFoto.innerHTML = `<div class="card"><p class="muted">Produto não encontrado no Supabase. Buscando na API pública...</p></div>`;
 
     try {
       produto = await buscarProdutoAPI(codigo);
+
+      if (produto) {
+        produto = await valisysDB.salvarProduto(produto);
+      }
     } catch (erro) {
       console.error(erro);
-      previewFoto.innerHTML = `<p class="danger">Não foi possível consultar a API.</p>`;
+      previewFoto.innerHTML = `<p class="danger">Não foi possível consultar a API ou salvar no Supabase.</p>`;
       return;
     }
   }
 
   if (!produto) {
     produtoAtualCadastro = null;
-    previewFoto.innerHTML = `<p class="muted">Produto não encontrado na API. Preencha manualmente.</p>`;
+    previewFoto.innerHTML = `<p class="muted">Produto não encontrado. Preencha manualmente e salve no Supabase.</p>`;
     return;
   }
 
@@ -273,62 +287,57 @@ async function preencherProdutoPorEAN(ean) {
 
   if (produto.foto) {
     fotoBase64 = produto.foto;
-    previewFoto.innerHTML = `<img class="produto-img" src="${produto.foto}" alt="${esc(produto.nome)}">`;
-  } else {
-    previewFoto.innerHTML = `<p class="muted">Produto encontrado, mas sem foto.</p>`;
-  }
-}
-
-function carregarProdutos() {
-  const produtos = JSON.parse(localStorage.getItem("produtos")) || [];
-
-  if (produtos.length === 0) {
-    lista.innerHTML = `<div class="card"><p>Nenhum produto cadastrado.</p></div>`;
-    return;
-  }
-
-  produtos.sort((a, b) => a.nome.localeCompare(b.nome));
-
-  lista.innerHTML = produtos.map(produto => `
-    <article class="card">
-      <h3>${esc(produto.nome)}</h3>
-      <p><strong>EAN:</strong> ${esc(produto.ean)}</p>
-      <p><strong>Marca:</strong> ${esc(produto.marca || "Não informada")}</p>
-      <p><strong>Fabricante:</strong> ${esc(produto.fabricante || "Não informado")}</p>
-      <p><strong>Sabor/variação:</strong> ${esc(produto.sabor || "Não informado")}</p>
-      <p><strong>Categoria:</strong> ${esc(produto.categoria || "Não informada")}</p>
-      ${produto.quantidadePadrao ? `<p><strong>Quantidade padrão:</strong> ${esc(produto.quantidadePadrao)}</p>` : ""}
-      ${produto.embalagem ? `<p><strong>Embalagem:</strong> ${esc(produto.embalagem)}</p>` : ""}
-      ${produto.ingredientes ? `<p><strong>Ingredientes:</strong> ${esc(produto.ingredientes)}</p>` : ""}
-      ${produto.fonte ? `<p><strong>Fonte:</strong> ${esc(produto.fonte)}</p>` : ""}
-      ${
-        produto.foto
-          ? `<img class="produto-img" src="${produto.foto}" alt="${esc(produto.nome)}">`
-          : `<p class="muted">Sem foto cadastrada.</p>`
-      }
-      <div class="card-actions">
-        <button class="btn-danger" onclick="apagarProduto('${produto.id}')">Apagar produto</button>
+    previewFoto.innerHTML = `
+      <div class="card">
+        <p class="api-status">Produto encontrado no Supabase/API.</p>
+        <img src="${produto.foto}" class="produto-img" alt="${esc(produto.nome)}">
       </div>
-    </article>
-  `).join("");
+    `;
+  } else {
+    previewFoto.innerHTML = `<p class="muted">Produto sem foto cadastrada.</p>`;
+  }
 }
 
-function apagarProduto(id) {
-  const confirmar = confirm("Deseja apagar este produto cadastrado?");
+async function carregarProdutos() {
+  lista.innerHTML = `<div class="card"><p class="muted">Carregando produtos do Supabase...</p></div>`;
 
-  if (!confirmar) return;
+  try {
+    const produtos = await valisysDB.listarProdutos();
 
-  let produtos = JSON.parse(localStorage.getItem("produtos")) || [];
-  produtos = produtos.filter(p => p.id !== id);
+    if (produtos.length === 0) {
+      lista.innerHTML = `<div class="card"><p>Nenhum produto cadastrado no Supabase.</p></div>`;
+      return;
+    }
 
-  localStorage.setItem("produtos", JSON.stringify(produtos));
-  carregarProdutos();
+    lista.innerHTML = produtos.map(produto => `
+      <article class="card">
+        <h3>${esc(produto.nome)}</h3>
+        <p><strong>EAN:</strong> ${esc(produto.ean)}</p>
+        <p><strong>Marca:</strong> ${esc(produto.marca || "Não informada")}</p>
+        <p><strong>Fabricante:</strong> ${esc(produto.fabricante || "Não informado")}</p>
+        <p><strong>Sabor/variação:</strong> ${esc(produto.sabor || "Não informado")}</p>
+        <p><strong>Categoria:</strong> ${esc(produto.categoria || "Não informada")}</p>
+        ${produto.quantidadePadrao ? `<p><strong>Quantidade padrão:</strong> ${esc(produto.quantidadePadrao)}</p>` : ""}
+        ${produto.embalagem ? `<p><strong>Embalagem:</strong> ${esc(produto.embalagem)}</p>` : ""}
+        ${produto.ingredientes ? `<p><strong>Ingredientes:</strong> ${esc(produto.ingredientes)}</p>` : ""}
+        ${produto.fonte ? `<p><strong>Fonte:</strong> ${esc(produto.fonte)}</p>` : ""}
+        ${produto.foto ? `<img class="produto-img" src="${produto.foto}" alt="${esc(produto.nome)}">` : `<p class="muted">Sem foto cadastrada.</p>`}
+      </article>
+    `).join("");
+  } catch (erro) {
+    console.error(erro);
+    lista.innerHTML = `
+      <div class="card">
+        <p class="danger">Erro ao carregar produtos do Supabase.</p>
+        <p class="muted">${esc(erro.message)}</p>
+      </div>
+    `;
+  }
 }
 
-form.addEventListener("submit", function(event) {
+form.addEventListener("submit", async function(event) {
   event.preventDefault();
 
-  const produtos = JSON.parse(localStorage.getItem("produtos")) || [];
   const ean = normalizarCodigo(eanInput.value);
 
   if (!validarEAN(ean)) {
@@ -337,7 +346,6 @@ form.addEventListener("submit", function(event) {
   }
 
   const novoProduto = {
-    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
     ean,
     nome: nomeInput.value.trim(),
     marca: marcaInput.value.trim(),
@@ -357,9 +365,7 @@ form.addEventListener("submit", function(event) {
     ecoscore: produtoAtualCadastro?.ecoscore || "",
     nova: produtoAtualCadastro?.nova || "",
     foto: fotoBase64,
-    fonte: fotoBase64 && fotoBase64.startsWith("http") ? "Open Food Facts" : "Cadastro local",
-    cadastradoPor: usuario.nome,
-    criadoEm: new Date().toLocaleString("pt-BR")
+    fonte: fotoBase64 && fotoBase64.startsWith("http") ? "Open Food Facts" : "Cadastro Supabase"
   };
 
   if (!novoProduto.nome) {
@@ -367,24 +373,20 @@ form.addEventListener("submit", function(event) {
     return;
   }
 
-  const existe = produtos.some(p => p.ean === novoProduto.ean);
+  try {
+    await valisysDB.salvarProduto(novoProduto);
 
-  if (existe) {
-    alert("Já existe produto com esse EAN.");
-    return;
+    alert("Produto salvo no Supabase!");
+
+    form.reset();
+    fotoBase64 = "";
+    produtoAtualCadastro = null;
+    previewFoto.innerHTML = "";
+
+    await carregarProdutos();
+  } catch (erro) {
+    alert("Erro ao salvar produto no Supabase: " + erro.message);
   }
-
-  produtos.push(novoProduto);
-  localStorage.setItem("produtos", JSON.stringify(produtos));
-
-  alert("Produto cadastrado!");
-
-  form.reset();
-  fotoBase64 = "";
-  produtoAtualCadastro = null;
-  previewFoto.innerHTML = "";
-
-  carregarProdutos();
 });
 
 eanInput.addEventListener("blur", async () => {

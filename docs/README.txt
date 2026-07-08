@@ -109,3 +109,11 @@ Correção funcionários:
 - Menu "Usuários" aparece para gerente e admin.
 - Gerente/admin cadastram funcionários da loja atual dentro da tela Usuários.
 - Admin também vê os usuários que já entraram no sistema.
+
+
+Versão Supabase-only:
+- Removido salvamento local de lojas, funcionários, produtos, lançamentos e notificações.
+- Esses dados agora são carregados/salvos pelo Supabase.
+- localStorage fica apenas para sessão: usuário logado e loja atual.
+- Produto local foi desativado; cadastro e busca passam pelo Supabase.
+- Se o Supabase não estiver configurado ou a política bloquear acesso, a tela mostra erro em vez de salvar localmente.

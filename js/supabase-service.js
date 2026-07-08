@@ -1,6 +1,7 @@
 /*
-  ValiSys - Serviço Supabase
-  Esta camada permite migrar aos poucos do localStorage para banco online.
+  ValiSys - Serviço Supabase ONLY
+  Nesta versão, lojas, funcionários, produtos, lançamentos e notificações
+  NÃO são salvos no localStorage. Eles vêm do Supabase.
 */
 
 const valisysDB = {
@@ -8,9 +9,21 @@ const valisysDB = {
     return getSupabaseClient();
   },
 
+  async testarConexao() {
+    const db = this.client();
+
+    const { error } = await db
+      .from("lojas")
+      .select("id")
+      .limit(1);
+
+    if (error) throw error;
+
+    return true;
+  },
+
   async listarLojas() {
     const db = this.client();
-    if (!db) return lerJSONLocal("lojas", []);
 
     const { data, error } = await db
       .from("lojas")
@@ -20,28 +33,11 @@ const valisysDB = {
 
     if (error) throw error;
 
-    return data.map(loja => ({
-      id: loja.id,
-      nome: loja.nome,
-      responsavel: loja.responsavel || "",
-      criadaEm: loja.criada_em || ""
-    }));
+    return (data || []).map(this.lojaDBParaApp);
   },
 
   async criarLoja({ nome, responsavel }) {
     const db = this.client();
-    if (!db) {
-      const lojas = lerJSONLocal("lojas", []);
-      const nova = {
-        id: gerarIdLocal("loja"),
-        nome,
-        responsavel,
-        criadaEm: new Date().toLocaleString("pt-BR")
-      };
-      lojas.push(nova);
-      salvarJSONLocal("lojas", lojas);
-      return nova;
-    }
 
     const { data, error } = await db
       .from("lojas")
@@ -54,57 +50,56 @@ const valisysDB = {
 
     if (error) throw error;
 
-    return {
-      id: data.id,
-      nome: data.nome,
-      responsavel: data.responsavel || "",
-      criadaEm: data.criada_em
-    };
+    return this.lojaDBParaApp(data);
+  },
+
+  async excluirLoja(id) {
+    const db = this.client();
+
+    const { data: lancamentos, error: erroLancamentos } = await db
+      .from("lancamentos")
+      .select("id")
+      .eq("loja_id", id)
+      .limit(1);
+
+    if (erroLancamentos) throw erroLancamentos;
+
+    if (lancamentos && lancamentos.length > 0) {
+      throw new Error("Essa loja possui lançamentos. Para evitar perder histórico, ela não foi excluída.");
+    }
+
+    const { error } = await db
+      .from("lojas")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+
+    const atual = getLojaAtual();
+    if (atual && atual.id === id) {
+      limparLojaAtual();
+    }
+
+    return true;
   },
 
   async listarFuncionarios(lojaId) {
     const db = this.client();
-    if (!db) {
-      return lerJSONLocal("funcionarios", []).filter(f => f.lojaId === lojaId);
-    }
 
     const { data, error } = await db
       .from("funcionarios")
-      .select("*")
+      .select("*, lojas(nome)")
       .eq("loja_id", lojaId)
       .eq("ativo", true)
       .order("nome", { ascending: true });
 
     if (error) throw error;
 
-    return data.map(func => ({
-      id: func.id,
-      nome: func.nome,
-      cargo: func.cargo,
-      codigoAcesso: func.codigo_acesso || "",
-      lojaId: func.loja_id,
-      criadoEm: func.criado_em
-    }));
+    return (data || []).map(this.funcionarioDBParaApp);
   },
 
   async criarFuncionario({ lojaId, nome, cargo, codigoAcesso }) {
     const db = this.client();
-    if (!db) {
-      const funcionarios = lerJSONLocal("funcionarios", []);
-      const loja = getLojaAtual();
-      const novo = {
-        id: gerarIdLocal("funcionario"),
-        nome,
-        cargo,
-        codigoAcesso,
-        lojaId,
-        lojaNome: loja?.nome || "",
-        criadoEm: new Date().toLocaleString("pt-BR")
-      };
-      funcionarios.push(novo);
-      salvarJSONLocal("funcionarios", funcionarios);
-      return novo;
-    }
 
     const { data, error } = await db
       .from("funcionarios")
@@ -112,26 +107,61 @@ const valisysDB = {
         loja_id: lojaId,
         nome,
         cargo,
-        codigo_acesso: codigoAcesso
+        codigo_acesso: codigoAcesso || ""
       })
-      .select()
+      .select("*, lojas(nome)")
       .single();
 
     if (error) throw error;
 
-    return {
-      id: data.id,
-      nome: data.nome,
-      cargo: data.cargo,
-      codigoAcesso: data.codigo_acesso || "",
-      lojaId: data.loja_id,
-      criadoEm: data.criado_em
-    };
+    return this.funcionarioDBParaApp(data);
+  },
+
+  async removerFuncionario(id) {
+    const db = this.client();
+
+    const { error } = await db
+      .from("funcionarios")
+      .update({ ativo: false })
+      .eq("id", id);
+
+    if (error) throw error;
+
+    return true;
+  },
+
+  async buscarFuncionarioPorNomeCargo(nome, cargo) {
+    const db = this.client();
+
+    const { data, error } = await db
+      .from("funcionarios")
+      .select("*, lojas(nome, responsavel)")
+      .ilike("nome", nome)
+      .eq("cargo", cargo)
+      .eq("ativo", true)
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    return data ? this.funcionarioDBParaApp(data) : null;
+  },
+
+  async listarProdutos() {
+    const db = this.client();
+
+    const { data, error } = await db
+      .from("produtos")
+      .select("*")
+      .order("nome", { ascending: true });
+
+    if (error) throw error;
+
+    return (data || []).map(this.produtoDBParaApp);
   },
 
   async buscarProdutoPorEAN(ean) {
     const db = this.client();
-    if (!db) return buscarProdutoLocal(ean);
 
     const { data, error } = await db
       .from("produtos")
@@ -140,14 +170,12 @@ const valisysDB = {
       .maybeSingle();
 
     if (error) throw error;
-    if (!data) return null;
 
-    return this.produtoDBParaApp(data);
+    return data ? this.produtoDBParaApp(data) : null;
   },
 
   async salvarProduto(produto) {
     const db = this.client();
-    if (!db) return salvarProdutoLocalSeNovo(produto);
 
     const payload = {
       ean: produto.ean,
@@ -169,7 +197,7 @@ const valisysDB = {
       ecoscore: produto.ecoscore || "",
       nova: produto.nova || "",
       foto: produto.foto || "",
-      fonte: produto.fonte || ""
+      fonte: produto.fonte || "Supabase"
     };
 
     const { data, error } = await db
@@ -185,12 +213,6 @@ const valisysDB = {
 
   async criarLancamento(item) {
     const db = this.client();
-    if (!db) {
-      const lancamentos = lerJSONLocal("lancamentos", []);
-      lancamentos.push(item);
-      salvarJSONLocal("lancamentos", lancamentos);
-      return item;
-    }
 
     let produtoId = null;
 
@@ -218,7 +240,7 @@ const valisysDB = {
         usuario_nome: item.usuarioNome || "",
         usuario_cargo: item.usuarioCargo || ""
       })
-      .select()
+      .select("*, lojas(nome)")
       .single();
 
     if (error) throw error;
@@ -228,16 +250,10 @@ const valisysDB = {
 
   async listarLancamentos({ lojaId = "", status = "ativo" } = {}) {
     const db = this.client();
-    if (!db) {
-      let itens = lerJSONLocal("lancamentos", []);
-      if (lojaId && lojaId !== "todas") itens = itens.filter(i => i.lojaId === lojaId);
-      if (status && status !== "todos") itens = itens.filter(i => (i.status || "ativo") === status);
-      return itens;
-    }
 
     let query = db
       .from("lancamentos")
-      .select("*")
+      .select("*, lojas(nome)")
       .order("validade", { ascending: true });
 
     if (lojaId && lojaId !== "todas") {
@@ -252,12 +268,11 @@ const valisysDB = {
 
     if (error) throw error;
 
-    return data.map(item => this.lancamentoDBParaApp(item));
+    return (data || []).map(this.lancamentoDBParaApp);
   },
 
   async marcarRetirado(id, usuarioNome) {
     const db = this.client();
-    if (!db) return null;
 
     const { data, error } = await db
       .from("lancamentos")
@@ -267,7 +282,7 @@ const valisysDB = {
         retirado_por: usuarioNome
       })
       .eq("id", id)
-      .select()
+      .select("*, lojas(nome)")
       .single();
 
     if (error) throw error;
@@ -275,9 +290,40 @@ const valisysDB = {
     return this.lancamentoDBParaApp(data);
   },
 
+  async reativarLancamento(id) {
+    const db = this.client();
+
+    const { data, error } = await db
+      .from("lancamentos")
+      .update({
+        status: "ativo",
+        retirado_em: null,
+        retirado_por: ""
+      })
+      .eq("id", id)
+      .select("*, lojas(nome)")
+      .single();
+
+    if (error) throw error;
+
+    return this.lancamentoDBParaApp(data);
+  },
+
+  async apagarLancamento(id) {
+    const db = this.client();
+
+    const { error } = await db
+      .from("lancamentos")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+
+    return true;
+  },
+
   async criarNotificacao(dados) {
     const db = this.client();
-    if (!db) return criarNotificacaoInterna(dados);
 
     const { data, error } = await db
       .from("notificacoes")
@@ -292,12 +338,76 @@ const valisysDB = {
         validade: dados.validade || null,
         criado_por: dados.criadoPor || ""
       })
-      .select()
+      .select("*, lojas(nome)")
       .single();
 
     if (error) throw error;
 
-    return data;
+    return this.notificacaoDBParaApp(data);
+  },
+
+  async listarNotificacoes(lojaId) {
+    const db = this.client();
+
+    const { data, error } = await db
+      .from("notificacoes")
+      .select("*, lojas(nome)")
+      .eq("loja_id", lojaId)
+      .order("criado_em", { ascending: false });
+
+    if (error) throw error;
+
+    return (data || []).map(this.notificacaoDBParaApp);
+  },
+
+  async marcarNotificacaoLida(id) {
+    const db = this.client();
+
+    const { data, error } = await db
+      .from("notificacoes")
+      .update({ lida: true })
+      .eq("id", id)
+      .select("*, lojas(nome)")
+      .single();
+
+    if (error) throw error;
+
+    return this.notificacaoDBParaApp(data);
+  },
+
+  async apagarNotificacao(id) {
+    const db = this.client();
+
+    const { error } = await db
+      .from("notificacoes")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+
+    return true;
+  },
+
+  lojaDBParaApp(data) {
+    return {
+      id: data.id,
+      nome: data.nome,
+      responsavel: data.responsavel || "",
+      telefone: data.telefone || "",
+      criadaEm: data.criada_em || ""
+    };
+  },
+
+  funcionarioDBParaApp(data) {
+    return {
+      id: data.id,
+      nome: data.nome,
+      cargo: data.cargo,
+      codigoAcesso: data.codigo_acesso || "",
+      lojaId: data.loja_id,
+      lojaNome: data.lojas?.nome || data.lojaNome || "",
+      criadoEm: data.criado_em || ""
+    };
   },
 
   produtoDBParaApp(data) {
@@ -323,7 +433,7 @@ const valisysDB = {
       nova: data.nova || "",
       foto: data.foto || "",
       fonte: data.fonte || "Supabase",
-      criadoEm: data.criado_em
+      criadoEm: data.criado_em || ""
     };
   },
 
@@ -331,6 +441,7 @@ const valisysDB = {
     return {
       id: data.id,
       lojaId: data.loja_id,
+      lojaNome: data.lojas?.nome || "",
       ean: data.ean || "",
       nomeProduto: data.nome_produto,
       marca: data.marca || "",
@@ -346,7 +457,25 @@ const valisysDB = {
       usuarioCargo: data.usuario_cargo || "",
       retiradoEm: data.retirado_em || "",
       retiradoPor: data.retirado_por || "",
-      criadoEm: data.criado_em
+      criadoEm: data.criado_em || ""
+    };
+  },
+
+  notificacaoDBParaApp(data) {
+    return {
+      id: data.id,
+      lojaId: data.loja_id,
+      lojaNome: data.lojas?.nome || "",
+      tipo: data.tipo || "aviso",
+      titulo: data.titulo || "Aviso",
+      mensagem: data.mensagem || "",
+      lancamentoId: data.lancamento_id || "",
+      produto: data.produto || "",
+      setor: data.setor || "",
+      validade: data.validade || "",
+      criadoPor: data.criado_por || "",
+      lida: Boolean(data.lida),
+      criadoEm: data.criado_em || ""
     };
   }
 };

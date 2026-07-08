@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teste Supabase - ValiSys</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a href="index.html" class="user-icon" aria-label="Voltar">←</a>
+  <h1>Teste Supabase</h1>
+  <a href="login.html" class="user-icon" aria-label="Login">👤</a>
+</header>
+
+<main class="container">
+  <section class="card">
+    <h2>Teste de conexão</h2>
+    <p class="muted">
+      Esta tela testa se o site consegue ler e gravar no Supabase.
+    </p>
+
+    <button id="btn-testar">Testar conexão</button>
+  </section>
+
+  <section id="resultado-teste"></section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/supabase-service.js"></script>
+<script src="js/teste-supabase.js"></script>
+</body>
+</html>

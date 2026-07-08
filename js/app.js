@@ -58,139 +58,109 @@ if (usuario) {
   carregarResumoNotificacoes();
 }
 
-function normalizarLancamentosDashboard() {
-  const lojaAtual = getLojaAtual();
-  const todos = lerJSONLocal("lancamentos", []);
-  let mudou = false;
-
-  const normalizados = todos.map(item => {
-    const copia = { ...item };
-
-    if (!copia.id) {
-      copia.id = gerarIdLocal("lancamento");
-      mudou = true;
-    }
-
-    if (!copia.lojaId && lojaAtual) {
-      copia.lojaId = lojaAtual.id;
-      copia.lojaNome = lojaAtual.nome;
-      mudou = true;
-    }
-
-    if (!copia.usuarioId && usuario) {
-      copia.usuarioId = usuario.id;
-      copia.usuarioNome = usuario.nome;
-      copia.usuarioCargo = usuario.cargo;
-      mudou = true;
-    }
-
-    return copia;
-  });
-
-  if (mudou) {
-    salvarJSONLocal("lancamentos", normalizados);
-  }
-
-  return normalizados;
-}
-
-function carregarResumoInicial() {
+async function carregarResumoInicial() {
   const lembretesArea = document.getElementById("lembretes-vencimento");
   const textoLembrete = document.getElementById("texto-lembrete");
 
-  let lancamentos = normalizarLancamentosDashboard();
-  const lojaAtual = getLojaAtual();
+  lembretesArea.innerHTML = `<div class="card"><p class="muted">Carregando vencimentos do Supabase...</p></div>`;
 
-  // Dashboard é da loja atual. Meus/Listas têm filtro para todas as lojas.
-  lancamentos = lancamentos.filter(item => item.lojaId === lojaAtual.id && (item.status || "ativo") === "ativo");
+  try {
+    const lojaAtual = getLojaAtual();
 
-  if (!podeVerListaGeral(usuario.cargo)) {
-    lancamentos = lancamentos.filter(item =>
-      item.usuarioId === usuario.id ||
-      (
+    let lancamentos = await valisysDB.listarLancamentos({
+      lojaId: lojaAtual.id,
+      status: "ativo"
+    });
+
+    if (!podeVerListaGeral(usuario.cargo)) {
+      lancamentos = lancamentos.filter(item =>
         String(item.usuarioNome || "").toLowerCase() === String(usuario.nome || "").toLowerCase() &&
         item.usuarioCargo === usuario.cargo
-      )
-    );
-    textoLembrete.innerText = "Mostrando somente os produtos lançados por você nesta loja.";
-  } else {
-    textoLembrete.innerText = "Mostrando os produtos lançados pela equipe desta loja.";
-  }
-
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
-
-  const produtos = lerJSONLocal("produtos", []);
-
-  const lancamentosComDias = lancamentos.map(item => {
-    const validade = parseDataLocal(item.validade);
-    const dias = Math.ceil((validade - hoje) / (1000 * 60 * 60 * 24));
-    const produtoLocal = produtos.find(p => p.ean === item.ean);
-
-    return {
-      ...item,
-      dias,
-      marcaFinal: item.marca || produtoLocal?.marca || "",
-      fabricanteFinal: item.fabricante || produtoLocal?.fabricante || "",
-      saborFinal: item.sabor || produtoLocal?.sabor || "",
-      categoriaFinal: item.categoria || produtoLocal?.categoria || "",
-      fotoFinal: item.foto || produtoLocal?.foto || ""
-    };
-  });
-
-  const vencidos = lancamentosComDias.filter(item => item.dias < 0);
-  const hojeLista = lancamentosComDias.filter(item => item.dias === 0);
-  const seteDias = lancamentosComDias.filter(item => item.dias > 0 && item.dias <= 7);
-  const trintaDias = lancamentosComDias.filter(item => item.dias > 7 && item.dias <= 30);
-
-  document.getElementById("qtd-vencidos").innerText = vencidos.length;
-  document.getElementById("qtd-hoje").innerText = hojeLista.length;
-  document.getElementById("qtd-7dias").innerText = seteDias.length;
-  document.getElementById("qtd-30dias").innerText = trintaDias.length;
-
-  const grupos = [
-    {
-      titulo: "🚨 Vencidos",
-      descricao: "Produtos que já passaram da validade",
-      itens: vencidos.sort((a, b) => a.dias - b.dias),
-      classe: "danger"
-    },
-    {
-      titulo: "📅 Vencem hoje",
-      descricao: "Itens que precisam de ação imediata",
-      itens: hojeLista.sort((a, b) => a.nomeProduto.localeCompare(b.nomeProduto)),
-      classe: "danger"
-    },
-    {
-      titulo: "⏳ Até 7 dias",
-      descricao: "Produtos próximos do vencimento",
-      itens: seteDias.sort((a, b) => a.dias - b.dias),
-      classe: "warning"
-    },
-    {
-      titulo: "🗓️ Até 30 dias",
-      descricao: "Produtos para acompanhar com calma",
-      itens: trintaDias.sort((a, b) => a.dias - b.dias),
-      classe: "success"
+      );
+      textoLembrete.innerText = "Mostrando somente os produtos lançados por você nesta loja. Dados vindos do Supabase.";
+    } else {
+      textoLembrete.innerText = "Mostrando os produtos lançados pela equipe desta loja. Dados vindos do Supabase.";
     }
-  ];
 
-  const gruposComItens = grupos.filter(grupo => grupo.itens.length > 0);
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
 
-  if (gruposComItens.length === 0) {
-    const totalNaLoja = lancamentos.length;
+    const lancamentosComDias = lancamentos.map(item => {
+      const validade = parseDataLocal(item.validade);
+      const dias = Math.ceil((validade - hoje) / (1000 * 60 * 60 * 24));
+
+      return {
+        ...item,
+        dias,
+        marcaFinal: item.marca || "",
+        fabricanteFinal: item.fabricante || "",
+        saborFinal: item.sabor || "",
+        categoriaFinal: item.categoria || "",
+        fotoFinal: item.foto || ""
+      };
+    });
+
+    const vencidos = lancamentosComDias.filter(item => item.dias < 0);
+    const hojeLista = lancamentosComDias.filter(item => item.dias === 0);
+    const seteDias = lancamentosComDias.filter(item => item.dias > 0 && item.dias <= 7);
+    const trintaDias = lancamentosComDias.filter(item => item.dias > 7 && item.dias <= 30);
+
+    document.getElementById("qtd-vencidos").innerText = vencidos.length;
+    document.getElementById("qtd-hoje").innerText = hojeLista.length;
+    document.getElementById("qtd-7dias").innerText = seteDias.length;
+    document.getElementById("qtd-30dias").innerText = trintaDias.length;
+
+    const grupos = [
+      {
+        titulo: "🚨 Vencidos",
+        descricao: "Produtos que já passaram da validade",
+        itens: vencidos.sort((a, b) => a.dias - b.dias),
+        classe: "danger"
+      },
+      {
+        titulo: "📅 Vencem hoje",
+        descricao: "Itens que precisam de ação imediata",
+        itens: hojeLista.sort((a, b) => a.nomeProduto.localeCompare(b.nomeProduto)),
+        classe: "danger"
+      },
+      {
+        titulo: "⏳ Até 7 dias",
+        descricao: "Produtos próximos do vencimento",
+        itens: seteDias.sort((a, b) => a.dias - b.dias),
+        classe: "warning"
+      },
+      {
+        titulo: "🗓️ Até 30 dias",
+        descricao: "Produtos para acompanhar com calma",
+        itens: trintaDias.sort((a, b) => a.dias - b.dias),
+        classe: "success"
+      }
+    ];
+
+    const gruposComItens = grupos.filter(grupo => grupo.itens.length > 0);
+
+    if (gruposComItens.length === 0) {
+      lembretesArea.innerHTML = `
+        <div class="empty-state">
+          <span>✅</span>
+          <p>Nenhum vencimento urgente encontrado nesta loja.</p>
+          <p class="muted">Total de lançamentos ativos no Supabase nesta loja: ${lancamentos.length}</p>
+          <a class="mini-link" href="meus-lancamentos.html">Ver meus lançamentos</a>
+        </div>
+      `;
+      return;
+    }
+
+    lembretesArea.innerHTML = gruposComItens.map(grupo => renderizarGrupoLembrete(grupo)).join("");
+  } catch (erro) {
+    console.error(erro);
     lembretesArea.innerHTML = `
-      <div class="empty-state">
-        <span>✅</span>
-        <p>Nenhum vencimento urgente encontrado nesta loja.</p>
-        <p class="muted">Total de lançamentos salvos nesta loja: ${totalNaLoja}</p>
-        <a class="mini-link" href="meus-lancamentos.html">Ver meus lançamentos</a>
+      <div class="card">
+        <p class="danger">Erro ao carregar resumo do Supabase.</p>
+        <p class="muted">${esc(erro.message)}</p>
       </div>
     `;
-    return;
   }
-
-  lembretesArea.innerHTML = gruposComItens.map(grupo => renderizarGrupoLembrete(grupo)).join("");
 }
 
 function renderizarGrupoLembrete(grupo) {
@@ -290,8 +260,7 @@ function renderizarItemLembrete(item) {
   `;
 }
 
-
-function carregarResumoNotificacoes() {
+async function carregarResumoNotificacoes() {
   const atalho = document.getElementById("atalho-notificacoes");
   const contador = document.getElementById("qtd-notificacoes");
 
@@ -302,10 +271,12 @@ function carregarResumoNotificacoes() {
     return;
   }
 
-  const lojaAtual = getLojaAtual();
-  const notificacoes = lerJSONLocal("notificacoes", [])
-    .filter(item => !item.lojaId || item.lojaId === lojaAtual.id)
-    .filter(item => !(item.lidaPor || []).includes(usuario.id));
-
-  contador.innerText = notificacoes.length;
+  try {
+    const lojaAtual = getLojaAtual();
+    const notificacoes = await valisysDB.listarNotificacoes(lojaAtual.id);
+    contador.innerText = notificacoes.filter(item => !item.lida).length;
+  } catch (erro) {
+    contador.innerText = "!";
+    console.error(erro);
+  }
 }

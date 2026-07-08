@@ -191,59 +191,15 @@ function limparCategoria(categoria) {
 }
 
 function buscarProdutoLocal(ean) {
-  const codigo = normalizarCodigo(ean);
-  const produtos = JSON.parse(localStorage.getItem("produtos")) || [];
-  return produtos.find(p => p.ean === codigo) || null;
+  // Versão Supabase-only: produto local desativado.
+  // Use valisysDB.buscarProdutoPorEAN(ean).
+  return null;
 }
 
 function salvarProdutoLocalSeNovo(produto) {
-  if (!produto || !produto.ean) return null;
-
-  const produtos = JSON.parse(localStorage.getItem("produtos")) || [];
-  const existente = produtos.find(p => p.ean === produto.ean);
-
-  if (existente) {
-    let mudou = false;
-
-    const campos = [
-      "nome",
-      "marca",
-      "fabricante",
-      "sabor",
-      "categoria",
-      "quantidadePadrao",
-      "porcao",
-      "embalagem",
-      "origem",
-      "paises",
-      "lojas",
-      "ingredientes",
-      "alergicos",
-      "rastros",
-      "nutriscore",
-      "ecoscore",
-      "nova",
-      "foto",
-      "fonte"
-    ];
-
-    campos.forEach(campo => {
-      if (!existente[campo] && produto[campo]) {
-        existente[campo] = produto[campo];
-        mudou = true;
-      }
-    });
-
-    if (mudou) {
-      localStorage.setItem("produtos", JSON.stringify(produtos));
-    }
-
-    return existente;
-  }
-
-  produtos.push(produto);
-  localStorage.setItem("produtos", JSON.stringify(produtos));
-  return produto;
+  // Versão Supabase-only: salvamento local desativado.
+  // Use valisysDB.salvarProduto(produto).
+  return produto || null;
 }
 
 function cardProdutoHTML(produto, mensagem = "") {

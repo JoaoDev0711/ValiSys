@@ -14,108 +14,69 @@ const listaFuncionarios = document.getElementById("lista-funcionarios");
 const listaUsuarios = document.getElementById("lista-usuarios");
 const areaUsuariosSistema = document.getElementById("area-usuarios-sistema");
 
-if (!podeGerenciarUsuarios(usuario.cargo) && areaUsuariosSistema) {
+if (areaUsuariosSistema) {
   areaUsuariosSistema.style.display = "none";
-}
-
-function getFuncionarios() {
-  return lerJSONLocal("funcionarios", []);
-}
-
-function salvarFuncionarios(funcionarios) {
-  salvarJSONLocal("funcionarios", funcionarios);
 }
 
 function gerarCodigoAcesso() {
   return String(Math.floor(1000 + Math.random() * 9000));
 }
 
-function renderizarFuncionarios() {
-  const funcionarios = getFuncionarios()
-    .filter(func => func.lojaId === lojaAtual.id)
-    .sort((a, b) => a.nome.localeCompare(b.nome));
+async function renderizarFuncionarios() {
+  listaFuncionarios.innerHTML = `<div class="card"><p class="muted">Carregando funcionários do Supabase...</p></div>`;
 
-  if (funcionarios.length === 0) {
+  try {
+    const funcionarios = await valisysDB.listarFuncionarios(lojaAtual.id);
+
+    if (funcionarios.length === 0) {
+      listaFuncionarios.innerHTML = `
+        <div class="card">
+          <p>Nenhum funcionário cadastrado no Supabase para esta loja.</p>
+        </div>
+      `;
+      return;
+    }
+
+    listaFuncionarios.innerHTML = funcionarios.map(func => `
+      <article class="card funcionario-card">
+        <div>
+          <h3>${esc(func.nome)}</h3>
+          <p><strong>Cargo:</strong> ${esc(nomeCargo(func.cargo))}</p>
+          <p><strong>Loja:</strong> ${esc(func.lojaNome || lojaAtual.nome)}</p>
+          <p><strong>Código de acesso:</strong> ${esc(func.codigoAcesso || "Não informado")}</p>
+          <p class="muted">ID Supabase: ${esc(func.id)}</p>
+        </div>
+
+        <div class="card-actions stack-actions">
+          <button class="btn-danger" onclick="removerFuncionario('${func.id}')">Remover funcionário</button>
+        </div>
+      </article>
+    `).join("");
+  } catch (erro) {
+    console.error(erro);
     listaFuncionarios.innerHTML = `
       <div class="card">
-        <p>Nenhum funcionário cadastrado para esta loja.</p>
+        <p class="danger">Erro ao carregar funcionários do Supabase.</p>
+        <p class="muted">${esc(erro.message)}</p>
       </div>
     `;
-    return;
   }
-
-  listaFuncionarios.innerHTML = funcionarios.map(func => `
-    <article class="card funcionario-card">
-      <div>
-        <h3>${esc(func.nome)}</h3>
-        <p><strong>Cargo:</strong> ${esc(nomeCargo(func.cargo))}</p>
-        <p><strong>Loja:</strong> ${esc(func.lojaNome)}</p>
-        <p><strong>Código de acesso:</strong> ${esc(func.codigoAcesso)}</p>
-        <p class="muted">Criado em: ${esc(func.criadoEm || "Não informado")}</p>
-      </div>
-
-      <div class="card-actions stack-actions">
-        <button onclick="preencherLogin('${func.id}')">Separar para login</button>
-        <button class="btn-danger" onclick="removerFuncionario('${func.id}')">Remover funcionário</button>
-      </div>
-    </article>
-  `).join("");
 }
 
-function renderizarUsuariosSistema() {
-  if (!podeGerenciarUsuarios(usuario.cargo)) {
-    return;
-  }
-
-  const usuarios = lerJSONLocal("usuarios", []);
-
-  if (usuarios.length === 0) {
-    listaUsuarios.innerHTML = `<div class="card"><p>Nenhum usuário entrou no sistema ainda.</p></div>`;
-    return;
-  }
-
-  listaUsuarios.innerHTML = usuarios.map(user => `
-    <article class="card">
-      <h3>${esc(user.nome)}</h3>
-      <p><strong>Cargo:</strong> ${esc(nomeCargo(user.cargo))}</p>
-      ${user.lojaNomePadrao ? `<p><strong>Loja padrão:</strong> ${esc(user.lojaNomePadrao)}</p>` : ""}
-      ${user.funcionarioId ? `<p><strong>Origem:</strong> Funcionário cadastrado</p>` : ""}
-      <p><strong>Criado em:</strong> ${esc(user.criadoEm || "Não informado")}</p>
-    </article>
-  `).join("");
-}
-
-function preencherLogin(id) {
-  const funcionarios = getFuncionarios();
-  const funcionario = funcionarios.find(func => func.id === id);
-
-  if (!funcionario) {
-    alert("Funcionário não encontrado.");
-    return;
-  }
-
-  salvarJSONLocal("funcionarioLoginRapido", {
-    nome: funcionario.nome,
-    cargo: funcionario.cargo,
-    codigoAcesso: funcionario.codigoAcesso,
-    lojaId: funcionario.lojaId,
-    lojaNome: funcionario.lojaNome
-  });
-
-  alert("Funcionário separado para login. Vá na tela de login e clique em preencher funcionário cadastrado.");
-}
-
-function removerFuncionario(id) {
-  const confirmar = confirm("Remover funcionário desta loja?");
+async function removerFuncionario(id) {
+  const confirmar = confirm("Remover funcionário desta loja no Supabase?");
 
   if (!confirmar) return;
 
-  const funcionarios = getFuncionarios().filter(func => func.id !== id);
-  salvarFuncionarios(funcionarios);
-  renderizarFuncionarios();
+  try {
+    await valisysDB.removerFuncionario(id);
+    await renderizarFuncionarios();
+  } catch (erro) {
+    alert("Erro ao remover funcionário: " + erro.message);
+  }
 }
 
-formFuncionario.addEventListener("submit", event => {
+formFuncionario.addEventListener("submit", async event => {
   event.preventDefault();
 
   const nome = document.getElementById("nomeFuncionario").value.trim();
@@ -127,37 +88,21 @@ formFuncionario.addEventListener("submit", event => {
     return;
   }
 
-  const funcionarios = getFuncionarios();
-  const existe = funcionarios.some(func =>
-    func.lojaId === lojaAtual.id &&
-    func.nome.toLowerCase() === nome.toLowerCase() &&
-    func.cargo === cargo
-  );
+  try {
+    const novo = await valisysDB.criarFuncionario({
+      lojaId: lojaAtual.id,
+      nome,
+      cargo,
+      codigoAcesso: codigoInformado || gerarCodigoAcesso()
+    });
 
-  if (existe) {
-    alert("Esse funcionário já está cadastrado nesta loja com este cargo.");
-    return;
+    formFuncionario.reset();
+    await renderizarFuncionarios();
+
+    alert(`Funcionário salvo no Supabase.\n\nNome: ${novo.nome}\nCargo: ${nomeCargo(novo.cargo)}\nCódigo: ${novo.codigoAcesso || "Não informado"}`);
+  } catch (erro) {
+    alert("Erro ao salvar funcionário no Supabase: " + erro.message);
   }
-
-  const novo = {
-    id: gerarIdLocal("funcionario"),
-    nome,
-    cargo,
-    codigoAcesso: codigoInformado || gerarCodigoAcesso(),
-    lojaId: lojaAtual.id,
-    lojaNome: lojaAtual.nome,
-    criadoPor: usuario.nome,
-    criadoEm: new Date().toLocaleString("pt-BR")
-  };
-
-  funcionarios.push(novo);
-  salvarFuncionarios(funcionarios);
-
-  formFuncionario.reset();
-  renderizarFuncionarios();
-
-  alert(`Funcionário cadastrado.\n\nNome: ${novo.nome}\nCargo: ${nomeCargo(novo.cargo)}\nCódigo: ${novo.codigoAcesso}`);
 });
 
 renderizarFuncionarios();
-renderizarUsuariosSistema();

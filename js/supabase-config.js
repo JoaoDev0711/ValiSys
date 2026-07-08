@@ -1,14 +1,11 @@
 /*
   ValiSys - Configuração Supabase
+  Esta versão é Supabase-only para testar dados online em vários celulares.
 
-  1. Crie um projeto no Supabase.
-  2. Vá em Project Settings > API.
-  3. Copie:
-     - Project URL
-     - anon public key ou publishable key
-  4. Cole abaixo.
-
-  Nunca coloque service_role key aqui.
+  IMPORTANTE:
+  - URL é a URL base do projeto, sem /rest/v1.
+  - Use publishable key/anon key pública.
+  - Nunca use secret key/service_role no front-end.
 */
 
 const VALISYS_SUPABASE_URL = "https://bwrgkzetsnglmkneqqzs.supabase.co";
@@ -18,6 +15,7 @@ function supabaseConfigurado() {
   return (
     VALISYS_SUPABASE_URL &&
     VALISYS_SUPABASE_ANON_KEY &&
+    VALISYS_SUPABASE_URL.startsWith("https://") &&
     !VALISYS_SUPABASE_URL.includes("COLE_AQUI") &&
     !VALISYS_SUPABASE_ANON_KEY.includes("COLE_AQUI")
   );
@@ -25,13 +23,11 @@ function supabaseConfigurado() {
 
 function getSupabaseClient() {
   if (!supabaseConfigurado()) {
-    console.warn("Supabase ainda não configurado. O sistema continuará usando localStorage.");
-    return null;
+    throw new Error("Supabase não configurado em js/supabase-config.js.");
   }
 
   if (!window.supabase) {
-    console.error("Biblioteca Supabase não carregou.");
-    return null;
+    throw new Error("Biblioteca Supabase não carregou. Verifique a internet/CDN.");
   }
 
   return window.supabase.createClient(

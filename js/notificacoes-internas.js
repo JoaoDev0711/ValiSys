@@ -11,85 +11,86 @@ if (lojaEl && lojaAtual) lojaEl.innerText = lojaAtual.nome;
 
 const lista = document.getElementById("lista-notificacoes");
 
-function renderizarNotificacoes() {
-  const notificacoes = lerJSONLocal("notificacoes", [])
-    .filter(item => !item.lojaId || item.lojaId === lojaAtual.id);
+async function renderizarNotificacoes() {
+  lista.innerHTML = `<div class="card"><p class="muted">Carregando notificações do Supabase...</p></div>`;
 
-  if (notificacoes.length === 0) {
-    lista.innerHTML = `
-      <div class="card">
-        <p>Nenhum aviso interno encontrado para esta loja.</p>
-      </div>
-    `;
-    return;
-  }
+  try {
+    const notificacoes = await valisysDB.listarNotificacoes(lojaAtual.id);
 
-  lista.innerHTML = notificacoes.map(item => {
-    const lida = (item.lidaPor || []).includes(usuario.id);
-
-    return `
-      <article class="card notificacao-card ${lida ? "notificacao-lida" : ""}">
-        <div class="lancamento-topo">
-          <div>
-            <h3>${esc(item.titulo)}</h3>
-            <p class="muted">${esc(item.lojaNome || lojaAtual.nome)} • ${esc(item.criadoEm)}</p>
-          </div>
-          ${lida ? `<span class="badge neutral">Lida</span>` : `<span class="badge warning">Nova</span>`}
+    if (notificacoes.length === 0) {
+      lista.innerHTML = `
+        <div class="card">
+          <p>Nenhum aviso interno encontrado no Supabase para esta loja.</p>
         </div>
-
-        <p>${esc(item.mensagem)}</p>
-
-        <div class="info-grid">
-          ${item.produto ? `<p><strong>Produto:</strong> ${esc(item.produto)}</p>` : ""}
-          ${item.setor ? `<p><strong>Setor:</strong> ${esc(item.setor)}</p>` : ""}
-          ${item.validade ? `<p><strong>Validade:</strong> ${esc(item.validade)}</p>` : ""}
-          ${item.criadoPor ? `<p><strong>Criado por:</strong> ${esc(item.criadoPor)}</p>` : ""}
-        </div>
-
-        <div class="card-actions stack-actions">
-          ${!lida ? `<button onclick="marcarLida('${item.id}')">Marcar como lida</button>` : ""}
-          ${usuario.cargo === "admin" ? `<button class="btn-danger" onclick="apagarNotificacao('${item.id}')">Apagar aviso</button>` : ""}
-        </div>
-      </article>
-    `;
-  }).join("");
-}
-
-function marcarLida(id) {
-  const notificacoes = lerJSONLocal("notificacoes", []);
-
-  const atualizadas = notificacoes.map(item => {
-    if (item.id !== id) return item;
-
-    const lidaPor = item.lidaPor || [];
-
-    if (!lidaPor.includes(usuario.id)) {
-      lidaPor.push(usuario.id);
+      `;
+      return;
     }
 
-    return {
-      ...item,
-      lidaPor
-    };
-  });
+    lista.innerHTML = notificacoes.map(item => {
+      const lida = Boolean(item.lida);
 
-  salvarJSONLocal("notificacoes", atualizadas);
-  renderizarNotificacoes();
+      return `
+        <article class="card notificacao-card ${lida ? "notificacao-lida" : ""}">
+          <div class="lancamento-topo">
+            <div>
+              <h3>${esc(item.titulo)}</h3>
+              <p class="muted">${esc(item.lojaNome || lojaAtual.nome)} • ${esc(item.criadoEm)}</p>
+            </div>
+            ${lida ? `<span class="badge neutral">Lida</span>` : `<span class="badge warning">Nova</span>`}
+          </div>
+
+          <p>${esc(item.mensagem)}</p>
+
+          <div class="info-grid">
+            ${item.produto ? `<p><strong>Produto:</strong> ${esc(item.produto)}</p>` : ""}
+            ${item.setor ? `<p><strong>Setor:</strong> ${esc(item.setor)}</p>` : ""}
+            ${item.validade ? `<p><strong>Validade:</strong> ${esc(item.validade)}</p>` : ""}
+            ${item.criadoPor ? `<p><strong>Criado por:</strong> ${esc(item.criadoPor)}</p>` : ""}
+          </div>
+
+          <div class="card-actions stack-actions">
+            ${!lida ? `<button onclick="marcarLida('${item.id}')">Marcar como lida</button>` : ""}
+            ${usuario.cargo === "admin" ? `<button class="btn-danger" onclick="apagarNotificacao('${item.id}')">Apagar aviso</button>` : ""}
+          </div>
+        </article>
+      `;
+    }).join("");
+  } catch (erro) {
+    console.error(erro);
+    lista.innerHTML = `
+      <div class="card">
+        <p class="danger">Erro ao carregar notificações do Supabase.</p>
+        <p class="muted">${esc(erro.message)}</p>
+      </div>
+    `;
+  }
 }
 
-function apagarNotificacao(id) {
+async function marcarLida(id) {
+  try {
+    await valisysDB.marcarNotificacaoLida(id);
+    await renderizarNotificacoes();
+  } catch (erro) {
+    alert("Erro ao marcar como lida: " + erro.message);
+  }
+}
+
+async function apagarNotificacao(id) {
   if (usuario.cargo !== "admin") {
     alert("Somente admin pode apagar avisos.");
     return;
   }
 
-  const confirmar = confirm("Apagar este aviso interno?");
+  const confirmar = confirm("Apagar este aviso interno do Supabase?");
 
   if (!confirmar) return;
 
-  const notificacoes = lerJSONLocal("notificacoes", []).filter(item => item.id !== id);
-  salvarJSONLocal("notificacoes", notificacoes);
-  renderizarNotificacoes();
+  try {
+    await valisysDB.apagarNotificacao(id);
+    await renderizarNotificacoes();
+  } catch (erro) {
+    alert("Erro ao apagar aviso: " + erro.message);
+  }
 }
 
 renderizarNotificacoes();

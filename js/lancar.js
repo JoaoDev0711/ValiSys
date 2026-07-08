@@ -186,37 +186,45 @@ async function buscarProdutoCompleto(ean) {
     return null;
   }
 
-  let produto = buscarProdutoLocal(codigo);
-
-  if (produto) {
-    produtoAtual = produto;
-    nomeInput.value = produto.nome;
-    produtoPreview.innerHTML = cardProdutoHTML(produto, "Produto encontrado no cadastro local.");
-    return produto;
-  }
+  let produto = null;
 
   nomeInput.value = "";
   produtoPreview.innerHTML = `
     <div class="card">
-      <p class="muted">Buscando produto na API...</p>
+      <p class="muted">Buscando produto no Supabase...</p>
     </div>
   `;
 
   try {
-    produto = await buscarProdutoAPI(codigo);
+    produto = await valisysDB.buscarProdutoPorEAN(codigo);
 
     if (produto) {
-      produto = salvarProdutoLocalSeNovo(produto);
       produtoAtual = produto;
       nomeInput.value = produto.nome;
-      produtoPreview.innerHTML = cardProdutoHTML(produto, "Produto encontrado na API e salvo no cadastro local.");
+      produtoPreview.innerHTML = cardProdutoHTML(produto, "Produto encontrado no Supabase.");
       return produto;
     }
 
     produtoPreview.innerHTML = `
       <div class="card">
-        <p class="danger">Produto não encontrado na API.</p>
-        <p class="muted">Digite o nome manualmente ou peça para gerente/admin cadastrar o produto com foto.</p>
+        <p class="muted">Produto não encontrado no Supabase. Buscando na API pública...</p>
+      </div>
+    `;
+
+    produto = await buscarProdutoAPI(codigo);
+
+    if (produto) {
+      produto = await valisysDB.salvarProduto(produto);
+      produtoAtual = produto;
+      nomeInput.value = produto.nome;
+      produtoPreview.innerHTML = cardProdutoHTML(produto, "Produto encontrado na API e salvo no Supabase.");
+      return produto;
+    }
+
+    produtoPreview.innerHTML = `
+      <div class="card">
+        <p class="danger">Produto não encontrado.</p>
+        <p class="muted">Digite o nome manualmente ou peça para gerente/admin cadastrar o produto.</p>
       </div>
     `;
 
@@ -226,8 +234,8 @@ async function buscarProdutoCompleto(ean) {
 
     produtoPreview.innerHTML = `
       <div class="card">
-        <p class="danger">Não foi possível consultar a API.</p>
-        <p class="muted">Confira a internet ou cadastre/digite o produto manualmente.</p>
+        <p class="danger">Erro ao consultar Supabase/API.</p>
+        <p class="muted">${esc(erro.message)}</p>
       </div>
     `;
 
@@ -292,7 +300,7 @@ btnCamera.addEventListener("click", async () => {
 
 btnPararCamera.addEventListener("click", pararCamera);
 
-form.addEventListener("submit", function(event) {
+form.addEventListener("submit", async function(event) {
   event.preventDefault();
 
   if (!lojaAtual) {
@@ -314,45 +322,43 @@ form.addEventListener("submit", function(event) {
     return;
   }
 
-  const lancamentos = lerJSONLocal("lancamentos", []);
-  const produtoCadastrado = buscarProdutoLocal(ean);
-
   const novo = {
-    id: gerarIdLocal("lancamento"),
     lojaId: lojaAtual.id,
     lojaNome: lojaAtual.nome,
     ean,
     nomeProduto,
-    marca: produtoCadastrado ? (produtoCadastrado.marca || "") : (produtoAtual?.marca || ""),
-    fabricante: produtoCadastrado ? (produtoCadastrado.fabricante || "") : (produtoAtual?.fabricante || ""),
-    sabor: produtoCadastrado ? (produtoCadastrado.sabor || "") : (produtoAtual?.sabor || ""),
-    categoria: produtoCadastrado ? (produtoCadastrado.categoria || "") : (produtoAtual?.categoria || ""),
-    quantidadePadrao: produtoCadastrado ? (produtoCadastrado.quantidadePadrao || "") : (produtoAtual?.quantidadePadrao || ""),
-    embalagem: produtoCadastrado ? (produtoCadastrado.embalagem || "") : (produtoAtual?.embalagem || ""),
-    ingredientes: produtoCadastrado ? (produtoCadastrado.ingredientes || "") : (produtoAtual?.ingredientes || ""),
+    marca: produtoAtual?.marca || "",
+    fabricante: produtoAtual?.fabricante || "",
+    sabor: produtoAtual?.sabor || "",
+    categoria: produtoAtual?.categoria || "",
+    quantidadePadrao: produtoAtual?.quantidadePadrao || "",
+    embalagem: produtoAtual?.embalagem || "",
+    ingredientes: produtoAtual?.ingredientes || "",
     setor: document.getElementById("setor").value,
     quantidade: Number(document.getElementById("quantidade").value),
     validade: document.getElementById("validade").value,
-    foto: produtoCadastrado ? (produtoCadastrado.foto || "") : (produtoAtual?.foto || ""),
-    produtoCadastrado: Boolean(produtoCadastrado),
-    usuarioId: usuario.id,
+    foto: produtoAtual?.foto || "",
+    status: "ativo",
     usuarioNome: usuario.nome,
-    usuarioCargo: usuario.cargo,
-    criadoEm: new Date().toLocaleString("pt-BR")
+    usuarioCargo: usuario.cargo
   };
 
   const confirmar = confirm(
-    `Confirmar lançamento?\n\nLoja: ${lojaAtual.nome}\nProduto: ${nomeProduto}\nSetor: ${novo.setor}\nValidade: ${novo.validade}`
+    `Confirmar lançamento no Supabase?\n\nLoja: ${lojaAtual.nome}\nProduto: ${nomeProduto}\nSetor: ${novo.setor}\nValidade: ${novo.validade}`
   );
 
   if (!confirmar) {
     return;
   }
 
-  lancamentos.push(novo);
-  salvarJSONLocal("lancamentos", lancamentos);
+  try {
+    await valisysDB.criarLancamento(novo);
 
-  alert("Lançamento salvo com sucesso!");
-  form.reset();
-  produtoPreview.innerHTML = "";
+    alert("Lançamento salvo no Supabase!");
+    form.reset();
+    produtoAtual = null;
+    produtoPreview.innerHTML = "";
+  } catch (erro) {
+    alert("Erro ao salvar lançamento no Supabase: " + erro.message);
+  }
 });
