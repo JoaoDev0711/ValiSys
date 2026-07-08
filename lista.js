@@ -9,7 +9,7 @@ const paginaAtual = window.location.pathname;
 if (paginaAtual.includes("lista-geral")) {
   if (!podeVerListaGeral(usuario.cargo)) {
     alert("Você não tem permissão para acessar a lista completa.");
-    window.location.href = "main.html";
+    window.location.href = "index.html";
   }
 } else {
   lancamentosBase = lancamentosBase.filter(item => item.usuarioId === usuario.id);

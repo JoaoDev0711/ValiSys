@@ -2,7 +2,7 @@ const usuario = protegerPagina();
 
 if (!podeCadastrarProduto(usuario.cargo)) {
   alert("Você não tem permissão para cadastrar produtos.");
-  window.location.href = "main.html";
+  window.location.href = "index.html";
 }
 
 const form = document.getElementById("form-produto");

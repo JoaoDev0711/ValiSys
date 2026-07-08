@@ -1,4 +1,4 @@
-const MAIN_PAGE = "main.html";
+const MAIN_PAGE = "index.html";
 
 function getUsuarioLogado() {
   return JSON.parse(localStorage.getItem("usuarioLogado"));

@@ -30,5 +30,5 @@ form.addEventListener("submit", function(event) {
   }
 
   localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
-  window.location.href = "main.html";
+  window.location.href = "index.html";
 });
