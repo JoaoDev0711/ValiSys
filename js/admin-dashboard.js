@@ -960,6 +960,16 @@ formLojaAdmin.addEventListener("submit", async event => {
 
 
 let conversaSacSelecionada = "";
+const chaveAtendenteSac = "valisysSacAtendenteNome";
+const chaveHorarioSac = "valisysSacHorarioAtendimento";
+
+function horarioPadraoSac() {
+  return localStorage.getItem(chaveHorarioSac) || "Segunda a sexta, 08h às 18h. Sábado, 08h às 12h.";
+}
+
+function atendentePadraoSac() {
+  return localStorage.getItem(chaveAtendenteSac) || "";
+}
 
 async function renderizarSacAdmin() {
   if (!listaSacAdmin) return;
@@ -1038,19 +1048,34 @@ async function abrirConversaSacAdmin(sessaoId, atualizarLista = true) {
     const contato = primeira.contato || "Sem contato";
 
     chatSacAdminPainel.innerHTML = `
-      <div class="chat-admin-top">
+      <div class="chat-admin-top chat-admin-top-assumir">
         <div>
           <h3>${esc(nome)}</h3>
           <p class="muted">${esc(contato)}</p>
         </div>
 
-        <button type="button" class="btn-danger" onclick="apagarConversaSacAdmin('${sessaoId}')">Apagar conversa</button>
+        <div class="chat-assumir-box">
+          <label>
+            Quem vai assumir
+            <input type="text" id="nomeAtendenteSac" placeholder="Ex: João" value="${esc(atendentePadraoSac())}">
+          </label>
+
+          <label>
+            Horário de atendimento
+            <input type="text" id="horarioAtendimentoSac" value="${esc(horarioPadraoSac())}">
+          </label>
+
+          <div class="chat-assumir-actions">
+            <button type="button" class="secondary" onclick="assumirConversaSacAdmin('${sessaoId}')">Assumir chat</button>
+            <button type="button" class="btn-danger" onclick="apagarConversaSacAdmin('${sessaoId}')">Apagar conversa</button>
+          </div>
+        </div>
       </div>
 
       <div class="chat-admin-mensagens" id="chatAdminMensagens">
         ${mensagens.map(item => `
           <div class="chat-message ${item.autor === "admin" ? "bot" : "user"}">
-            <small>${item.autor === "admin" ? "Admin" : esc(item.nome || "Cliente")}</small>
+            <small>${item.autor === "admin" ? esc(item.atendente || "Admin") : esc(item.nome || "Cliente")}</small>
             <p>${esc(item.mensagem)}</p>
           </div>
         `).join("")}
@@ -1086,8 +1111,11 @@ async function responderConversaSacAdmin(event, sessaoId) {
 
   const campo = document.getElementById("respostaSacAdmin");
   const mensagem = campo.value.trim();
+  const nomeAtendente = document.getElementById("nomeAtendenteSac")?.value.trim() || atendentePadraoSac() || "ValiSys";
 
   if (!mensagem) return;
+
+  localStorage.setItem(chaveAtendenteSac, nomeAtendente);
 
   const mensagens = await valisysDB.listarMensagensChatSac(sessaoId);
   const primeira = mensagens[0] || {};
@@ -1098,13 +1126,51 @@ async function responderConversaSacAdmin(event, sessaoId) {
       nome: primeira.nome || "Visitante",
       contato: primeira.contato || "",
       mensagem,
-      autor: "admin"
+      autor: "admin",
+      atendente: nomeAtendente
     });
 
     campo.value = "";
     await abrirConversaSacAdmin(sessaoId, true);
   } catch (erro) {
     alert("Erro ao responder SAC: " + erro.message);
+  }
+}
+
+async function assumirConversaSacAdmin(sessaoId) {
+  const campoNome = document.getElementById("nomeAtendenteSac");
+  const campoHorario = document.getElementById("horarioAtendimentoSac");
+
+  const nomeAtendente = campoNome?.value.trim() || "";
+  const horario = campoHorario?.value.trim() || horarioPadraoSac();
+
+  if (!nomeAtendente) {
+    alert("Informe o nome de quem vai assumir o chat.");
+    campoNome?.focus();
+    return;
+  }
+
+  localStorage.setItem(chaveAtendenteSac, nomeAtendente);
+  localStorage.setItem(chaveHorarioSac, horario);
+
+  try {
+    const mensagens = await valisysDB.listarMensagensChatSac(sessaoId);
+    const primeira = mensagens[0] || {};
+
+    const mensagemAutomatica = `Olá! Aqui é ${nomeAtendente}. Assumi seu atendimento no SAC Online do ValiSys.\n\nNosso horário de atendimento é: ${horario}\n\nPode me explicar o que precisa que vou te ajudar por aqui.`;
+
+    await valisysDB.criarMensagemChatSac({
+      sessaoId,
+      nome: primeira.nome || "Visitante",
+      contato: primeira.contato || "",
+      mensagem: mensagemAutomatica,
+      autor: "admin",
+      atendente: nomeAtendente
+    });
+
+    await abrirConversaSacAdmin(sessaoId, true);
+  } catch (erro) {
+    alert("Erro ao assumir chat: " + erro.message);
   }
 }
 
@@ -1124,6 +1190,7 @@ async function apagarConversaSacAdmin(sessaoId) {
 
 window.abrirConversaSacAdmin = abrirConversaSacAdmin;
 window.responderConversaSacAdmin = responderConversaSacAdmin;
+window.assumirConversaSacAdmin = assumirConversaSacAdmin;
 window.apagarConversaSacAdmin = apagarConversaSacAdmin;
 
 if (btnAtualizarSacAdmin) {

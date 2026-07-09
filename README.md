@@ -1000,3 +1000,56 @@ index.html
 css/styles.css
 js/public-animations.js
 ```
+
+
+---
+
+## Correção do SAC chat
+
+O chat do SAC foi ajustado para não ficar piscando/recarregando a conversa toda a cada atualização.
+
+Mudanças:
+
+```txt
+- polling aumentado para 9 segundos
+- evita requisição duplicada ao mesmo tempo
+- só redesenha o chat quando chega mensagem nova
+- preserva o scroll quando o usuário está lendo mensagens antigas
+- botão flutuante agora usa SVG fixo
+- card "SAC Online" do contato também recebeu SVG
+```
+
+Arquivos alterados:
+
+```txt
+index.html
+css/styles.css
+js/public-sac.js
+```
+
+
+---
+
+## Assumir chat no SAC
+
+No painel admin do SAC, agora existe a opção de assumir uma conversa.
+
+Funciona assim:
+
+```txt
+Admin abre uma conversa
+Informa o nome de quem vai atender
+Confere ou altera o horário de atendimento
+Clica em "Assumir chat"
+O cliente recebe uma mensagem automática
+```
+
+Mensagem automática enviada:
+
+```txt
+Olá! Aqui é [nome]. Assumi seu atendimento no SAC Online do ValiSys.
+
+Nosso horário de atendimento é: [horário].
+```
+
+Também foi corrigido o blur da tela ativa no coverflow do site público.

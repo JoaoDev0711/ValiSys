@@ -1419,6 +1419,7 @@ const valisysDB = {
       nome: extra.nome || "",
       contato: extra.contato || "",
       autor: extra.autor || "cliente",
+      atendente: extra.atendente || "",
       mensagem: data.mensagem || "",
       lida: Boolean(data.lida),
       criadoEm: data.criado_em || ""
@@ -1443,7 +1444,8 @@ const valisysDB = {
           sessaoId,
           nome: dados.nome || "",
           contato: dados.contato || "",
-          autor
+          autor,
+          atendente: dados.atendente || ""
         }),
         setor: "SAC Online",
         validade: null,

@@ -1,6 +1,12 @@
 /*
   ValiSys - Chat SAC Online
   Chat flutuante no site público. Sem tabela nova: usa notificacoes com tipo sac_chat.
+
+  Correção:
+  - não recria o corpo do chat a cada polling se nada mudou;
+  - evita requisições sobrepostas;
+  - mantém ícone SVG fixo no botão;
+  - preserva o scroll quando o usuário está lendo mensagens antigas.
 */
 
 (function () {
@@ -22,6 +28,8 @@
 
   const storageKey = "valisysSacChat";
   let timer = null;
+  let carregando = false;
+  let ultimaAssinatura = "";
 
   function lerSessao() {
     try {
@@ -61,7 +69,7 @@
   function abrirChat() {
     panel.classList.add("active");
     panel.setAttribute("aria-hidden", "false");
-    carregarMensagens();
+    carregarMensagens({ forcar: true });
     iniciarAtualizacao();
 
     setTimeout(() => mensagemInput?.focus(), 120);
@@ -75,7 +83,9 @@
 
   function iniciarAtualizacao() {
     pararAtualizacao();
-    timer = setInterval(carregarMensagens, 4500);
+
+    // Intervalo maior para não ficar parecendo que o chat está piscando.
+    timer = setInterval(() => carregarMensagens(), 9000);
   }
 
   function pararAtualizacao() {
@@ -83,24 +93,44 @@
     timer = null;
   }
 
+  function assinaturaMensagens(mensagens) {
+    return mensagens
+      .map(item => `${item.id || ""}:${item.autor || ""}:${item.mensagem || ""}:${item.criadoEm || ""}`)
+      .join("|");
+  }
+
+  function estaPertoDoFim() {
+    return body.scrollHeight - body.scrollTop - body.clientHeight < 110;
+  }
+
   function baseAutomatica() {
     return `
-      <div class="chat-message bot">
+      <div class="chat-message bot sac-auto-msg" data-auto="1">
+        <small>ValiSys</small>
         <p>Olá! Sou o atendimento automático do ValiSys.</p>
       </div>
-      <div class="chat-message bot">
+      <div class="chat-message bot sac-auto-msg" data-auto="1">
+        <small>ValiSys</small>
         <p>Me diga seu nome e uma forma de contato. Depois escreva o que você precisa. Quando o responsável responder, a mensagem aparece aqui.</p>
       </div>
     `;
   }
 
-  function renderizarMensagens(mensagens) {
+  function renderizarMensagens(mensagens, { forcar = false } = {}) {
+    const assinatura = assinaturaMensagens(mensagens);
+
+    if (!forcar && assinatura === ultimaAssinatura) {
+      return;
+    }
+
+    const deveDescer = forcar || estaPertoDoFim();
+
     const html = mensagens.map(item => {
       const classe = item.autor === "admin" ? "bot" : "user";
-      const rotulo = item.autor === "admin" ? "ValiSys" : "Você";
+      const rotulo = item.autor === "admin" ? (item.atendente || "ValiSys") : "Você";
 
       return `
-        <div class="chat-message ${classe}">
+        <div class="chat-message ${classe}" data-msg-id="${esc(item.id)}">
           <small>${rotulo}</small>
           <p>${esc(item.mensagem)}</p>
         </div>
@@ -108,19 +138,31 @@
     }).join("");
 
     body.innerHTML = baseAutomatica() + html;
-    body.scrollTop = body.scrollHeight;
+    ultimaAssinatura = assinatura;
+
+    if (deveDescer) {
+      requestAnimationFrame(() => {
+        body.scrollTop = body.scrollHeight;
+      });
+    }
   }
 
-  async function carregarMensagens() {
+  async function carregarMensagens(opcoes = {}) {
+    if (carregando) return;
+
     try {
       if (typeof valisysDB === "undefined" || !valisysDB.listarMensagensChatSac) {
         return;
       }
 
+      carregando = true;
+
       const mensagens = await valisysDB.listarMensagensChatSac(sessao.sessaoId);
-      renderizarMensagens(mensagens);
+      renderizarMensagens(mensagens, opcoes);
     } catch (erro) {
       console.error(erro);
+    } finally {
+      carregando = false;
     }
   }
 
@@ -148,9 +190,13 @@
     const textoOriginal = botao.innerText;
 
     botao.disabled = true;
-    botao.innerText = "...";
+    botao.innerText = "Enviando";
 
     try {
+      if (typeof valisysDB === "undefined" || !valisysDB.criarMensagemChatSac) {
+        throw new Error("Serviço do SAC não carregou.");
+      }
+
       await valisysDB.criarMensagemChatSac({
         sessaoId: sessao.sessaoId,
         nome,
@@ -161,7 +207,7 @@
 
       mensagemInput.value = "";
       mensagemInput.style.height = "";
-      await carregarMensagens();
+      await carregarMensagens({ forcar: true });
     } catch (erro) {
       console.error(erro);
       alert("Não foi possível enviar a mensagem: " + erro.message);
@@ -200,6 +246,7 @@
     }
 
     if (panel.classList.contains("active")) {
+      carregarMensagens();
       iniciarAtualizacao();
     }
   });

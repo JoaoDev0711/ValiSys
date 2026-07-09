@@ -6031,3 +6031,154 @@ body.valisys-public-redesign::before {
     transform: translate(-50%, -50%) translateX(-102px) translateY(18px) translateZ(-26px) scale(.78) rotateY(18deg);
   }
 }
+
+
+/* Correções SAC chat: polling sem piscar e ícone SVG fixo */
+.sac-card-icon {
+  width: 42px;
+  height: 42px;
+  margin-bottom: 8px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(135deg, var(--public-green, #2f7d4f), var(--public-green-dark, #183e2a));
+  box-shadow: 0 12px 26px rgba(47, 125, 79, .18);
+}
+
+.sac-card-icon svg {
+  width: 23px;
+  height: 23px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sac-chat-toggle {
+  width: 72px;
+  height: 72px;
+  min-height: 72px;
+  border-radius: 24px;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  place-items: center;
+  gap: 3px;
+  padding: 11px 8px 9px;
+}
+
+.sac-chat-toggle-icon {
+  width: 30px;
+  height: 30px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sac-chat-toggle span {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .02em;
+  line-height: 1;
+}
+
+.sac-chat-body {
+  overflow-anchor: none;
+}
+
+.chat-message {
+  will-change: transform, opacity;
+}
+
+.chat-message.sac-auto-msg {
+  opacity: .96;
+}
+
+.sac-chat-send button[disabled] {
+  opacity: .72;
+  cursor: wait;
+}
+
+@media (max-width: 760px) {
+  .sac-chat-toggle {
+    width: 66px;
+    height: 66px;
+    min-height: 66px;
+    border-radius: 22px;
+  }
+
+  .sac-chat-toggle-icon {
+    width: 27px;
+    height: 27px;
+  }
+}
+
+
+/* Correção coverflow ativo + assumir atendimento no SAC */
+.phone-stack-stage .coverflow-slide.active,
+.phone-stack-stage .coverflow-slide.active .coverflow-window,
+.phone-stack-stage .coverflow-slide.active .phone-screen {
+  filter: blur(0) saturate(1) !important;
+  opacity: 1;
+}
+
+.phone-stack-stage .coverflow-slide.active .phone-screen {
+  image-rendering: auto;
+}
+
+.chat-admin-top-assumir {
+  align-items: flex-start;
+}
+
+.chat-assumir-box {
+  width: min(520px, 100%);
+  display: grid;
+  gap: 10px;
+}
+
+.chat-assumir-box label {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.chat-assumir-box input {
+  min-height: 42px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.chat-assumir-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chat-assumir-actions button {
+  min-height: 42px;
+  border-radius: 16px;
+}
+
+@media (max-width: 760px) {
+  .chat-admin-top-assumir {
+    align-items: stretch;
+  }
+
+  .chat-assumir-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
