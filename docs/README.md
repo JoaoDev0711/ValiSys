@@ -616,3 +616,110 @@ Na próxima leitura daquele mesmo EAN, o produto será puxado do banco do ValiSy
 ```
 
 A busca por nome/marca/fabricante continua apenas como apoio, não como fluxo principal.
+
+
+---
+
+## Importação de catálogo completo por CSV
+
+Para ter "todos" os produtos, o sistema agora aceita importar uma base grande por CSV.
+
+Tela nova:
+
+```txt
+catalogo-importar.html
+```
+
+Arquivo modelo:
+
+```txt
+database/modelo-catalogo-produtos.csv
+```
+
+Campos aceitos:
+
+```txt
+ean
+nome
+marca
+fabricante
+sabor
+categoria
+quantidade_padrao
+porcao
+embalagem
+origem
+paises
+lojas_encontradas
+ingredientes
+alergicos
+rastros
+nutriscore
+ecoscore
+nova
+foto
+fonte
+```
+
+Fluxo correto:
+
+```txt
+1. Você importa uma lista grande com EAN real dos produtos.
+2. O sistema grava tudo em catalogo_produtos.
+3. Quando a câmera ler o EAN ou alguém digitar o EAN, o produto é puxado do banco.
+4. Se o EAN ainda não existir, pode cadastrar manualmente e ele passa a existir no banco interno.
+```
+
+Observação:
+
+```txt
+Não foi criado EAN falso.
+Para puxar por código de barras, o produto precisa ter o EAN real no CSV ou ser salvo manualmente uma primeira vez.
+```
+
+
+---
+
+## Correção do login de promotor por marca
+
+Antes o login do promotor estava permissivo demais:
+
+```txt
+Qualquer nome + marca existente conseguia entrar.
+```
+
+Agora ficou assim:
+
+```txt
+Promotor cadastrado:
+- nome precisa bater
+- marca precisa bater
+
+Nome já cadastrado com outra marca:
+- sistema bloqueia e avisa qual marca está correta
+
+Marca já existe, mas nome não está cadastrado nela:
+- sistema bloqueia
+- gerente/admin precisa cadastrar esse promotor nessa marca
+
+Marca nova:
+- sistema cadastra a marca e o promotor automaticamente
+```
+
+Também foi adicionado campo de marca no cadastro de funcionários, somente quando o cargo for Promotor.
+
+
+---
+
+## Scanner sem barra verde
+
+Removida a linha/barra verde que aparecia no centro do leitor de EAN.
+
+
+---
+
+## Barra do scanner somente na câmera
+
+A barra verde do leitor foi removida da tela normal.
+
+Agora ela aparece somente quando a câmera está aberta.

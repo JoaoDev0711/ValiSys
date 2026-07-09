@@ -237,6 +237,26 @@ create unique index if not exists idx_catalogo_produtos_codigo_interno
 on public.catalogo_produtos(codigo_interno)
 where codigo_interno is not null and codigo_interno <> '';
 
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'catalogo_produtos_codigo_interno_unique'
+  ) then
+    begin
+      alter table public.catalogo_produtos
+      add constraint catalogo_produtos_codigo_interno_unique unique (codigo_interno);
+    exception
+      when others then
+        raise notice 'Não foi possível criar unique em catalogo_produtos.codigo_interno. Verifique duplicados.';
+    end;
+  end if;
+end $$;
+
+
+
 create index if not exists idx_catalogo_produtos_ean
 on public.catalogo_produtos(ean);
 

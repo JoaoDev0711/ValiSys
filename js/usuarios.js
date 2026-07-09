@@ -22,6 +22,39 @@ const cargoFuncionarioSelect = document.getElementById("cargoFuncionario");
 const setorFuncionarioSelect = document.getElementById("setorFuncionario");
 const codigoFuncionarioArea = document.getElementById("codigoFuncionarioArea");
 const codigoFuncionarioInput = document.getElementById("codigoFuncionario");
+const marcaFuncionarioArea = document.getElementById("marcaFuncionarioArea");
+const marcaFuncionarioSelect = document.getElementById("marcaFuncionario");
+const novaMarcaFuncionarioInput = document.getElementById("novaMarcaFuncionario");
+
+
+async function carregarMarcasFuncionario() {
+  if (!marcaFuncionarioSelect || !lojaAtual) return;
+
+  marcaFuncionarioSelect.innerHTML = `<option value="">Carregando marcas...</option>`;
+
+  try {
+    const marcas = await valisysDB.listarMarcasPromotoria(lojaAtual.id);
+
+    marcaFuncionarioSelect.innerHTML = `
+      <option value="">Selecione a marca</option>
+      ${marcas.map(marca => `<option value="${esc(marca.nome)}">${esc(marca.nome)}</option>`).join("")}
+    `;
+
+    if (marcas.length === 0) {
+      marcaFuncionarioSelect.innerHTML = `<option value="">Nenhuma marca cadastrada</option>`;
+    }
+  } catch (erro) {
+    console.warn("Não foi possível carregar marcas.", erro);
+    marcaFuncionarioSelect.innerHTML = `<option value="">Digite a nova marca abaixo</option>`;
+  }
+}
+
+function marcaFuncionarioEscolhida() {
+  const nova = novaMarcaFuncionarioInput?.value.trim() || "";
+  const selecionada = marcaFuncionarioSelect?.value.trim() || "";
+
+  return nova || selecionada;
+}
 
 function atualizarCamposFuncionario() {
   const cargo = cargoFuncionarioSelect?.value || "";
@@ -43,7 +76,22 @@ function atualizarCamposFuncionario() {
       setorFuncionarioSelect.value = "Geral";
     }
 
+    if (cargo === "promotor") {
+      setorFuncionarioSelect.value = "Promotoria";
+    }
+
     setorFuncionarioSelect.required = cargo === "encarregado";
+  }
+
+  if (marcaFuncionarioArea) {
+    marcaFuncionarioArea.style.display = cargo === "promotor" ? "block" : "none";
+  }
+
+  if (cargo === "promotor") {
+    carregarMarcasFuncionario();
+  } else {
+    if (marcaFuncionarioSelect) marcaFuncionarioSelect.value = "";
+    if (novaMarcaFuncionarioInput) novaMarcaFuncionarioInput.value = "";
   }
 }
 
@@ -121,6 +169,7 @@ formFuncionario.addEventListener("submit", async event => {
   const setor = document.getElementById("setorFuncionario")?.value || "";
   const codigoInformado = document.getElementById("codigoFuncionario")?.value.trim() || "";
   const codigoFinal = cargo === "encarregado" ? (codigoInformado || gerarCodigoAcesso()) : "";
+  const marcaPromotoria = cargo === "promotor" ? marcaFuncionarioEscolhida() : "";
 
   if (!nome || !cargo) {
     alert("Informe nome e cargo do funcionário.");
@@ -132,20 +181,31 @@ formFuncionario.addEventListener("submit", async event => {
     return;
   }
 
+  if (cargo === "promotor" && !marcaPromotoria) {
+    alert("Selecione ou cadastre a marca da promotoria.");
+    novaMarcaFuncionarioInput?.focus();
+    return;
+  }
+
   try {
+    if (cargo === "promotor") {
+      await valisysDB.criarMarcaPromotoria(lojaAtual.id, marcaPromotoria);
+    }
+
     const novo = await valisysDB.criarFuncionario({
       lojaId: lojaAtual.id,
       nome,
       cargo,
-      setor: setor || "Geral",
-      codigoAcesso: codigoFinal
+      setor: cargo === "promotor" ? "Promotoria" : (setor || "Geral"),
+      codigoAcesso: codigoFinal,
+      marcaPromotoria
     });
 
     formFuncionario.reset();
     atualizarCamposFuncionario();
     await renderizarFuncionarios();
 
-    alert(`Funcionário salvo.\n\nNome: ${novo.nome}\nCargo: ${nomeCargo(novo.cargo)}\nSetor: ${novo.setor || "Geral"}\nCódigo: ${novo.cargo === "encarregado" ? (novo.codigoAcesso || "Não informado") : "Não usa"}`);
+    alert(`Funcionário salvo.\n\nNome: ${novo.nome}\nCargo: ${nomeCargo(novo.cargo)}\nSetor: ${novo.setor || "Geral"}${novo.cargo === "promotor" ? "\nMarca: " + (novo.marcaPromotoria || marcaPromotoria) : ""}\nCódigo: ${novo.cargo === "encarregado" ? (novo.codigoAcesso || "Não informado") : "Não usa"}`);
   } catch (erro) {
     alert("Erro ao salvar funcionário: " + erro.message);
   }

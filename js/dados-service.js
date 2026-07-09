@@ -330,6 +330,50 @@ const valisysDB = {
     return this.funcionarioDBParaApp(data);
   },
 
+
+  async listarPromotoresPorNome(lojaId, nome) {
+    const db = this.client();
+    const nomeLimpo = String(nome || "").trim();
+
+    if (!nomeLimpo) return [];
+
+    const { data, error } = await db
+      .from("funcionarios")
+      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+      .eq("loja_id", lojaId)
+      .eq("cargo", "promotor")
+      .eq("ativo", true)
+      .ilike("nome", nomeLimpo)
+      .limit(20);
+
+    if (error) throw error;
+
+    return (data || []).map(this.funcionarioDBParaApp);
+  },
+
+  async buscarPromotorPorNomeMarca(lojaId, nome, marcaPromotoria) {
+    const nomeLimpo = String(nome || "").trim();
+    const marcaLimpa = String(marcaPromotoria || "").trim().toLowerCase();
+
+    const promotores = await this.listarPromotoresPorNome(lojaId, nomeLimpo);
+
+    return promotores.find(promotor =>
+      String(promotor.marcaPromotoria || "").trim().toLowerCase() === marcaLimpa
+    ) || null;
+  },
+
+  async marcaPromotoriaExiste(lojaId, marcaPromotoria) {
+    const marcaLimpa = String(marcaPromotoria || "").trim().toLowerCase();
+
+    if (!marcaLimpa) return false;
+
+    const marcas = await this.listarMarcasPromotoria(lojaId);
+
+    return marcas.some(marca =>
+      String(marca.nome || "").trim().toLowerCase() === marcaLimpa
+    );
+  },
+
   async garantirPromotorComMarca({ lojaId, nome, marcaPromotoria }) {
     const nomeLimpo = String(nome || "").trim();
     const marcaLimpa = String(marcaPromotoria || "").trim();
@@ -342,31 +386,49 @@ const valisysDB = {
       throw new Error("Informe a marca da promotoria.");
     }
 
+    const promotoresMesmoNome = await this.listarPromotoresPorNome(lojaId, nomeLimpo);
+    const marcaExiste = await this.marcaPromotoriaExiste(lojaId, marcaLimpa);
+
+    const promotorCorreto = promotoresMesmoNome.find(promotor =>
+      String(promotor.marcaPromotoria || "").trim().toLowerCase() === marcaLimpa.toLowerCase()
+    );
+
+    if (promotorCorreto) {
+      return promotorCorreto;
+    }
+
+    if (promotoresMesmoNome.length > 0) {
+      const marcas = promotoresMesmoNome
+        .map(promotor => promotor.marcaPromotoria)
+        .filter(Boolean)
+        .join(", ");
+
+      throw new Error(
+        `Este promotor já está cadastrado com outra marca${marcas ? ": " + marcas : ""}. Use a marca correta ou peça para o gerente/admin ajustar o cadastro.`
+      );
+    }
+
+    if (marcaExiste) {
+      throw new Error(
+        "Esta marca já existe na loja, mas esse nome não está cadastrado nela. Peça para o gerente/admin cadastrar o promotor nessa marca antes de entrar."
+      );
+    }
+
+    // Só cadastra automaticamente quando é uma marca nova.
+    // Assim ninguém consegue entrar usando a marca já cadastrada de outro promotor.
     await this.criarMarcaPromotoria(lojaId, marcaLimpa);
 
-    let promotor = await this.buscarFuncionarioPorNomeCargo(nomeLimpo, "promotor", lojaId, "");
+    const criado = await this.criarFuncionario({
+      lojaId,
+      nome: nomeLimpo,
+      cargo: "promotor",
+      setor: "Promotoria",
+      codigoAcesso: "",
+      marcaPromotoria: marcaLimpa
+    });
 
-    if (!promotor) {
-      const criado = await this.criarFuncionario({
-        lojaId,
-        nome: nomeLimpo,
-        cargo: "promotor",
-        setor: "Promotoria",
-        codigoAcesso: "",
-        marcaPromotoria: marcaLimpa
-      });
-
-      criado.marcaPromotoria = criado.marcaPromotoria || marcaLimpa;
-      return criado;
-    }
-
-    if (String(promotor.marcaPromotoria || "").trim() !== marcaLimpa) {
-      const atualizado = await this.atualizarMarcaFuncionario(promotor.id, marcaLimpa);
-      if (atualizado) promotor = atualizado;
-      promotor.marcaPromotoria = marcaLimpa;
-    }
-
-    return promotor;
+    criado.marcaPromotoria = criado.marcaPromotoria || marcaLimpa;
+    return criado;
   },
 
   async removerFuncionario(id) {
@@ -595,6 +657,70 @@ const valisysDB = {
       foto: item.foto || "",
       fonte: item.fonte || "Catálogo interno ValiSys",
       criadoEm: new Date().toLocaleString("pt-BR")
+    };
+  },
+
+
+  catalogoAppParaDB(item) {
+    const nome = String(item.nome || "").trim();
+    const ean = String(item.ean || "").replace(/\D/g, "");
+    const codigoInterno = String(item.codigoInterno || item.codigo_interno || ean || `IMPORT-${Date.now()}-${Math.floor(Math.random() * 1000000)}`).trim();
+
+    return {
+      codigo_interno: codigoInterno,
+      ean,
+      nome,
+      marca: item.marca || "",
+      fabricante: item.fabricante || "",
+      sabor: item.sabor || "",
+      categoria: item.categoria || "",
+      quantidade_padrao: item.quantidadePadrao || item.quantidade_padrao || "",
+      porcao: item.porcao || "",
+      embalagem: item.embalagem || "",
+      origem: item.origem || "",
+      paises: item.paises || "",
+      lojas_encontradas: item.lojas || item.lojasEncontradas || item.lojas_encontradas || "",
+      ingredientes: item.ingredientes || "",
+      alergicos: item.alergicos || "",
+      rastros: item.rastros || "",
+      nutriscore: item.nutriscore || "",
+      ecoscore: item.ecoscore || "",
+      nova: item.nova || "",
+      foto: item.foto || "",
+      fonte: item.fonte || "Importação CSV",
+      ativo: item.ativo !== false
+    };
+  },
+
+  async importarCatalogoProdutos(itens = []) {
+    const db = this.client();
+
+    const payload = itens
+      .map(item => this.catalogoAppParaDB(item))
+      .filter(item => item.nome && (item.ean || item.codigo_interno));
+
+    if (payload.length === 0) {
+      return { total: 0, importados: 0 };
+    }
+
+    let importados = 0;
+    const tamanhoLote = 100;
+
+    for (let i = 0; i < payload.length; i += tamanhoLote) {
+      const lote = payload.slice(i, i + tamanhoLote);
+
+      const { error } = await db
+        .from("catalogo_produtos")
+        .upsert(lote, { onConflict: "codigo_interno" });
+
+      if (error) throw error;
+
+      importados += lote.length;
+    }
+
+    return {
+      total: payload.length,
+      importados
     };
   },
 
