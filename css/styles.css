@@ -3814,3 +3814,47 @@ select option {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+
+
+/* Seleção de setores no admin */
+.setores-selecao {
+  display: grid;
+  gap: 10px;
+  margin: 8px 0 12px;
+}
+
+.setor-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface-soft);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.setor-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+
+.setor-check span {
+  flex: 1;
+}
+
+.setor-outro-area {
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px dashed var(--line-strong, var(--line));
+  background: var(--surface-soft);
+  margin: 8px 0 12px;
+}
+
+@media (min-width: 720px) {
+  .setores-selecao {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

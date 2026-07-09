@@ -16,7 +16,10 @@ const regiaoLojaAdmin = document.getElementById("regiaoLojaAdmin");
 const corLojaAdmin = document.getElementById("corLojaAdmin");
 const imagemLojaAdmin = document.getElementById("imagemLojaAdmin");
 const previewImagemLojaAdmin = document.getElementById("previewImagemLojaAdmin");
-const setoresLojaAdmin = document.getElementById("setoresLojaAdmin");
+const setoresLojaAdminLista = document.getElementById("setoresLojaAdminLista");
+const setorOutroAdminArea = document.getElementById("setorOutroAdminArea");
+const novoSetorAdmin = document.getElementById("novoSetorAdmin");
+const btnAdicionarSetorAdmin = document.getElementById("btnAdicionarSetorAdmin");
 const gerentesPreCadastroAdmin = document.getElementById("gerentesPreCadastroAdmin");
 const encarregadosPreCadastroAdmin = document.getElementById("encarregadosPreCadastroAdmin");
 const listaLojasAdmin = document.getElementById("lista-lojas-admin");
@@ -48,12 +51,103 @@ function lerLinhasTextarea(valor) {
     .filter(Boolean);
 }
 
-function setoresFormularioAdmin() {
-  const setores = lerLinhasTextarea(setoresLojaAdmin?.value || "");
+function setoresBaseAdmin() {
+  return valisysDB.setoresPadraoLoja
+    ? valisysDB.setoresPadraoLoja()
+    : ["Geral", "Mercearia", "Bebidas", "Frios e Laticínios", "Açougue", "Hortifruti", "Padaria", "Congelados", "Limpeza", "Higiene e Perfumaria", "Pet", "Outros"];
+}
 
-  return setores.length > 0
-    ? setores
-    : (valisysDB.setoresPadraoLoja ? valisysDB.setoresPadraoLoja() : ["Geral", "Mercearia", "Bebidas", "Frios e Laticínios", "Açougue", "Hortifruti", "Padaria", "Congelados", "Limpeza", "Higiene e Perfumaria", "Pet", "Outros"]);
+function setorIdSeguro(nome) {
+  return String(nome || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase() || "setor";
+}
+
+function renderizarSelecaoSetores(container, selecionados = [], customizados = []) {
+  if (!container) return;
+
+  const base = setoresBaseAdmin();
+  const todos = [...new Set([...base, ...customizados].map(item => String(item || "").trim()).filter(Boolean))];
+
+  const selecionadosPadrao = base.filter(item => item !== "Outros");
+
+  const selecionadosSet = new Set(
+    (selecionados.length ? selecionados : selecionadosPadrao)
+      .map(item => String(item || "").trim())
+      .filter(Boolean)
+  );
+
+  container.innerHTML = todos.map(nome => {
+    const id = `setor-${setorIdSeguro(nome)}-${container.id || "admin"}`;
+    const marcado = selecionadosSet.has(nome) ? "checked" : "";
+
+    return `
+      <label class="setor-check" for="${esc(id)}">
+        <input type="checkbox" id="${esc(id)}" value="${esc(nome)}" ${marcado}>
+        <span>${esc(nome)}</span>
+      </label>
+    `;
+  }).join("");
+
+  atualizarAreaOutroSetor(container);
+}
+
+function setoresSelecionadosDoContainer(container) {
+  if (!container) return [];
+
+  const marcados = [...container.querySelectorAll("input[type='checkbox']:checked")]
+    .map(input => input.value.trim())
+    .filter(valor => valor && valor !== "Outros");
+
+  return [...new Set(marcados)];
+}
+
+function atualizarAreaOutroSetor(container = setoresLojaAdminLista) {
+  if (!container || !setorOutroAdminArea) return;
+
+  const outrosMarcado = [...container.querySelectorAll("input[type='checkbox']:checked")]
+    .some(input => input.value === "Outros");
+
+  setorOutroAdminArea.style.display = outrosMarcado ? "block" : "none";
+}
+
+function adicionarSetorPersonalizadoAdmin(container = setoresLojaAdminLista, input = novoSetorAdmin) {
+  if (!container || !input) return;
+
+  const nome = input.value.trim();
+
+  if (!nome) {
+    alert("Digite o nome do setor.");
+    return;
+  }
+
+  const existentes = [...container.querySelectorAll("input[type='checkbox']")]
+    .map(item => item.value.trim().toLowerCase());
+
+  if (existentes.includes(nome.toLowerCase())) {
+    alert("Esse setor já está na lista.");
+    input.value = "";
+    return;
+  }
+
+  const selecionados = setoresSelecionadosDoContainer(container);
+  selecionados.push(nome);
+
+  const customizados = [...container.querySelectorAll("input[type='checkbox']")]
+    .map(item => item.value.trim())
+    .filter(Boolean);
+
+  renderizarSelecaoSetores(container, selecionados, [...customizados, nome]);
+  input.value = "";
+}
+
+function setoresFormularioAdmin() {
+  const setores = setoresSelecionadosDoContainer(setoresLojaAdminLista);
+
+  return setores.length > 0 ? setores : setoresBaseAdmin().filter(item => item !== "Outros");
 }
 
 function funcionariosPreCadastroAdmin(setores = []) {
@@ -89,6 +183,25 @@ function funcionariosPreCadastroAdmin(setores = []) {
     });
 
   return funcionarios;
+}
+
+if (setoresLojaAdminLista) {
+  renderizarSelecaoSetores(setoresLojaAdminLista);
+
+  setoresLojaAdminLista.addEventListener("change", () => atualizarAreaOutroSetor(setoresLojaAdminLista));
+}
+
+if (btnAdicionarSetorAdmin) {
+  btnAdicionarSetorAdmin.addEventListener("click", () => adicionarSetorPersonalizadoAdmin());
+}
+
+if (novoSetorAdmin) {
+  novoSetorAdmin.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      adicionarSetorPersonalizadoAdmin();
+    }
+  });
 }
 
 
@@ -566,8 +679,8 @@ async function administrarLoja(id) {
 
 async function abrirModalEdicaoLoja(loja) {
   const setoresAtuais = await valisysDB.listarSetoresLoja(loja.id)
-    .then(lista => lista.map(item => item.nome).join("\n"))
-    .catch(() => "");
+    .then(lista => lista.map(item => item.nome))
+    .catch(() => []);
 
   return new Promise(resolve => {
     let modal = document.getElementById("modal-editar-loja-admin");
@@ -596,8 +709,16 @@ async function abrirModalEdicaoLoja(loja) {
             <label for="editarLojaCor">Cor</label>
             <input type="color" id="editarLojaCor" value="#2f7d4f">
 
-            <label for="editarLojaSetores">Setores da loja</label>
-            <textarea id="editarLojaSetores" rows="5"></textarea>
+            <label>Setores da loja</label>
+            <div id="editarLojaSetoresLista" class="setores-selecao"></div>
+
+            <div id="editarSetorOutroArea" class="setor-outro-area" style="display:none;">
+              <label for="editarNovoSetor">Adicionar outro setor</label>
+              <div class="input-action-row">
+                <input type="text" id="editarNovoSetor" placeholder="Ex: Adega, Depósito, Rotisseria">
+                <button type="button" class="secondary" id="editarBtnAdicionarSetor">Adicionar</button>
+              </div>
+            </div>
 
             <button type="submit">Salvar alterações</button>
           </form>
@@ -612,25 +733,67 @@ async function abrirModalEdicaoLoja(loja) {
       resolve(resultado);
     };
 
+    const form = modal.querySelector("#form-editar-loja-admin");
+    const fecharBtn = modal.querySelector("#fechar-editar-loja-admin");
+    const listaSetores = modal.querySelector("#editarLojaSetoresLista");
+    const areaOutro = modal.querySelector("#editarSetorOutroArea");
+    const inputOutro = modal.querySelector("#editarNovoSetor");
+    const btnOutro = modal.querySelector("#editarBtnAdicionarSetor");
+
     modal.querySelector("#editarLojaNome").value = loja.nome || "";
     modal.querySelector("#editarLojaResponsavel").value = loja.responsavel || "";
     modal.querySelector("#editarLojaGrupo").value = loja.grupo || "";
     modal.querySelector("#editarLojaRegiao").value = loja.regiao || "";
     modal.querySelector("#editarLojaCor").value = normalizarHexCor(loja.corTema) || "#2f7d4f";
-    modal.querySelector("#editarLojaSetores").value = setoresAtuais || "";
 
-    const form = modal.querySelector("#form-editar-loja-admin");
-    const fecharBtn = modal.querySelector("#fechar-editar-loja-admin");
+    const customizados = setoresAtuais.filter(setor => !setoresBaseAdmin().includes(setor));
+    renderizarSelecaoSetores(listaSetores, setoresAtuais, customizados);
 
-    const novoForm = form.cloneNode(true);
-    form.replaceWith(novoForm);
+    const atualizarAreaOutroEdicao = () => {
+      const outrosMarcado = [...listaSetores.querySelectorAll("input[type='checkbox']:checked")]
+        .some(input => input.value === "Outros");
 
-    novoForm.querySelector("#editarLojaNome").value = loja.nome || "";
-    novoForm.querySelector("#editarLojaResponsavel").value = loja.responsavel || "";
-    novoForm.querySelector("#editarLojaGrupo").value = loja.grupo || "";
-    novoForm.querySelector("#editarLojaRegiao").value = loja.regiao || "";
-    novoForm.querySelector("#editarLojaCor").value = normalizarHexCor(loja.corTema) || "#2f7d4f";
-    novoForm.querySelector("#editarLojaSetores").value = setoresAtuais || "";
+      areaOutro.style.display = outrosMarcado ? "block" : "none";
+    };
+
+    listaSetores.onchange = atualizarAreaOutroEdicao;
+    atualizarAreaOutroEdicao();
+
+    btnOutro.onclick = () => {
+      const nome = inputOutro.value.trim();
+
+      if (!nome) {
+        alert("Digite o nome do setor.");
+        return;
+      }
+
+      const existentes = [...listaSetores.querySelectorAll("input[type='checkbox']")]
+        .map(item => item.value.trim().toLowerCase());
+
+      if (existentes.includes(nome.toLowerCase())) {
+        alert("Esse setor já está na lista.");
+        inputOutro.value = "";
+        return;
+      }
+
+      const selecionados = setoresSelecionadosDoContainer(listaSetores);
+      selecionados.push(nome);
+
+      const todosAtuais = [...listaSetores.querySelectorAll("input[type='checkbox']")]
+        .map(item => item.value.trim())
+        .filter(Boolean);
+
+      renderizarSelecaoSetores(listaSetores, selecionados, [...todosAtuais, nome]);
+      inputOutro.value = "";
+      atualizarAreaOutroEdicao();
+    };
+
+    inputOutro.onkeydown = event => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        btnOutro.click();
+      }
+    };
 
     fecharBtn.onclick = () => fechar(null);
 
@@ -638,23 +801,22 @@ async function abrirModalEdicaoLoja(loja) {
       if (event.target === modal) fechar(null);
     };
 
-    novoForm.onsubmit = event => {
+    form.onsubmit = event => {
       event.preventDefault();
 
       fechar({
-        nome: novoForm.querySelector("#editarLojaNome").value.trim(),
-        responsavel: novoForm.querySelector("#editarLojaResponsavel").value.trim(),
-        grupo: novoForm.querySelector("#editarLojaGrupo").value.trim(),
-        regiao: novoForm.querySelector("#editarLojaRegiao").value.trim(),
-        corTema: novoForm.querySelector("#editarLojaCor").value,
-        setores: lerLinhasTextarea(novoForm.querySelector("#editarLojaSetores").value)
+        nome: modal.querySelector("#editarLojaNome").value.trim(),
+        responsavel: modal.querySelector("#editarLojaResponsavel").value.trim(),
+        grupo: modal.querySelector("#editarLojaGrupo").value.trim(),
+        regiao: modal.querySelector("#editarLojaRegiao").value.trim(),
+        corTema: modal.querySelector("#editarLojaCor").value,
+        setores: setoresSelecionadosDoContainer(listaSetores)
       });
     };
 
     modal.classList.add("active");
   });
 }
-
 
 async function editarDadosLoja(id) {
   const loja = lojasAdminCache.find(item => item.id === id);
@@ -778,7 +940,7 @@ formLojaAdmin.addEventListener("submit", async event => {
 
     formLojaAdmin.reset();
     if (corLojaAdmin) corLojaAdmin.value = "#2f7d4f";
-    if (setoresLojaAdmin && valisysDB.setoresPadraoLoja) setoresLojaAdmin.value = valisysDB.setoresPadraoLoja().join("\n");
+    if (setoresLojaAdminLista) renderizarSelecaoSetores(setoresLojaAdminLista);
     imagemLojaBase64 = "";
     previewImagemLojaAdmin.innerHTML = "";
 

@@ -806,3 +806,27 @@ setores_loja
 produtos.ativo
 políticas de acesso dos setores
 ```
+
+
+---
+
+## Setores por seleção
+
+Os setores da loja agora são escolhidos por seleção/checklist na área admin.
+
+Fluxo:
+
+```txt
+Admin cria ou edita loja
+Seleciona os setores usados naquela loja
+Se precisar de um setor diferente, marca "Outros"
+Ao marcar "Outros", aparece o campo para adicionar novo setor
+O setor adicionado entra na seleção
+```
+
+Observação:
+
+```txt
+"Outros" serve apenas para abrir o campo de novo setor.
+Ele não é salvo como setor operacional.
+```
