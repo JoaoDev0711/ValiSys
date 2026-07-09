@@ -17,7 +17,7 @@
 <main class="container">
   <section class="card">
     <h2>Cadastrar produto</h2>
-    <p class="muted">Gerente e admin podem cadastrar produtos. Ao escanear ou digitar um EAN válido, o sistema puxa os dados automaticamente.</p>
+    <p class="muted">Gerente e admin podem cadastrar produtos. Use apenas EAN, nome, marca e fabricante. Ao escanear ou digitar um EAN válido, o sistema busca automaticamente.</p>
 
     <div class="button-row">
       <button type="button" id="btn-camera">📷 Escanear EAN</button>
@@ -42,68 +42,6 @@
 
       <label for="fabricante">Fabricante</label>
       <input type="text" id="fabricante" placeholder="Ex: M. Dias Branco">
-
-      <label for="sabor">Sabor ou variação</label>
-      <input type="text" id="sabor" placeholder="Ex: Morango, Chocolate, Natural">
-
-      <label for="categoria">Categoria</label>
-      <input type="text" id="categoria" placeholder="Ex: Laticínios">
-
-      <div class="form-grid-2">
-        <div>
-          <label for="quantidadePadrao">Quantidade padrão</label>
-          <input type="text" id="quantidadePadrao" placeholder="Ex: 1L, 500g, 12 un">
-        </div>
-
-        <div>
-          <label for="porcao">Porção</label>
-          <input type="text" id="porcao" placeholder="Ex: 200ml, 30g">
-        </div>
-      </div>
-
-      <label for="embalagem">Embalagem</label>
-      <input type="text" id="embalagem" placeholder="Ex: Caixa, garrafa, pacote plástico">
-
-      <label for="origem">Origem</label>
-      <input type="text" id="origem" placeholder="Ex: Brasil">
-
-      <label for="paises">Países</label>
-      <input type="text" id="paises" placeholder="Ex: Brasil, Argentina">
-
-      <label for="lojasEncontradas">Lojas encontradas</label>
-      <input type="text" id="lojasEncontradas" placeholder="Ex: Mercado, atacado, loja online">
-
-      <label for="ingredientes">Ingredientes</label>
-      <textarea id="ingredientes" rows="3" placeholder="Ingredientes do produto"></textarea>
-
-      <label for="alergicos">Alérgicos</label>
-      <textarea id="alergicos" rows="2" placeholder="Ex: contém leite, glúten, soja"></textarea>
-
-      <label for="rastros">Pode conter / traços</label>
-      <textarea id="rastros" rows="2" placeholder="Ex: pode conter amendoim, ovos"></textarea>
-
-      <div class="form-grid-3">
-        <div>
-          <label for="nutriscore">Nutri-Score</label>
-          <input type="text" id="nutriscore" placeholder="Ex: A, B, C">
-        </div>
-
-        <div>
-          <label for="ecoscore">Eco-Score</label>
-          <input type="text" id="ecoscore" placeholder="Ex: A, B, C">
-        </div>
-
-        <div>
-          <label for="nova">NOVA</label>
-          <input type="text" id="nova" placeholder="Ex: 1, 2, 3, 4">
-        </div>
-      </div>
-
-      <label for="fonteProduto">Fonte</label>
-      <input type="text" id="fonteProduto" placeholder="Ex: cadastro manual, base pública de produtos">
-
-      <label for="fotoArquivo">Foto do produto</label>
-      <input type="file" id="fotoArquivo" accept="image/*" capture="environment">
 
       <div id="preview-foto"></div>
 

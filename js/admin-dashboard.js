@@ -385,6 +385,10 @@ function renderizarListaFiltradaAdmin() {
               ? `<button type="button" class="btn-warning" onclick="alterarStatusLojaAdmin('${loja.id}', 'inativa')">Desativar serviço</button>`
               : `<button type="button" onclick="alterarStatusLojaAdmin('${loja.id}', 'ativa')">Ativar serviço</button>`
           }
+
+          <button type="button" class="btn-danger" onclick="excluirLojaAdmin('${loja.id}')">
+            Excluir loja
+          </button>
         </div>
       </article>
     `;
@@ -545,6 +549,26 @@ async function trocarImagemLojaAdmin(id, input) {
     alert("Erro ao atualizar imagem: " + erro.message);
   } finally {
     input.value = "";
+  }
+}
+
+async function excluirLojaAdmin(id) {
+  const loja = lojasAdminCache.find(item => item.id === id);
+  const nome = loja?.nome || "esta loja";
+
+  const confirmar = await confirmarAcao(
+    `Deseja excluir/desativar ${nome}? A loja sairá da seleção dos funcionários, mas pode ser reativada depois pelo admin.`,
+    "Excluir loja"
+  );
+
+  if (!confirmar) return;
+
+  try {
+    await valisysDB.excluirLoja(id);
+    alert("Loja excluída/desativada.");
+    await renderizarLojasAdmin();
+  } catch (erro) {
+    alert("Erro ao excluir loja: " + erro.message);
   }
 }
 

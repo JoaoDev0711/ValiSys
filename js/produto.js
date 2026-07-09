@@ -59,7 +59,7 @@ let popupCadastroAberto = false;
 const scannerStatus = document.getElementById("scanner-status");
 
 
-function cameraResolucaoDoCelular() {
+function cameraPreferencialDoCelular() {
   const dpr = window.devicePixelRatio || 1;
 
   const larguraTela = Math.round((window.screen?.width || window.innerWidth || 1280) * dpr);
@@ -68,8 +68,7 @@ function cameraResolucaoDoCelular() {
   const maior = Math.max(larguraTela, alturaTela);
   const menor = Math.min(larguraTela, alturaTela);
 
-  // Usa a resolução real aproximada do aparelho como "ideal".
-  // Não usamos "exact" porque alguns celulares recusam e a câmera nem abre.
+  // Preferência de câmera traseira sem travar aparelhos que não suportam configurações exatas.
   return {
     facingMode: { ideal: "environment" },
     width: { ideal: maior },
@@ -101,12 +100,12 @@ async function melhorarImagemCamera() {
       const larguraTela = Math.round((window.screen?.width || window.innerWidth || 1280) * dpr);
       const alturaTela = Math.round((window.screen?.height || window.innerHeight || 720) * dpr);
 
-      const larguraIdeal = Math.min(caps.width.max || larguraTela, Math.max(caps.width.min || 0, Math.max(larguraTela, alturaTela)));
-      const alturaIdeal = Math.min(caps.height.max || alturaTela, Math.max(caps.height.min || 0, Math.min(larguraTela, alturaTela)));
+      const larguraPreferencial = Math.min(caps.width.max || larguraTela, Math.max(caps.width.min || 0, Math.max(larguraTela, alturaTela)));
+      const alturaPreferencial = Math.min(caps.height.max || alturaTela, Math.max(caps.height.min || 0, Math.min(larguraTela, alturaTela)));
 
       advanced.push({
-        width: larguraIdeal,
-        height: alturaIdeal
+        width: larguraPreferencial,
+        height: alturaPreferencial
       });
     }
 
@@ -136,18 +135,10 @@ async function melhorarImagemCamera() {
       await track.applyConstraints({ advanced });
     }
   } catch (erro) {
-    console.warn("Não foi possível aplicar resolução/foco automático nesta câmera.", erro);
+    console.warn("Não foi possível aplicar foco automático nesta câmera.", erro);
   }
 
-  try {
-    const settings = track.getSettings ? track.getSettings() : null;
-
-    if (settings?.width && settings?.height) {
-      atualizarStatusScanner(`Câmera aberta em ${settings.width}x${settings.height}. Aproxime ou afaste até o código ficar nítido.`, "scanner-lendo");
-    }
-  } catch (erro) {
-    console.warn("Não foi possível ler a resolução da câmera.", erro);
-  }
+  atualizarStatusScanner("Câmera aberta. Tentando ler o código de barras...", "scanner-lendo");
 }
 
 async function iniciarCameraLeitura(callbackLeitura) {
@@ -155,15 +146,15 @@ async function iniciarCameraLeitura(callbackLeitura) {
 
   try {
     await leitorCamera.start(
-      cameraResolucaoDoCelular(),
+      cameraPreferencialDoCelular(),
       configScanner(),
       callbackLeitura,
       () => {}
     );
 
     await melhorarImagemCamera();
-  } catch (erroResolucaoCelular) {
-    console.warn("Resolução do celular não disponível. Tentando modo padrão.", erroResolucaoCelular);
+  } catch (erroCameraPrincipal) {
+    console.warn("Modo de câmera principal não abriu. Tentando modo padrão.", erroCameraPrincipal);
 
     await leitorCamera.start(
       { facingMode: "environment" },
@@ -173,7 +164,7 @@ async function iniciarCameraLeitura(callbackLeitura) {
     );
 
     await melhorarImagemCamera();
-    atualizarStatusScanner("Câmera aberta em modo padrão. Aproxime o código e mantenha o celular parado.", "scanner-lendo");
+    atualizarStatusScanner("Câmera aberta. Tentando ler o código de barras...", "scanner-lendo");
   }
 }
 
@@ -288,7 +279,7 @@ function configScanner() {
     fps: 18,
     rememberLastUsedCamera: true,
     disableFlip: true,
-    videoConstraints: cameraResolucaoDoCelular()
+    videoConstraints: cameraPreferencialDoCelular()
   };
 
   if (window.Html5QrcodeSupportedFormats) {
@@ -328,26 +319,28 @@ async function pararCamera() {
 }
 
 
-fotoArquivo.addEventListener("change", async function() {
-  const arquivo = fotoArquivo.files[0];
+if (fotoArquivo) {
+  fotoArquivo.addEventListener("change", async function() {
+    const arquivo = fotoArquivo.files[0];
 
-  if (!arquivo) {
-    fotoBase64 = "";
-    previewFoto.innerHTML = "";
-    return;
-  }
+    if (!arquivo) {
+      fotoBase64 = "";
+      previewFoto.innerHTML = "";
+      return;
+    }
 
-  try {
-    fotoBase64 = await compactarImagem(arquivo, 700, 0.72);
+    try {
+      fotoBase64 = await compactarImagem(arquivo, 700, 0.72);
 
-    previewFoto.innerHTML = `
-      <img class="produto-img" src="${fotoBase64}" alt="Preview da foto">
-    `;
-  } catch (erro) {
-    alert("Não foi possível carregar a foto.");
-    console.error(erro);
-  }
-});
+      previewFoto.innerHTML = `
+        <img class="produto-img" src="${fotoBase64}" alt="Preview da foto">
+      `;
+    } catch (erro) {
+      alert("Não foi possível carregar a foto.");
+      console.error(erro);
+    }
+  });
+}
 
 function compactarImagem(arquivo, larguraMaxima, qualidade) {
   return new Promise((resolve, reject) => {
@@ -702,38 +695,31 @@ if (buscaCatalogoProdutoInput) {
 
 
 function preencherCamposProduto(produto) {
-  preencherCamposProduto(produto);
+  if (!produto) return;
 
-  if (quantidadePadraoInput) quantidadePadraoInput.value = produto.quantidadePadrao || "";
-  if (porcaoInput) porcaoInput.value = produto.porcao || "";
-  if (embalagemInput) embalagemInput.value = produto.embalagem || "";
-  if (origemInput) origemInput.value = produto.origem || "";
-  if (paisesInput) paisesInput.value = produto.paises || "";
-  if (lojasEncontradasInput) lojasEncontradasInput.value = produto.lojas || "";
-  if (ingredientesInput) ingredientesInput.value = produto.ingredientes || "";
-  if (alergicosInput) alergicosInput.value = produto.alergicos || "";
-  if (rastrosInput) rastrosInput.value = produto.rastros || "";
-  if (nutriscoreInput) nutriscoreInput.value = produto.nutriscore || "";
-  if (ecoscoreInput) ecoscoreInput.value = produto.ecoscore || "";
-  if (novaInput) novaInput.value = produto.nova || "";
-  if (fonteProdutoInput) fonteProdutoInput.value = produto.fonte || "";
+  if (eanInput) eanInput.value = produto.ean || "";
+  if (nomeInput) nomeInput.value = produto.nome || "";
+  if (marcaInput) marcaInput.value = produto.marca || "";
+  if (fabricanteInput) fabricanteInput.value = produto.fabricante || "";
 }
 
 function lerCamposExtrasProduto() {
   return {
-    quantidadePadrao: quantidadePadraoInput?.value.trim() || "",
-    porcao: porcaoInput?.value.trim() || "",
-    embalagem: embalagemInput?.value.trim() || "",
-    origem: origemInput?.value.trim() || "",
-    paises: paisesInput?.value.trim() || "",
-    lojas: lojasEncontradasInput?.value.trim() || "",
-    ingredientes: ingredientesInput?.value.trim() || "",
-    alergicos: alergicosInput?.value.trim() || "",
-    rastros: rastrosInput?.value.trim() || "",
-    nutriscore: nutriscoreInput?.value.trim() || "",
-    ecoscore: ecoscoreInput?.value.trim() || "",
-    nova: novaInput?.value.trim() || "",
-    fonte: fonteProdutoInput?.value.trim() || ""
+    sabor: "",
+    categoria: "",
+    quantidadePadrao: "",
+    porcao: "",
+    embalagem: "",
+    origem: "",
+    paises: "",
+    lojas: "",
+    ingredientes: "",
+    alergicos: "",
+    rastros: "",
+    nutriscore: "",
+    ecoscore: "",
+    nova: "",
+    fonte: ""
   };
 }
 
@@ -877,11 +863,11 @@ form.addEventListener("submit", async function(event) {
     nome: nomeInput.value.trim(),
     marca: marcaInput.value.trim(),
     fabricante: fabricanteInput.value.trim(),
-    sabor: saborInput.value.trim(),
-    categoria: categoriaInput.value.trim(),
+    sabor: "",
+    categoria: "",
     ...lerCamposExtrasProduto(),
-    foto: fotoBase64,
-    fonte: fonteProdutoInput?.value.trim() || produtoAtualCadastro?.fonte || "Cadastro sistema"
+    foto: produtoAtualCadastro?.foto || "",
+    fonte: produtoAtualCadastro?.fonte || "Cadastro básico"
   };
 
   if (!novoProduto.nome) {

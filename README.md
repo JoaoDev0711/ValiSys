@@ -704,3 +704,34 @@ sem caixinha
 com traço limpo
 aplicados automaticamente em menus, cards, botões e conteúdos criados pelo JavaScript
 ```
+
+
+---
+
+## Ajustes finais: produto básico, loja e câmera
+
+Cadastro de produto simplificado:
+
+```txt
+Código EAN
+Nome do produto
+Marca
+Fabricante
+```
+
+A tela de cadastro não mostra mais campos longos como ingredientes, alergênicos, embalagem, porção, origem, categoria e outros.
+
+Admin de lojas:
+
+```txt
+Voltou a opção Excluir loja no card da loja.
+```
+
+A exclusão/desativação remove a loja da seleção operacional dos funcionários, mas permite controle pelo admin.
+
+Leitor de código:
+
+```txt
+Não mostra mais mensagem de resolução da câmera.
+Mostra apenas status de leitura: abrindo câmera, tentando ler, EAN detectado/confirmado ou erro.
+```

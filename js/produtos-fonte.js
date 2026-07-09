@@ -512,32 +512,14 @@ function cardProdutoHTML(produto, mensagem = "") {
         <div>
           <h3>${esc(produto.nome || "Produto sem nome")}</h3>
           <p class="muted">EAN: ${esc(produto.ean || "Não informado")}</p>
+          <p><strong>Marca:</strong> ${esc(produto.marca || "Não informada")}</p>
+          <p><strong>Fabricante:</strong> ${esc(produto.fabricante || "Não informado")}</p>
         </div>
         ${
           produto.foto
             ? `<img class="produto-img produto-img-mini" src="${produto.foto}" alt="${esc(produto.nome)}">`
-            : `<div class="produto-img-mini produto-sem-foto">Sem foto</div>`
+            : ``
         }
-      </div>
-
-      <div class="produto-detalhes-grid">
-        ${produtoCampoHTML("Marca", produto.marca || "Não informada")}
-        ${produtoCampoHTML("Fabricante", produto.fabricante || "Não informado")}
-        ${produtoCampoHTML("Sabor/variação", produto.sabor || "Não informado")}
-        ${produtoCampoHTML("Categoria", produto.categoria || "Não informada")}
-        ${produtoCampoHTML("Quantidade padrão", produto.quantidadePadrao)}
-        ${produtoCampoHTML("Porção", produto.porcao)}
-        ${produtoCampoHTML("Embalagem", produto.embalagem)}
-        ${produtoCampoHTML("Origem", produto.origem)}
-        ${produtoCampoHTML("Países", produto.paises)}
-        ${produtoCampoHTML("Lojas encontradas", produto.lojas)}
-        ${produtoCampoHTML("Ingredientes", produto.ingredientes, "produto-campo-longo")}
-        ${produtoCampoHTML("Alérgicos", produto.alergicos, "produto-campo-longo")}
-        ${produtoCampoHTML("Pode conter / traços", produto.rastros, "produto-campo-longo")}
-        ${produtoCampoHTML("Nutri-Score", produto.nutriscore)}
-        ${produtoCampoHTML("Eco-Score", produto.ecoscore)}
-        ${produtoCampoHTML("NOVA", produto.nova)}
-        ${produtoCampoHTML("Fonte", produto.fonte)}
       </div>
     </div>
   `;

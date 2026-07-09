@@ -41,7 +41,7 @@ let popupCadastroAberto = false;
 const scannerStatus = document.getElementById("scanner-status");
 
 
-function cameraResolucaoDoCelular() {
+function cameraPreferencialDoCelular() {
   const dpr = window.devicePixelRatio || 1;
 
   const larguraTela = Math.round((window.screen?.width || window.innerWidth || 1280) * dpr);
@@ -50,8 +50,7 @@ function cameraResolucaoDoCelular() {
   const maior = Math.max(larguraTela, alturaTela);
   const menor = Math.min(larguraTela, alturaTela);
 
-  // Usa a resolução real aproximada do aparelho como "ideal".
-  // Não usamos "exact" porque alguns celulares recusam e a câmera nem abre.
+  // Preferência de câmera traseira sem travar aparelhos que não suportam configurações exatas.
   return {
     facingMode: { ideal: "environment" },
     width: { ideal: maior },
@@ -83,12 +82,12 @@ async function melhorarImagemCamera() {
       const larguraTela = Math.round((window.screen?.width || window.innerWidth || 1280) * dpr);
       const alturaTela = Math.round((window.screen?.height || window.innerHeight || 720) * dpr);
 
-      const larguraIdeal = Math.min(caps.width.max || larguraTela, Math.max(caps.width.min || 0, Math.max(larguraTela, alturaTela)));
-      const alturaIdeal = Math.min(caps.height.max || alturaTela, Math.max(caps.height.min || 0, Math.min(larguraTela, alturaTela)));
+      const larguraPreferencial = Math.min(caps.width.max || larguraTela, Math.max(caps.width.min || 0, Math.max(larguraTela, alturaTela)));
+      const alturaPreferencial = Math.min(caps.height.max || alturaTela, Math.max(caps.height.min || 0, Math.min(larguraTela, alturaTela)));
 
       advanced.push({
-        width: larguraIdeal,
-        height: alturaIdeal
+        width: larguraPreferencial,
+        height: alturaPreferencial
       });
     }
 
@@ -118,18 +117,10 @@ async function melhorarImagemCamera() {
       await track.applyConstraints({ advanced });
     }
   } catch (erro) {
-    console.warn("Não foi possível aplicar resolução/foco automático nesta câmera.", erro);
+    console.warn("Não foi possível aplicar foco automático nesta câmera.", erro);
   }
 
-  try {
-    const settings = track.getSettings ? track.getSettings() : null;
-
-    if (settings?.width && settings?.height) {
-      atualizarStatusScanner(`Câmera aberta em ${settings.width}x${settings.height}. Aproxime ou afaste até o código ficar nítido.`, "scanner-lendo");
-    }
-  } catch (erro) {
-    console.warn("Não foi possível ler a resolução da câmera.", erro);
-  }
+  atualizarStatusScanner("Câmera aberta. Tentando ler o código de barras...", "scanner-lendo");
 }
 
 async function iniciarCameraLeitura(callbackLeitura) {
@@ -137,15 +128,15 @@ async function iniciarCameraLeitura(callbackLeitura) {
 
   try {
     await leitorCamera.start(
-      cameraResolucaoDoCelular(),
+      cameraPreferencialDoCelular(),
       configScanner(),
       callbackLeitura,
       () => {}
     );
 
     await melhorarImagemCamera();
-  } catch (erroResolucaoCelular) {
-    console.warn("Resolução do celular não disponível. Tentando modo padrão.", erroResolucaoCelular);
+  } catch (erroCameraPrincipal) {
+    console.warn("Modo de câmera principal não abriu. Tentando modo padrão.", erroCameraPrincipal);
 
     await leitorCamera.start(
       { facingMode: "environment" },
@@ -155,7 +146,7 @@ async function iniciarCameraLeitura(callbackLeitura) {
     );
 
     await melhorarImagemCamera();
-    atualizarStatusScanner("Câmera aberta em modo padrão. Aproxime o código e mantenha o celular parado.", "scanner-lendo");
+    atualizarStatusScanner("Câmera aberta. Tentando ler o código de barras...", "scanner-lendo");
   }
 }
 
@@ -270,7 +261,7 @@ function configScanner() {
     fps: 18,
     rememberLastUsedCamera: true,
     disableFlip: true,
-    videoConstraints: cameraResolucaoDoCelular()
+    videoConstraints: cameraPreferencialDoCelular()
   };
 
   if (window.Html5QrcodeSupportedFormats) {
