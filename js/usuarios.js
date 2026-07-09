@@ -3,7 +3,7 @@ if (bloquearAdminEmAreaLoja()) throw new Error('Admin bloqueado na área da loja
 const lojaAtual = protegerLojaSelecionada();
 
 if (!podeGerenciarFuncionarios(usuario.cargo)) {
-  alert("Somente gerente e admin podem acessar esta área.");
+  alert("Somente gerente e admin podem cadastrar funcionários.");
   window.location.href = "dashboard.html";
 }
 
@@ -17,6 +17,41 @@ const areaUsuariosSistema = document.getElementById("area-usuarios-sistema");
 if (areaUsuariosSistema) {
   areaUsuariosSistema.style.display = "none";
 }
+
+const cargoFuncionarioSelect = document.getElementById("cargoFuncionario");
+const setorFuncionarioSelect = document.getElementById("setorFuncionario");
+const codigoFuncionarioArea = document.getElementById("codigoFuncionarioArea");
+const codigoFuncionarioInput = document.getElementById("codigoFuncionario");
+
+function atualizarCamposFuncionario() {
+  const cargo = cargoFuncionarioSelect?.value || "";
+
+  if (codigoFuncionarioArea) {
+    codigoFuncionarioArea.style.display = cargo === "encarregado" ? "block" : "none";
+  }
+
+  if (codigoFuncionarioInput) {
+    codigoFuncionarioInput.required = false;
+
+    if (cargo !== "encarregado") {
+      codigoFuncionarioInput.value = "";
+    }
+  }
+
+  if (setorFuncionarioSelect) {
+    if (cargo === "gerente") {
+      setorFuncionarioSelect.value = "Geral";
+    }
+
+    setorFuncionarioSelect.required = cargo === "encarregado";
+  }
+}
+
+if (cargoFuncionarioSelect) {
+  cargoFuncionarioSelect.addEventListener("change", atualizarCamposFuncionario);
+  atualizarCamposFuncionario();
+}
+
 
 function gerarCodigoAcesso() {
   return String(Math.floor(1000 + Math.random() * 9000));
@@ -43,8 +78,9 @@ async function renderizarFuncionarios() {
           <h3>${esc(func.nome)}</h3>
           <p><strong>Cargo:</strong> ${esc(nomeCargo(func.cargo))}</p>
           <p><strong>Setor:</strong> ${esc(func.setor || "Geral")}</p>
+          ${func.cargo === "promotor" ? `<p><strong>Marca da promotoria:</strong> ${esc(func.marcaPromotoria || "Será escolhida no primeiro login")}</p>` : ""}
           <p><strong>Loja:</strong> ${lojaInlineHTML({ ...lojaAtual, nome: func.lojaNome || lojaAtual.nome }, "loja-inline-small")}</p>
-          <p><strong>Código de acesso:</strong> ${esc(func.codigoAcesso || "Não informado")}</p>
+          ${func.cargo === "encarregado" ? `<p><strong>Código de acesso:</strong> ${esc(func.codigoAcesso || "Não informado")}</p>` : `<p><strong>Código de acesso:</strong> Não usa</p>`}
           <p class="muted">Código interno: ${esc(String(func.id).slice(0, 8))}</p>
         </div>
 
@@ -82,11 +118,17 @@ formFuncionario.addEventListener("submit", async event => {
 
   const nome = document.getElementById("nomeFuncionario").value.trim();
   const cargo = document.getElementById("cargoFuncionario").value;
-  const setor = document.getElementById("setorFuncionario")?.value.trim() || "";
-  const codigoInformado = document.getElementById("codigoFuncionario").value.trim();
+  const setor = document.getElementById("setorFuncionario")?.value || "";
+  const codigoInformado = document.getElementById("codigoFuncionario")?.value.trim() || "";
+  const codigoFinal = cargo === "encarregado" ? (codigoInformado || gerarCodigoAcesso()) : "";
 
   if (!nome || !cargo) {
     alert("Informe nome e cargo do funcionário.");
+    return;
+  }
+
+  if (cargo === "encarregado" && !setor) {
+    alert("Selecione o setor do encarregado.");
     return;
   }
 
@@ -95,14 +137,15 @@ formFuncionario.addEventListener("submit", async event => {
       lojaId: lojaAtual.id,
       nome,
       cargo,
-      setor,
-      codigoAcesso: codigoInformado || gerarCodigoAcesso()
+      setor: setor || "Geral",
+      codigoAcesso: codigoFinal
     });
 
     formFuncionario.reset();
+    atualizarCamposFuncionario();
     await renderizarFuncionarios();
 
-    alert(`Funcionário salvo.\n\nNome: ${novo.nome}\nCargo: ${nomeCargo(novo.cargo)}\nSetor: ${novo.setor || "Geral"}\nCódigo: ${novo.codigoAcesso || "Não informado"}`);
+    alert(`Funcionário salvo.\n\nNome: ${novo.nome}\nCargo: ${nomeCargo(novo.cargo)}\nSetor: ${novo.setor || "Geral"}\nCódigo: ${novo.cargo === "encarregado" ? (novo.codigoAcesso || "Não informado") : "Não usa"}`);
   } catch (erro) {
     alert("Erro ao salvar funcionário: " + erro.message);
   }

@@ -35,7 +35,20 @@
         <label for="senha" id="senha-label">Código de acesso</label>
         <input type="password" id="senha" placeholder="Digite o código">
         <p class="small muted" id="senha-ajuda">
-          Gerente e encarregado usam o código cadastrado na loja.
+          Somente encarregado usa código cadastrado na loja.
+        </p>
+      </div>
+
+      <div id="marca-promotor-area" style="display:none;">
+        <label for="marcaPromotor">Marca da promotoria</label>
+        <select id="marcaPromotor">
+          <option value="">Carregando marcas...</option>
+        </select>
+
+        <label for="novaMarcaPromotor">Cadastrar nova marca</label>
+        <input type="text" id="novaMarcaPromotor" placeholder="Ex: Nestlé, Danone, Coca-Cola">
+        <p class="small muted">
+          Apenas promotor precisa informar marca. Se a marca não existir, digite para cadastrar na hora.
         </p>
       </div>
 

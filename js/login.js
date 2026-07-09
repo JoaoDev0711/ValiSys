@@ -10,12 +10,60 @@ const lojaLoginCard = document.getElementById("loja-login-card");
 const textoLogin = document.getElementById("texto-login");
 const linkTrocarLoja = document.getElementById("link-trocar-loja");
 const voltarLogin = document.getElementById("voltar-login");
+const marcaPromotorArea = document.getElementById("marca-promotor-area");
+const marcaPromotorSelect = document.getElementById("marcaPromotor");
+const novaMarcaPromotorInput = document.getElementById("novaMarcaPromotor");
 
 const lojaAtual = getLojaAtual();
 const usuarioAtual = getUsuarioLogado();
 
 if (usuarioAtual?.cargo === "admin") {
   limparUsuarioLogado();
+}
+
+
+async function carregarMarcasPromotor() {
+  if (!marcaPromotorSelect || !lojaAtual) return;
+
+  marcaPromotorSelect.innerHTML = `<option value="">Carregando marcas...</option>`;
+
+  try {
+    const marcas = await valisysDB.listarMarcasPromotoria(lojaAtual.id);
+
+    marcaPromotorSelect.innerHTML = `
+      <option value="">Selecione uma marca</option>
+      ${marcas.map(marca => `<option value="${esc(marca.nome)}">${esc(marca.nome)}</option>`).join("")}
+    `;
+
+    if (marcas.length === 0) {
+      marcaPromotorSelect.innerHTML = `<option value="">Nenhuma marca cadastrada</option>`;
+    }
+  } catch (erro) {
+    console.warn("Não foi possível carregar marcas de promotoria.", erro);
+    marcaPromotorSelect.innerHTML = `<option value="">Digite a nova marca abaixo</option>`;
+  }
+}
+
+function marcaPromotorEscolhida() {
+  const nova = novaMarcaPromotorInput?.value.trim() || "";
+  const selecionada = marcaPromotorSelect?.value.trim() || "";
+
+  return nova || selecionada;
+}
+
+function atualizarAreaPromotor() {
+  const cargo = cargoSelect.value;
+
+  if (!marcaPromotorArea) return;
+
+  marcaPromotorArea.style.display = cargo === "promotor" ? "block" : "none";
+
+  if (cargo === "promotor") {
+    carregarMarcasPromotor();
+  } else {
+    if (marcaPromotorSelect) marcaPromotorSelect.value = "";
+    if (novaMarcaPromotorInput) novaMarcaPromotorInput.value = "";
+  }
 }
 
 function configurarTiposDeAcesso() {
@@ -62,22 +110,24 @@ function renderizarLojaLogin() {
 function atualizarCamposLogin() {
   const cargo = cargoSelect.value;
 
+  atualizarAreaPromotor();
+
   nomeArea.style.display = "block";
   nomeInput.required = true;
   textoLogin.innerText = lojaAtual
     ? `Login da loja ${lojaAtual.nome}`
     : "Clique primeiro na loja desejada para entrar.";
 
-  if (["gerente", "encarregado"].includes(cargo)) {
+  if (cargo === "encarregado") {
     senhaArea.style.display = "block";
     senhaInput.required = true;
     senhaLabel.innerText = "Código de acesso";
-    senhaInput.placeholder = "Código cadastrado para este funcionário";
-    senhaAjuda.innerText = "Gerente e encarregado usam o código cadastrado na loja.";
+    senhaInput.placeholder = "Código cadastrado para este encarregado";
+    senhaAjuda.innerText = "Somente encarregado usa código cadastrado na loja.";
     return;
   }
 
-  if (cargo === "promotor") {
+  if (cargo === "gerente" || cargo === "promotor") {
     senhaArea.style.display = "none";
     senhaInput.required = false;
     senhaInput.value = "";
@@ -126,13 +176,45 @@ form.addEventListener("submit", async function(event) {
     return;
   }
 
-  if (["gerente", "encarregado"].includes(cargo) && !senha) {
-    alert("Informe o código de acesso.");
+  if (cargo === "encarregado" && !senha) {
+    alert("Informe o código de acesso do encarregado.");
     senhaInput.focus();
     return;
   }
 
+  const marcaPromotoria = cargo === "promotor" ? marcaPromotorEscolhida() : "";
+
+  if (cargo === "promotor" && !marcaPromotoria) {
+    alert("Selecione ou cadastre a marca da promotoria.");
+    novaMarcaPromotorInput?.focus();
+    return;
+  }
+
   try {
+    if (cargo === "promotor") {
+      const promotor = await valisysDB.garantirPromotorComMarca({
+        lojaId: lojaAtual.id,
+        nome,
+        marcaPromotoria
+      });
+
+      salvarJSONLocal("usuarioLogado", {
+        id: promotor.id,
+        nome: promotor.nome,
+        cargo: "promotor",
+        funcionarioId: promotor.id,
+        lojaIdPadrao: lojaAtual.id,
+        lojaNomePadrao: lojaAtual.nome,
+        setor: promotor.setor || "Promotoria",
+        marcaPromotoria: promotor.marcaPromotoria || marcaPromotoria,
+        criadoEm: new Date().toLocaleString("pt-BR")
+      });
+
+      setLojaAtual(lojaAtual);
+      window.location.href = "dashboard.html";
+      return;
+    }
+
     const funcionario = await valisysDB.buscarFuncionarioPorNomeCargo(
       nome,
       cargo,
@@ -141,31 +223,7 @@ form.addEventListener("submit", async function(event) {
     );
 
     if (!funcionario) {
-      if (cargo === "promotor") {
-        const confirmar = await confirmarAcao(
-          "Promotor não encontrado no cadastro desta loja.\n\nDeseja entrar mesmo assim como promotor temporário?",
-          "Promotor temporário"
-        );
-
-        if (!confirmar) return;
-
-        salvarJSONLocal("usuarioLogado", {
-          id: gerarIdLocal("promotor"),
-          nome,
-          cargo,
-          funcionarioId: "",
-          lojaIdPadrao: lojaAtual.id,
-          lojaNomePadrao: lojaAtual.nome,
-          setor: "",
-          criadoEm: new Date().toLocaleString("pt-BR")
-        });
-
-        setLojaAtual(lojaAtual);
-        window.location.href = "dashboard.html";
-        return;
-      }
-
-      alert("Funcionário ou código não encontrado para esta loja.");
+      alert(cargo === "encarregado" ? "Encarregado ou código não encontrado para esta loja." : "Funcionário não encontrado para esta loja.");
       return;
     }
 
@@ -177,6 +235,7 @@ form.addEventListener("submit", async function(event) {
       lojaIdPadrao: funcionario.lojaId,
       lojaNomePadrao: funcionario.lojaNome,
       setor: funcionario.setor || "",
+      marcaPromotoria: funcionario.marcaPromotoria || "",
       criadoEm: new Date().toLocaleString("pt-BR")
     });
 

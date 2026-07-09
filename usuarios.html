@@ -22,7 +22,7 @@
         <p>Funcionários vinculados à loja atual.</p>
       </div>
     </div>
-    <a href="escolher-loja.html">Trocar</a>
+    <a href="#" onclick="trocarLojaComConfirmacao()">Trocar</a>
   </section>
 
   <section class="card">
@@ -35,7 +35,7 @@
   <section class="card" id="area-cadastro-funcionario">
     <h2>Cadastrar funcionário da loja</h2>
     <p class="muted">
-      Disponível para gerente e admin. O funcionário fica vinculado à loja selecionada e pode receber um setor.
+      Disponível para gerente e admin. O funcionário fica vinculado à loja selecionada. Setor é escolhido pela lista interna.
     </p>
 
     <form id="form-funcionario">
@@ -51,10 +51,27 @@
       </select>
 
       <label for="setorFuncionario">Setor</label>
-      <input type="text" id="setorFuncionario" placeholder="Ex: Frios, Padaria, Mercearia">
+      <select id="setorFuncionario">
+        <option value="">Selecione o setor</option>
+        <option value="Geral">Geral</option>
+        <option value="Mercearia">Mercearia</option>
+        <option value="Bebidas">Bebidas</option>
+        <option value="Frios e Laticínios">Frios e Laticínios</option>
+        <option value="Açougue">Açougue</option>
+        <option value="Hortifruti">Hortifruti</option>
+        <option value="Padaria">Padaria</option>
+        <option value="Congelados">Congelados</option>
+        <option value="Limpeza">Limpeza</option>
+        <option value="Higiene e Perfumaria">Higiene e Perfumaria</option>
+        <option value="Pet">Pet</option>
+        <option value="Outros">Outros</option>
+      </select>
 
-      <label for="codigoFuncionario">Código de acesso</label>
-      <input type="text" id="codigoFuncionario" placeholder="Ex: 1234 ou deixe vazio para gerar">
+      <div id="codigoFuncionarioArea" style="display:none;">
+        <label for="codigoFuncionario">Código de acesso do encarregado</label>
+        <input type="text" id="codigoFuncionario" placeholder="Ex: 1234 ou deixe vazio para gerar">
+        <p class="small muted">Somente encarregado usa código. Gerente e promotor entram sem código.</p>
+      </div>
 
       <button type="submit">Salvar funcionário</button>
     </form>

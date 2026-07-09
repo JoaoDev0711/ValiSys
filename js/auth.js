@@ -40,7 +40,7 @@ function podeCadastrarProduto(cargo) {
 }
 
 function podeGerenciarUsuarios(cargo) {
-  return cargo === "admin";
+  return ["gerente", "admin"].includes(cargo);
 }
 
 function nomeCargo(cargo) {

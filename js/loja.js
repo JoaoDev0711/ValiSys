@@ -134,15 +134,15 @@ function escurecerHex(cor, porcentagem = 24) {
 function aplicarTemaLoja(loja) {
   const cor = normalizarHexCor(loja?.corTema || loja?.cor || "");
 
-  if (!cor) return;
+  // A cor da rede não altera mais o tema inteiro do site.
+  // Ela fica apenas como destaque visual da loja.
+  const corFinal = cor || "#2f7d4f";
+  const forte = escurecerHex(corFinal, 26) || corFinal;
 
-  const forte = escurecerHex(cor, 26) || cor;
-
-  document.documentElement.style.setProperty("--primary", cor);
-  document.documentElement.style.setProperty("--primary-strong", forte);
-  document.documentElement.style.setProperty("--accent", `${cor}18`);
+  document.documentElement.style.setProperty("--loja-cor", corFinal);
+  document.documentElement.style.setProperty("--loja-cor-strong", forte);
+  document.documentElement.style.setProperty("--loja-cor-soft", `${corFinal}18`);
 }
-
 document.addEventListener("DOMContentLoaded", () => {
   const loja = getLojaAtual();
 

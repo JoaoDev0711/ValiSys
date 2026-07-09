@@ -8,11 +8,15 @@ if (usuario) {
     throw new Error("Loja não selecionada.");
   }
 
+  const marcaTextoPromotor = usuario.cargo === "promotor" && usuario.marcaPromotoria
+    ? ` • Marca: ${usuario.marcaPromotoria}`
+    : "";
+
   document.getElementById("welcome-title").innerText = `Olá, ${usuario.nome}`;
-  document.getElementById("welcome-role").innerText = `Cargo: ${nomeCargo(usuario.cargo)}${usuario.setor ? " • Setor: " + usuario.setor : ""}`;
+  document.getElementById("welcome-role").innerText = `Cargo: ${nomeCargo(usuario.cargo)}${usuario.setor ? " • Setor: " + usuario.setor : ""}${marcaTextoPromotor}`;
 
   document.getElementById("sidebar-nome").innerText = usuario.nome;
-  document.getElementById("sidebar-cargo").innerText = `${nomeCargo(usuario.cargo)}${usuario.setor ? " • " + usuario.setor : ""}`;
+  document.getElementById("sidebar-cargo").innerText = `${nomeCargo(usuario.cargo)}${usuario.setor ? " • " + usuario.setor : ""}${marcaTextoPromotor}`;
 
   const lojaNomeEl = document.getElementById("loja-atual-nome");
   if (lojaNomeEl) lojaNomeEl.innerText = lojaAtual.nome;
@@ -20,19 +24,6 @@ if (usuario) {
   const lojaLogoEl = document.getElementById("loja-atual-logo");
   if (lojaLogoEl) lojaLogoEl.innerHTML = logoLojaHTML(lojaAtual, "loja-logo-dashboard");
 
-  const menuBtn = document.getElementById("menu-btn");
-  const sidebar = document.getElementById("sidebar");
-  const overlay = document.getElementById("overlay");
-
-  menuBtn.addEventListener("click", () => {
-    sidebar.classList.add("active");
-    overlay.classList.add("active");
-  });
-
-  overlay.addEventListener("click", () => {
-    sidebar.classList.remove("active");
-    overlay.classList.remove("active");
-  });
 
   document.querySelectorAll("[data-role='lista-geral']").forEach(el => {
     if (!podeVerListaGeral(usuario.cargo)) {

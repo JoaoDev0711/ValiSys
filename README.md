@@ -438,3 +438,81 @@ admin-dashboard.html → Administrar esta loja → entra na loja mantendo cargo 
 ```
 
 Quando o admin administra uma loja pela Dashboard Admin, ele continua como admin e pode acessar a dashboard da loja, produtos, usuários, listas e gestão da loja.
+
+
+---
+
+## Correção de navbar, admin loja e cor da rede
+
+Esta versão corrige:
+
+```txt
+Botão ☰ funcionando com script global
+Sem duplicidade de evento na navbar
+Admin administrando loja mantendo cargo Admin
+Cor da rede sem alterar o tema inteiro do site
+```
+
+A cor cadastrada na loja agora aparece apenas como destaque visual da loja, sem mudar todas as cores do sistema.
+
+
+---
+
+## Regras de funcionários, código e setor
+
+Nesta versão:
+
+```txt
+Admin pode cadastrar funcionários.
+Gerente pode cadastrar funcionários da loja.
+Encarregado não cadastra funcionários.
+Gerente não usa código de acesso.
+Promotor não usa código de acesso.
+Somente encarregado usa código de acesso.
+Setor é escolhido por lista interna, não digitado livremente.
+```
+
+Setores internos:
+
+```txt
+Geral
+Mercearia
+Bebidas
+Frios e Laticínios
+Açougue
+Hortifruti
+Padaria
+Congelados
+Limpeza
+Higiene e Perfumaria
+Pet
+Outros
+```
+
+
+---
+
+## Promotor com marca automática no login
+
+Somente promotor precisa informar a marca da promotoria ao entrar.
+
+Fluxo:
+
+```txt
+Promotor escolhe a loja
+Seleciona Promotor no login
+Digita o nome
+Seleciona uma marca cadastrada ou digita uma nova
+Entra no sistema
+```
+
+O sistema faz automaticamente:
+
+```txt
+Se a marca não existir, cadastra a marca na loja
+Se o promotor não existir, cadastra o promotor no banco
+Se o promotor já existir, atualiza/vincula a marca escolhida
+Salva nome, cargo e marca da promotoria na sessão
+```
+
+Gerente, encarregado e admin não precisam informar marca.

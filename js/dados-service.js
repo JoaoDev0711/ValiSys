@@ -185,7 +185,7 @@ const valisysDB = {
     return (data || []).map(this.funcionarioDBParaApp);
   },
 
-  async criarFuncionario({ lojaId, nome, cargo, setor = "", codigoAcesso }) {
+  async criarFuncionario({ lojaId, nome, cargo, setor = "", codigoAcesso, marcaPromotoria = "" }) {
     const db = this.client();
 
     const payload = {
@@ -193,7 +193,8 @@ const valisysDB = {
       nome,
       cargo,
       setor,
-      codigo_acesso: codigoAcesso || ""
+      codigo_acesso: codigoAcesso || "",
+      marca_promotoria: marcaPromotoria || ""
     };
 
     let resposta = await db
@@ -201,6 +202,16 @@ const valisysDB = {
       .insert(payload)
       .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
       .single();
+
+    if (resposta.error && String(resposta.error.message || "").includes("marca_promotoria")) {
+      delete payload.marca_promotoria;
+
+      resposta = await db
+        .from("funcionarios")
+        .insert(payload)
+        .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+        .single();
+    }
 
     if (resposta.error && String(resposta.error.message || "").includes("setor")) {
       delete payload.setor;
@@ -215,6 +226,147 @@ const valisysDB = {
     if (resposta.error) throw resposta.error;
 
     return this.funcionarioDBParaApp(resposta.data);
+  },
+
+
+  async listarMarcasPromotoria(lojaId) {
+    const db = this.client();
+
+    const { data, error } = await db
+      .from("marcas_promotoria")
+      .select("*")
+      .eq("loja_id", lojaId)
+      .eq("ativa", true)
+      .order("nome", { ascending: true });
+
+    if (error) {
+      console.warn("Tabela marcas_promotoria indisponível. Usando marcas dos promotores cadastrados.", error);
+
+      const funcionarios = await this.listarFuncionarios(lojaId);
+      return [...new Set(funcionarios
+        .filter(func => func.cargo === "promotor")
+        .map(func => String(func.marcaPromotoria || "").trim())
+        .filter(Boolean)
+      )].map(nome => ({
+        id: nome,
+        lojaId,
+        nome,
+        ativa: true
+      }));
+    }
+
+    return (data || []).map(item => ({
+      id: item.id,
+      lojaId: item.loja_id,
+      nome: item.nome,
+      ativa: item.ativa !== false,
+      criadoEm: item.criado_em || ""
+    }));
+  },
+
+  async criarMarcaPromotoria(lojaId, nome) {
+    const db = this.client();
+    const nomeLimpo = String(nome || "").trim();
+
+    if (!nomeLimpo) {
+      throw new Error("Informe o nome da marca.");
+    }
+
+    try {
+      const existentes = await this.listarMarcasPromotoria(lojaId);
+      const encontrada = existentes.find(item =>
+        String(item.nome || "").trim().toLowerCase() === nomeLimpo.toLowerCase()
+      );
+
+      if (encontrada) return encontrada;
+    } catch (erroLista) {
+      console.warn("Não foi possível verificar marcas existentes.", erroLista);
+    }
+
+    const { data, error } = await db
+      .from("marcas_promotoria")
+      .insert({
+        loja_id: lojaId,
+        nome: nomeLimpo,
+        ativa: true
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.warn("Não foi possível salvar marca em marcas_promotoria. A marca será salva no promotor.", error);
+      return {
+        id: nomeLimpo,
+        lojaId,
+        nome: nomeLimpo,
+        ativa: true
+      };
+    }
+
+    return {
+      id: data.id,
+      lojaId: data.loja_id,
+      nome: data.nome,
+      ativa: data.ativa !== false,
+      criadoEm: data.criado_em || ""
+    };
+  },
+
+  async atualizarMarcaFuncionario(id, marcaPromotoria) {
+    const db = this.client();
+
+    const { data, error } = await db
+      .from("funcionarios")
+      .update({ marca_promotoria: marcaPromotoria || "" })
+      .eq("id", id)
+      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+      .single();
+
+    if (error) {
+      console.warn("Não foi possível atualizar marca_promotoria. Talvez o SQL ainda não tenha sido rodado.", error);
+      return null;
+    }
+
+    return this.funcionarioDBParaApp(data);
+  },
+
+  async garantirPromotorComMarca({ lojaId, nome, marcaPromotoria }) {
+    const nomeLimpo = String(nome || "").trim();
+    const marcaLimpa = String(marcaPromotoria || "").trim();
+
+    if (!nomeLimpo) {
+      throw new Error("Informe o nome do promotor.");
+    }
+
+    if (!marcaLimpa) {
+      throw new Error("Informe a marca da promotoria.");
+    }
+
+    await this.criarMarcaPromotoria(lojaId, marcaLimpa);
+
+    let promotor = await this.buscarFuncionarioPorNomeCargo(nomeLimpo, "promotor", lojaId, "");
+
+    if (!promotor) {
+      const criado = await this.criarFuncionario({
+        lojaId,
+        nome: nomeLimpo,
+        cargo: "promotor",
+        setor: "Promotoria",
+        codigoAcesso: "",
+        marcaPromotoria: marcaLimpa
+      });
+
+      criado.marcaPromotoria = criado.marcaPromotoria || marcaLimpa;
+      return criado;
+    }
+
+    if (String(promotor.marcaPromotoria || "").trim() !== marcaLimpa) {
+      const atualizado = await this.atualizarMarcaFuncionario(promotor.id, marcaLimpa);
+      if (atualizado) promotor = atualizado;
+      promotor.marcaPromotoria = marcaLimpa;
+    }
+
+    return promotor;
   },
 
   async removerFuncionario(id) {
@@ -269,7 +421,7 @@ const valisysDB = {
 
     const { data, error } = await db
       .from("funcionarios")
-      .select("id, nome, cargo, setor, loja_id, codigo_acesso, ativo, criado_em, lojas(nome)")
+      .select("id, nome, cargo, setor, marca_promotoria, loja_id, codigo_acesso, ativo, criado_em, lojas(nome)")
       .eq("loja_id", lojaId)
       .eq("ativo", true)
       .order("nome", { ascending: true });
@@ -591,6 +743,7 @@ const valisysDB = {
       cargo: data.cargo,
       setor: data.setor || "",
       codigoAcesso: data.codigo_acesso || "",
+      marcaPromotoria: data.marca_promotoria || "",
       lojaId: data.loja_id,
       lojaNome: data.lojas?.nome || data.lojaNome || "",
       criadoEm: data.criado_em || ""

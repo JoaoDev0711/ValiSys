@@ -3500,3 +3500,36 @@ textarea:focus {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+
+/* Cor da loja sem trocar tema global */
+:root {
+  --loja-cor: #2f7d4f;
+  --loja-cor-strong: #245f3d;
+  --loja-cor-soft: rgba(47, 125, 79, .10);
+}
+
+.loja-atual-card {
+  border-left: 5px solid var(--loja-cor);
+}
+
+.loja-logo-iniciais {
+  background: var(--loja-cor-soft);
+  color: var(--loja-cor-strong);
+  border-color: color-mix(in srgb, var(--loja-cor) 28%, transparent);
+}
+
+.loja-inline-info .loja-logo-iniciais,
+.loja-logo-dashboard.loja-logo-iniciais,
+.loja-logo-card.loja-logo-iniciais {
+  background: var(--loja-cor-soft);
+  color: var(--loja-cor-strong);
+}
+
+.admin-current-store-card {
+  border-left: 5px solid var(--loja-cor);
+}
+
+.loja-card-com-logo {
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}

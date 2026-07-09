@@ -7,38 +7,6 @@ if (!usuario || usuario.cargo !== "admin") {
 }
 
 
-function iniciarMenuLateralAdmin() {
-  const sidebarNome = document.getElementById("sidebar-nome");
-  const sidebarCargo = document.getElementById("sidebar-cargo");
-
-  if (sidebarNome) sidebarNome.innerText = usuario.nome || "Admin";
-  if (sidebarCargo) sidebarCargo.innerText = "Dashboard Admin";
-
-  const menuBtn = document.getElementById("menu-btn");
-  const sidebar = document.getElementById("sidebar");
-  const overlay = document.getElementById("overlay");
-
-  if (!menuBtn || !sidebar || !overlay) return;
-
-  menuBtn.addEventListener("click", () => {
-    sidebar.classList.add("active");
-    overlay.classList.add("active");
-  });
-
-  overlay.addEventListener("click", () => {
-    sidebar.classList.remove("active");
-    overlay.classList.remove("active");
-  });
-
-  sidebar.querySelectorAll("a[href^='#']").forEach(link => {
-    link.addEventListener("click", () => {
-      sidebar.classList.remove("active");
-      overlay.classList.remove("active");
-    });
-  });
-}
-
-iniciarMenuLateralAdmin();
 
 const formLojaAdmin = document.getElementById("form-loja-admin");
 const nomeLojaAdmin = document.getElementById("nomeLojaAdmin");
@@ -514,10 +482,22 @@ async function administrarLoja(id) {
     }
 
     // Admin vindo da Dashboard Admin continua como admin.
-    // Isso é diferente da seleção pública de loja, que limpa o usuário e abre login da loja.
+    // Reforça a sessão para não cair como funcionário/promotor por usuário antigo.
     setLojaAtual(loja);
 
-    alert("Loja selecionada para administração.");
+    salvarJSONLocal("usuarioLogado", {
+      id: usuario.id || "admin-geral",
+      nome: usuario.nome || "Admin",
+      cargo: "admin",
+      funcionarioId: "",
+      lojaIdPadrao: loja.id,
+      lojaNomePadrao: loja.nome,
+      setor: "",
+      modoAdminLoja: true,
+      criadoEm: usuario.criadoEm || new Date().toLocaleString("pt-BR")
+    });
+
+    alert("Loja selecionada para administração como admin.");
     window.location.href = "dashboard.html";
   } catch (erro) {
     alert("Erro ao abrir loja: " + erro.message);

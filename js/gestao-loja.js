@@ -8,38 +8,6 @@ if (!podeVerGestaoLoja(usuario.cargo)) {
 }
 
 
-function iniciarMenuLateralGestao() {
-  const sidebarNome = document.getElementById("sidebar-nome");
-  const sidebarCargo = document.getElementById("sidebar-cargo");
-
-  if (sidebarNome) sidebarNome.innerText = usuario.nome || "Usuário";
-  if (sidebarCargo) sidebarCargo.innerText = `${nomeCargo(usuario.cargo)}${usuario.setor ? " • " + usuario.setor : ""}`;
-
-  const menuBtn = document.getElementById("menu-btn");
-  const sidebar = document.getElementById("sidebar");
-  const overlay = document.getElementById("overlay");
-
-  if (!menuBtn || !sidebar || !overlay) return;
-
-  menuBtn.addEventListener("click", () => {
-    sidebar.classList.add("active");
-    overlay.classList.add("active");
-  });
-
-  overlay.addEventListener("click", () => {
-    sidebar.classList.remove("active");
-    overlay.classList.remove("active");
-  });
-
-  sidebar.querySelectorAll("a[href^='#']").forEach(link => {
-    link.addEventListener("click", () => {
-      sidebar.classList.remove("active");
-      overlay.classList.remove("active");
-    });
-  });
-}
-
-iniciarMenuLateralGestao();
 
 const lojaAtual = protegerLojaSelecionada();
 
@@ -52,7 +20,11 @@ const gestaoTextoVencimentos = document.getElementById("gestao-vencimentos-texto
 if (gestaoLojaAtual) gestaoLojaAtual.innerHTML = lojaInlineHTML(lojaAtual);
 if (gestaoSubtitulo) gestaoSubtitulo.innerText = `${lojaAtual.grupo || "Sem grupo"} • ${lojaAtual.regiao || "Sem região"}`;
 
-gestaoTitulo.innerText = usuario.cargo === "gerente" ? "Gestão da loja" : "Gestão do encarregado";
+gestaoTitulo.innerText = usuario.cargo === "admin"
+  ? "Administração da loja"
+  : usuario.cargo === "gerente"
+    ? "Gestão da loja"
+    : "Gestão do encarregado";
 gestaoDescricao.innerText = descricaoPermissaoGestao(usuario.cargo);
 gestaoTextoVencimentos.innerText = usuario.cargo === "encarregado" && usuario.setor
   ? `Resumo filtrado pelo setor ${usuario.setor}.`

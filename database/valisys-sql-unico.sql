@@ -65,6 +65,7 @@ create table if not exists public.funcionarios (
   nome text not null,
   cargo text not null,
   setor text,
+  marca_promotoria text,
   codigo_acesso text,
   ativo boolean not null default true,
   criado_em timestamptz not null default now()
@@ -83,6 +84,9 @@ alter table public.funcionarios
 add column if not exists setor text;
 
 alter table public.funcionarios
+add column if not exists marca_promotoria text;
+
+alter table public.funcionarios
 add column if not exists codigo_acesso text;
 
 alter table public.funcionarios
@@ -94,6 +98,40 @@ add column if not exists criado_em timestamptz not null default now();
 update public.funcionarios
 set ativo = true
 where ativo is null;
+
+
+-- =========================
+-- TABELA: MARCAS DE PROMOTORIA
+-- =========================
+create table if not exists public.marcas_promotoria (
+  id uuid primary key default gen_random_uuid(),
+  loja_id uuid references public.lojas(id) on delete cascade,
+  nome text not null,
+  ativa boolean not null default true,
+  criado_em timestamptz not null default now()
+);
+
+alter table public.marcas_promotoria
+add column if not exists loja_id uuid references public.lojas(id) on delete cascade;
+
+alter table public.marcas_promotoria
+add column if not exists nome text;
+
+alter table public.marcas_promotoria
+add column if not exists ativa boolean not null default true;
+
+alter table public.marcas_promotoria
+add column if not exists criado_em timestamptz not null default now();
+
+update public.marcas_promotoria
+set ativa = true
+where ativa is null;
+
+create index if not exists idx_marcas_promotoria_loja
+on public.marcas_promotoria(loja_id);
+
+create index if not exists idx_marcas_promotoria_nome
+on public.marcas_promotoria(nome);
 
 -- =========================
 -- TABELA: PRODUTOS
@@ -404,6 +442,7 @@ create index if not exists idx_lojas_regiao on public.lojas(regiao);
 create index if not exists idx_funcionarios_loja on public.funcionarios(loja_id);
 create index if not exists idx_funcionarios_cargo on public.funcionarios(cargo);
 create index if not exists idx_funcionarios_ativo on public.funcionarios(ativo);
+create index if not exists idx_funcionarios_marca_promotoria on public.funcionarios(marca_promotoria);
 
 create index if not exists idx_produtos_ean on public.produtos(ean);
 
@@ -423,6 +462,7 @@ create index if not exists idx_notificacoes_lida on public.notificacoes(lida);
 -- =========================
 alter table public.lojas enable row level security;
 alter table public.funcionarios enable row level security;
+alter table public.marcas_promotoria enable row level security;
 alter table public.produtos enable row level security;
 alter table public.lancamentos enable row level security;
 alter table public.notificacoes enable row level security;
@@ -436,6 +476,11 @@ drop policy if exists "ValiSys select funcionarios" on public.funcionarios;
 drop policy if exists "ValiSys insert funcionarios" on public.funcionarios;
 drop policy if exists "ValiSys update funcionarios" on public.funcionarios;
 drop policy if exists "ValiSys delete funcionarios" on public.funcionarios;
+
+drop policy if exists "ValiSys select marcas_promotoria" on public.marcas_promotoria;
+drop policy if exists "ValiSys insert marcas_promotoria" on public.marcas_promotoria;
+drop policy if exists "ValiSys update marcas_promotoria" on public.marcas_promotoria;
+drop policy if exists "ValiSys delete marcas_promotoria" on public.marcas_promotoria;
 
 drop policy if exists "ValiSys select produtos" on public.produtos;
 drop policy if exists "ValiSys insert produtos" on public.produtos;
@@ -474,6 +519,18 @@ create policy "ValiSys update funcionarios" on public.funcionarios
 for update to anon using (true) with check (true);
 
 create policy "ValiSys delete funcionarios" on public.funcionarios
+for delete to anon using (true);
+
+create policy "ValiSys select marcas_promotoria" on public.marcas_promotoria
+for select to anon using (true);
+
+create policy "ValiSys insert marcas_promotoria" on public.marcas_promotoria
+for insert to anon with check (true);
+
+create policy "ValiSys update marcas_promotoria" on public.marcas_promotoria
+for update to anon using (true) with check (true);
+
+create policy "ValiSys delete marcas_promotoria" on public.marcas_promotoria
 for delete to anon using (true);
 
 create policy "ValiSys select produtos" on public.produtos
@@ -516,3 +573,4 @@ for delete to anon using (true);
 -- FIM
 -- =========================
 select 'ValiSys SQL único aplicado com sucesso.' as resultado;
+
