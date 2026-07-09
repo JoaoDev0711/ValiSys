@@ -27,6 +27,32 @@ const marcaFuncionarioSelect = document.getElementById("marcaFuncionario");
 const novaMarcaFuncionarioInput = document.getElementById("novaMarcaFuncionario");
 
 
+
+async function carregarSetoresFuncionario() {
+  if (!setorFuncionarioSelect || !lojaAtual) return;
+
+  const valorAtual = setorFuncionarioSelect.value;
+
+  try {
+    const setores = await valisysDB.listarSetoresLoja(lojaAtual.id);
+
+    setorFuncionarioSelect.innerHTML = `
+      <option value="">Selecione o setor</option>
+      ${setores.map(setor => `<option value="${esc(setor.nome)}">${esc(setor.nome)}</option>`).join("")}
+      <option value="Promotoria">Promotoria</option>
+    `;
+
+    if ([...setorFuncionarioSelect.options].some(op => op.value === valorAtual)) {
+      setorFuncionarioSelect.value = valorAtual;
+    }
+  } catch (erro) {
+    console.warn("Não foi possível carregar setores da loja.", erro);
+  }
+}
+
+carregarSetoresFuncionario();
+
+
 async function carregarMarcasFuncionario() {
   if (!marcaFuncionarioSelect || !lojaAtual) return;
 

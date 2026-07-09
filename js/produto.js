@@ -418,6 +418,9 @@ function garantirPopupCadastroBasico() {
         <label for="popupProdutoFabricante">Fabricante</label>
         <input type="text" id="popupProdutoFabricante" placeholder="Ex: M. Dias Branco">
 
+        <label for="popupProdutoSabor">Sabor ou variação</label>
+        <input type="text" id="popupProdutoSabor" placeholder="Ex: Tradicional, Chocolate, Integral">
+
         <label for="popupProdutoFoto">Foto</label>
         <input type="file" id="popupProdutoFoto" accept="image/*">
 
@@ -459,6 +462,7 @@ async function abrirPopupCadastroBasico({ ean = "", nome = "" } = {}) {
   modal.querySelector("#popupProdutoNome").value = nomeLimpo;
   modal.querySelector("#popupProdutoMarca").value = marcaInput.value || produtoAtualCadastro?.marca || "";
   modal.querySelector("#popupProdutoFabricante").value = fabricanteInput.value || produtoAtualCadastro?.fabricante || "";
+  modal.querySelector("#popupProdutoSabor").value = saborInput?.value || produtoAtualCadastro?.sabor || "";
   modal.querySelector("#popupProdutoFoto").value = "";
 
   modal.classList.add("active");
@@ -477,6 +481,7 @@ async function salvarPopupCadastroBasico(event) {
   const nome = modal.querySelector("#popupProdutoNome").value.trim();
   const marca = modal.querySelector("#popupProdutoMarca").value.trim();
   const fabricante = modal.querySelector("#popupProdutoFabricante").value.trim();
+  const sabor = modal.querySelector("#popupProdutoSabor").value.trim();
   const fotoArquivoModal = modal.querySelector("#popupProdutoFoto").files?.[0] || null;
 
   if (!ean || !validarEAN(ean)) {
@@ -490,14 +495,14 @@ async function salvarPopupCadastroBasico(event) {
   }
 
   try {
-    const foto = await arquivoParaBase64(fotoArquivoModal);
+    const foto = fotoArquivoModal ? await compactarImagem(fotoArquivoModal, 700, 0.72) : (produtoAtualCadastro?.foto || "");
 
     const produto = {
       ean,
       nome,
       marca,
       fabricante,
-      sabor: "",
+      sabor,
       categoria: "",
       quantidadePadrao: "",
       porcao: "",
@@ -559,6 +564,44 @@ async function buscarProdutoPorNomeAutomatico(nome) {
     }
   } catch (erro) {
     console.warn("Busca automática por nome falhou.", erro);
+  }
+
+  try {
+    previewFoto.innerHTML = `
+      <div class="card">
+        <p class="muted">Buscando foto e dados pela base pública...</p>
+      </div>
+    `;
+
+    const produtoFonte = typeof buscarProdutoFontePorNome === "function"
+      ? await buscarProdutoFontePorNome(termo)
+      : null;
+
+    if (produtoFonte && produtoFonte.nome) {
+      produtoAtualCadastro = produtoFonte;
+
+      if (produtoFonte.ean && validarEAN(produtoFonte.ean)) {
+        eanInput.value = produtoFonte.ean;
+
+        try {
+          const salvo = await valisysDB.salvarProduto(produtoFonte);
+          produtoAtualCadastro = salvo || produtoFonte;
+        } catch (erroSalvarFonteNome) {
+          console.warn("Produto encontrado por nome, mas não foi salvo automaticamente.", erroSalvarFonteNome);
+        }
+      }
+
+      preencherCamposProduto(produtoAtualCadastro);
+
+      if (produtoAtualCadastro.foto) {
+        fotoBase64 = produtoAtualCadastro.foto;
+      }
+
+      previewFoto.innerHTML = cardProdutoHTML(produtoAtualCadastro, "Produto/foto encontrado pelo nome.");
+      return produtoAtualCadastro;
+    }
+  } catch (erroFonteNome) {
+    console.warn("Busca por nome na base pública falhou.", erroFonteNome);
   }
 
   produtoAtualCadastro = null;
@@ -701,6 +744,7 @@ function preencherCamposProduto(produto) {
   if (nomeInput) nomeInput.value = produto.nome || "";
   if (marcaInput) marcaInput.value = produto.marca || "";
   if (fabricanteInput) fabricanteInput.value = produto.fabricante || "";
+  if (saborInput) saborInput.value = produto.sabor || "";
 }
 
 function lerCamposExtrasProduto() {
@@ -825,6 +869,51 @@ async function preencherProdutoPorEAN(ean) {
   previewFoto.innerHTML = cardProdutoHTML(produto, "Produto puxado com sucesso.");
 }
 
+
+function cardProdutoCadastroHTML(produto) {
+  return `
+    <article class="card produto-encontrado produto-card-completo">
+      <div class="produto-card-header">
+        <div>
+          <h3>${esc(produto.nome || "Produto sem nome")}</h3>
+          <p class="muted">EAN: ${esc(produto.ean || "Não informado")}</p>
+          <p><strong>Marca:</strong> ${esc(produto.marca || "Não informada")}</p>
+          <p><strong>Fabricante:</strong> ${esc(produto.fabricante || "Não informado")}</p>
+          ${produto.sabor ? `<p><strong>Sabor:</strong> ${esc(produto.sabor)}</p>` : ""}
+        </div>
+        ${produto.foto ? `<img class="produto-img produto-img-mini" src="${produto.foto}" alt="${esc(produto.nome)}">` : ""}
+      </div>
+
+      <div class="card-actions stack-actions">
+        <button type="button" class="btn-danger" onclick="excluirProdutoCadastro('${esc(produto.id || produto.ean)}')">
+          Excluir produto
+        </button>
+      </div>
+    </article>
+  `;
+}
+
+async function excluirProdutoCadastro(idOuEan) {
+  const confirmar = await confirmarAcao(
+    "Deseja excluir este produto cadastrado? Os lançamentos antigos continuam salvos.",
+    "Excluir produto",
+    "perigo"
+  );
+
+  if (!confirmar) return;
+
+  try {
+    await valisysDB.excluirProduto(idOuEan);
+    alert("Produto excluído.");
+    await carregarProdutos();
+  } catch (erro) {
+    alert("Erro ao excluir produto: " + erro.message);
+  }
+}
+
+window.excluirProdutoCadastro = excluirProdutoCadastro;
+
+
 async function carregarProdutos() {
   lista.innerHTML = `<div class="card"><p class="muted">Carregando produtos...</p></div>`;
 
@@ -836,7 +925,7 @@ async function carregarProdutos() {
       return;
     }
 
-    lista.innerHTML = produtos.map(produto => cardProdutoHTML(produto)).join("");
+    lista.innerHTML = produtos.map(produto => cardProdutoCadastroHTML(produto)).join("");
   } catch (erro) {
     console.error(erro);
     lista.innerHTML = `
@@ -863,10 +952,10 @@ form.addEventListener("submit", async function(event) {
     nome: nomeInput.value.trim(),
     marca: marcaInput.value.trim(),
     fabricante: fabricanteInput.value.trim(),
-    sabor: "",
-    categoria: "",
     ...lerCamposExtrasProduto(),
-    foto: produtoAtualCadastro?.foto || "",
+    sabor: saborInput?.value.trim() || "",
+    categoria: "",
+    foto: fotoBase64 || produtoAtualCadastro?.foto || "",
     fonte: produtoAtualCadastro?.fonte || "Cadastro básico"
   };
 

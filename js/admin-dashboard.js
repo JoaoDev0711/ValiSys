@@ -16,6 +16,9 @@ const regiaoLojaAdmin = document.getElementById("regiaoLojaAdmin");
 const corLojaAdmin = document.getElementById("corLojaAdmin");
 const imagemLojaAdmin = document.getElementById("imagemLojaAdmin");
 const previewImagemLojaAdmin = document.getElementById("previewImagemLojaAdmin");
+const setoresLojaAdmin = document.getElementById("setoresLojaAdmin");
+const gerentesPreCadastroAdmin = document.getElementById("gerentesPreCadastroAdmin");
+const encarregadosPreCadastroAdmin = document.getElementById("encarregadosPreCadastroAdmin");
 const listaLojasAdmin = document.getElementById("lista-lojas-admin");
 const qtdLojasAdmin = document.getElementById("qtd-lojas-admin");
 const qtdLojasInativasAdmin = document.getElementById("qtd-lojas-inativas-admin");
@@ -36,6 +39,58 @@ const adminLojaAtual = document.getElementById("admin-loja-atual");
 let imagemLojaBase64 = "";
 let lojasAdminCache = [];
 let lancamentosAdminCache = [];
+
+
+function lerLinhasTextarea(valor) {
+  return String(valor || "")
+    .split(/\n|,/)
+    .map(item => item.trim())
+    .filter(Boolean);
+}
+
+function setoresFormularioAdmin() {
+  const setores = lerLinhasTextarea(setoresLojaAdmin?.value || "");
+
+  return setores.length > 0
+    ? setores
+    : (valisysDB.setoresPadraoLoja ? valisysDB.setoresPadraoLoja() : ["Geral", "Mercearia", "Bebidas", "Frios e Laticínios", "Açougue", "Hortifruti", "Padaria", "Congelados", "Limpeza", "Higiene e Perfumaria", "Pet", "Outros"]);
+}
+
+function funcionariosPreCadastroAdmin(setores = []) {
+  const funcionarios = [];
+
+  lerLinhasTextarea(gerentesPreCadastroAdmin?.value || "").forEach(nome => {
+    funcionarios.push({
+      nome,
+      cargo: "gerente",
+      setor: "Geral",
+      codigoAcesso: ""
+    });
+  });
+
+  String(encarregadosPreCadastroAdmin?.value || "")
+    .split(/\n/)
+    .map(linha => linha.trim())
+    .filter(Boolean)
+    .forEach(linha => {
+      const partes = linha.split("|").map(parte => parte.trim());
+      const nome = partes[0] || "";
+      const setor = partes[1] || setores.find(item => item !== "Geral") || "Mercearia";
+      const codigoAcesso = partes[2] || "";
+
+      if (nome) {
+        funcionarios.push({
+          nome,
+          cargo: "encarregado",
+          setor,
+          codigoAcesso
+        });
+      }
+    });
+
+  return funcionarios;
+}
+
 
 function normalizarFiltro(valor) {
   return String(valor || "").trim().toLowerCase();
@@ -508,6 +563,99 @@ async function administrarLoja(id) {
   }
 }
 
+
+async function abrirModalEdicaoLoja(loja) {
+  const setoresAtuais = await valisysDB.listarSetoresLoja(loja.id)
+    .then(lista => lista.map(item => item.nome).join("\n"))
+    .catch(() => "");
+
+  return new Promise(resolve => {
+    let modal = document.getElementById("modal-editar-loja-admin");
+
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "modal-editar-loja-admin";
+      modal.className = "produto-popup-overlay";
+      modal.innerHTML = `
+        <div class="produto-popup-card">
+          <button type="button" class="produto-popup-fechar" id="fechar-editar-loja-admin">×</button>
+          <h2>Editar loja</h2>
+          <form id="form-editar-loja-admin">
+            <label for="editarLojaNome">Nome</label>
+            <input type="text" id="editarLojaNome" required>
+
+            <label for="editarLojaResponsavel">Responsável</label>
+            <input type="text" id="editarLojaResponsavel">
+
+            <label for="editarLojaGrupo">Grupo/Rede</label>
+            <input type="text" id="editarLojaGrupo">
+
+            <label for="editarLojaRegiao">Região</label>
+            <input type="text" id="editarLojaRegiao">
+
+            <label for="editarLojaCor">Cor</label>
+            <input type="color" id="editarLojaCor" value="#2f7d4f">
+
+            <label for="editarLojaSetores">Setores da loja</label>
+            <textarea id="editarLojaSetores" rows="5"></textarea>
+
+            <button type="submit">Salvar alterações</button>
+          </form>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+    }
+
+    const fechar = resultado => {
+      modal.classList.remove("active");
+      resolve(resultado);
+    };
+
+    modal.querySelector("#editarLojaNome").value = loja.nome || "";
+    modal.querySelector("#editarLojaResponsavel").value = loja.responsavel || "";
+    modal.querySelector("#editarLojaGrupo").value = loja.grupo || "";
+    modal.querySelector("#editarLojaRegiao").value = loja.regiao || "";
+    modal.querySelector("#editarLojaCor").value = normalizarHexCor(loja.corTema) || "#2f7d4f";
+    modal.querySelector("#editarLojaSetores").value = setoresAtuais || "";
+
+    const form = modal.querySelector("#form-editar-loja-admin");
+    const fecharBtn = modal.querySelector("#fechar-editar-loja-admin");
+
+    const novoForm = form.cloneNode(true);
+    form.replaceWith(novoForm);
+
+    novoForm.querySelector("#editarLojaNome").value = loja.nome || "";
+    novoForm.querySelector("#editarLojaResponsavel").value = loja.responsavel || "";
+    novoForm.querySelector("#editarLojaGrupo").value = loja.grupo || "";
+    novoForm.querySelector("#editarLojaRegiao").value = loja.regiao || "";
+    novoForm.querySelector("#editarLojaCor").value = normalizarHexCor(loja.corTema) || "#2f7d4f";
+    novoForm.querySelector("#editarLojaSetores").value = setoresAtuais || "";
+
+    fecharBtn.onclick = () => fechar(null);
+
+    modal.onclick = event => {
+      if (event.target === modal) fechar(null);
+    };
+
+    novoForm.onsubmit = event => {
+      event.preventDefault();
+
+      fechar({
+        nome: novoForm.querySelector("#editarLojaNome").value.trim(),
+        responsavel: novoForm.querySelector("#editarLojaResponsavel").value.trim(),
+        grupo: novoForm.querySelector("#editarLojaGrupo").value.trim(),
+        regiao: novoForm.querySelector("#editarLojaRegiao").value.trim(),
+        corTema: novoForm.querySelector("#editarLojaCor").value,
+        setores: lerLinhasTextarea(novoForm.querySelector("#editarLojaSetores").value)
+      });
+    };
+
+    modal.classList.add("active");
+  });
+}
+
+
 async function editarDadosLoja(id) {
   const loja = lojasAdminCache.find(item => item.id === id);
 
@@ -526,7 +674,14 @@ async function editarDadosLoja(id) {
   }
 
   try {
+    const setores = dados.setores || [];
+    delete dados.setores;
+
     await valisysDB.atualizarDadosLoja(id, dados);
+
+    if (setores.length > 0) {
+      await valisysDB.salvarSetoresLoja(id, setores);
+    }
 
     alert("Dados da loja atualizados.");
     await renderizarLojasAdmin();
@@ -557,7 +712,7 @@ async function excluirLojaAdmin(id) {
   const nome = loja?.nome || "esta loja";
 
   const confirmar = await confirmarAcao(
-    `Deseja excluir/desativar ${nome}? A loja sairá da seleção dos funcionários, mas pode ser reativada depois pelo admin.`,
+    `Deseja excluir ${nome}? Ela será removida da dashboard e da seleção de lojas.`,
     "Excluir loja"
   );
 
@@ -565,7 +720,9 @@ async function excluirLojaAdmin(id) {
 
   try {
     await valisysDB.excluirLoja(id);
-    alert("Loja excluída/desativada.");
+
+    lojasAdminCache = lojasAdminCache.filter(item => item.id !== id);
+    alert("Loja excluída.");
     await renderizarLojasAdmin();
   } catch (erro) {
     alert("Erro ao excluir loja: " + erro.message);
@@ -602,7 +759,8 @@ formLojaAdmin.addEventListener("submit", async event => {
   }
 
   try {
-    await valisysDB.criarLoja({
+    const setores = setoresFormularioAdmin();
+    const lojaCriada = await valisysDB.criarLoja({
       nome,
       responsavel,
       grupo,
@@ -611,8 +769,16 @@ formLojaAdmin.addEventListener("submit", async event => {
       imagem: imagemLojaBase64
     });
 
+    await valisysDB.salvarSetoresLoja(lojaCriada.id, setores);
+
+    const preFuncionarios = funcionariosPreCadastroAdmin(setores);
+    if (preFuncionarios.length > 0) {
+      await valisysDB.criarFuncionariosEmLote(lojaCriada.id, preFuncionarios);
+    }
+
     formLojaAdmin.reset();
     if (corLojaAdmin) corLojaAdmin.value = "#2f7d4f";
+    if (setoresLojaAdmin && valisysDB.setoresPadraoLoja) setoresLojaAdmin.value = valisysDB.setoresPadraoLoja().join("\n");
     imagemLojaBase64 = "";
     previewImagemLojaAdmin.innerHTML = "";
 

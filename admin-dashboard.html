@@ -167,6 +167,28 @@
       <input type="file" id="imagemLojaAdmin" accept="image/*">
       <p class="small muted">Aceita foto ou logo do celular.</p>
 
+      <label for="setoresLojaAdmin">Setores da loja</label>
+      <textarea id="setoresLojaAdmin" rows="4" placeholder="Um por linha: Mercearia, Bebidas, Frios e Laticínios...">Geral
+Mercearia
+Bebidas
+Frios e Laticínios
+Açougue
+Hortifruti
+Padaria
+Congelados
+Limpeza
+Higiene e Perfumaria
+Pet
+Outros</textarea>
+      <p class="small muted">Esses setores aparecem no lançamento e no cadastro de funcionários.</p>
+
+      <label for="gerentesPreCadastroAdmin">Pré-cadastrar gerentes</label>
+      <textarea id="gerentesPreCadastroAdmin" rows="2" placeholder="Um nome por linha. Ex: Maria Silva"></textarea>
+
+      <label for="encarregadosPreCadastroAdmin">Pré-cadastrar encarregados</label>
+      <textarea id="encarregadosPreCadastroAdmin" rows="3" placeholder="Formato: Nome | Setor | Código opcional"></textarea>
+      <p class="small muted">Exemplo: João Souza | Mercearia | 1234</p>
+
       <div id="previewImagemLojaAdmin" class="loja-preview"></div>
 
       <button type="submit">Salvar loja</button>
@@ -215,6 +237,7 @@
 <script src="js/loja.js"></script>
 <script src="js/site-dialog.js"></script>
 <script src="js/icons.js"></script>
+<script src="js/notificacoes-flutuantes.js"></script>
 <script src="js/navbar.js"></script>
 <script src="js/admin-dashboard.js"></script>
 </body>

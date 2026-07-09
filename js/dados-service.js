@@ -42,6 +42,7 @@ const valisysDB = {
     const { data, error } = await db
       .from("lojas")
       .select("*")
+      .neq("status", "excluida")
       .order("nome", { ascending: true });
 
     if (error) throw error;
@@ -167,7 +168,37 @@ const valisysDB = {
   },
 
   async excluirLoja(id) {
-    return await this.alternarStatusLoja(id, "inativa");
+    const db = this.client();
+
+    const atual = getLojaAtual();
+
+    const { error } = await db
+      .from("lojas")
+      .delete()
+      .eq("id", id);
+
+    if (!error) {
+      if (atual && atual.id === id) {
+        limparLojaAtual();
+      }
+
+      return true;
+    }
+
+    console.warn("Exclusão real bloqueada pelo banco. Marcando loja como excluída.", error);
+
+    const { error: erroFallback } = await db
+      .from("lojas")
+      .update({ status: "excluida" })
+      .eq("id", id);
+
+    if (erroFallback) throw error;
+
+    if (atual && atual.id === id) {
+      limparLojaAtual();
+    }
+
+    return true;
   },
 
   async listarFuncionarios(lojaId) {
@@ -226,6 +257,144 @@ const valisysDB = {
     if (resposta.error) throw resposta.error;
 
     return this.funcionarioDBParaApp(resposta.data);
+  },
+
+
+
+
+  setoresPadraoLoja() {
+    return [
+      "Geral",
+      "Mercearia",
+      "Bebidas",
+      "Frios e Laticínios",
+      "Açougue",
+      "Hortifruti",
+      "Padaria",
+      "Congelados",
+      "Limpeza",
+      "Higiene e Perfumaria",
+      "Pet",
+      "Outros"
+    ];
+  },
+
+  normalizarListaSetores(setores = []) {
+    const lista = Array.isArray(setores) ? setores : String(setores || "").split(/\n|,/);
+
+    const limpos = lista
+      .map(setor => String(setor || "").trim())
+      .filter(Boolean);
+
+    return [...new Set(limpos)];
+  },
+
+  async listarSetoresLoja(lojaId) {
+    const db = this.client();
+
+    try {
+      const { data, error } = await db
+        .from("setores_loja")
+        .select("*")
+        .eq("loja_id", lojaId)
+        .eq("ativo", true)
+        .order("nome", { ascending: true });
+
+      if (error) throw error;
+
+      const setores = (data || []).map(item => ({
+        id: item.id,
+        lojaId: item.loja_id,
+        nome: item.nome,
+        ativo: item.ativo !== false
+      }));
+
+      return setores.length > 0 ? setores : this.setoresPadraoLoja().map(nome => ({ id: nome, lojaId, nome, ativo: true }));
+    } catch (erro) {
+      console.warn("Tabela setores_loja indisponível. Usando setores padrão.", erro);
+
+      return this.setoresPadraoLoja().map(nome => ({ id: nome, lojaId, nome, ativo: true }));
+    }
+  },
+
+  async salvarSetoresLoja(lojaId, setores = []) {
+    const db = this.client();
+    const lista = this.normalizarListaSetores(setores);
+
+    if (lista.length === 0) return [];
+
+    try {
+      await db
+        .from("setores_loja")
+        .update({ ativo: false })
+        .eq("loja_id", lojaId);
+
+      const payload = lista.map(nome => ({
+        loja_id: lojaId,
+        nome,
+        ativo: true
+      }));
+
+      const { data, error } = await db
+        .from("setores_loja")
+        .insert(payload)
+        .select();
+
+      if (error) throw error;
+
+      return (data || []).map(item => ({
+        id: item.id,
+        lojaId: item.loja_id,
+        nome: item.nome,
+        ativo: item.ativo !== false
+      }));
+    } catch (erro) {
+      console.warn("Não foi possível salvar setores da loja. Rode o SQL único atualizado.", erro);
+      return lista.map(nome => ({ id: nome, lojaId, nome, ativo: true }));
+    }
+  },
+
+  async criarFuncionariosEmLote(lojaId, funcionarios = []) {
+    const lista = Array.isArray(funcionarios) ? funcionarios : [];
+
+    const criados = [];
+
+    for (const item of lista) {
+      const nome = String(item.nome || "").trim();
+      const cargo = String(item.cargo || "").trim();
+      const setor = String(item.setor || "").trim() || (cargo === "gerente" ? "Geral" : "");
+      const codigoAcesso = String(item.codigoAcesso || "").trim();
+
+      if (!nome || !cargo) continue;
+
+      try {
+        const existente = await this.buscarFuncionarioPorNomeCargo(nome, cargo, lojaId, codigoAcesso);
+
+        if (existente) {
+          criados.push(existente);
+          continue;
+        }
+      } catch (erroBusca) {
+        console.warn("Não foi possível verificar funcionário existente.", erroBusca);
+      }
+
+      try {
+        const criado = await this.criarFuncionario({
+          lojaId,
+          nome,
+          cargo,
+          setor,
+          codigoAcesso: cargo === "encarregado" ? (codigoAcesso || String(Math.floor(1000 + Math.random() * 9000))) : "",
+          marcaPromotoria: ""
+        });
+
+        criados.push(criado);
+      } catch (erroCriar) {
+        console.warn("Não foi possível pré-cadastrar funcionário.", item, erroCriar);
+      }
+    }
+
+    return criados;
   },
 
 
@@ -727,14 +896,22 @@ const valisysDB = {
   async listarProdutos() {
     const db = this.client();
 
-    const { data, error } = await db
+    let resposta = await db
       .from("produtos")
       .select("*")
+      .eq("ativo", true)
       .order("nome", { ascending: true });
 
-    if (error) throw error;
+    if (resposta.error && String(resposta.error.message || "").includes("ativo")) {
+      resposta = await db
+        .from("produtos")
+        .select("*")
+        .order("nome", { ascending: true });
+    }
 
-    return (data || []).map(this.produtoDBParaApp);
+    if (resposta.error) throw resposta.error;
+
+    return (resposta.data || []).map(this.produtoDBParaApp);
   },
 
 
@@ -755,17 +932,27 @@ const valisysDB = {
     try {
       const db = this.client();
 
-      const { data, error } = await db
+      let resposta = await db
         .from("produtos")
         .select("*")
         .or(`nome.ilike.%${seguro}%,marca.ilike.%${seguro}%,fabricante.ilike.%${seguro}%,categoria.ilike.%${seguro}%,ean.ilike.%${seguro}%`)
+        .eq("ativo", true)
         .order("nome", { ascending: true })
         .limit(1);
 
-      if (error) throw error;
+      if (resposta.error && String(resposta.error.message || "").includes("ativo")) {
+        resposta = await db
+          .from("produtos")
+          .select("*")
+          .or(`nome.ilike.%${seguro}%,marca.ilike.%${seguro}%,fabricante.ilike.%${seguro}%,categoria.ilike.%${seguro}%,ean.ilike.%${seguro}%`)
+          .order("nome", { ascending: true })
+          .limit(1);
+      }
 
-      if (data && data[0]) {
-        return this.produtoDBParaApp(data[0]);
+      if (resposta.error) throw resposta.error;
+
+      if (resposta.data && resposta.data[0]) {
+        return this.produtoDBParaApp(resposta.data[0]);
       }
     } catch (erro) {
       console.warn("Busca por texto em produtos falhou. Tentando catálogo.", erro);
@@ -787,15 +974,24 @@ const valisysDB = {
   async buscarProdutoPorEAN(ean) {
     const db = this.client();
 
-    const { data, error } = await db
+    let resposta = await db
       .from("produtos")
       .select("*")
       .eq("ean", ean)
+      .eq("ativo", true)
       .maybeSingle();
 
-    if (error) throw error;
+    if (resposta.error && String(resposta.error.message || "").includes("ativo")) {
+      resposta = await db
+        .from("produtos")
+        .select("*")
+        .eq("ean", ean)
+        .maybeSingle();
+    }
 
-    return data ? this.produtoDBParaApp(data) : null;
+    if (resposta.error) throw resposta.error;
+
+    return resposta.data ? this.produtoDBParaApp(resposta.data) : null;
   },
 
   async salvarProduto(produto) {
@@ -821,19 +1017,67 @@ const valisysDB = {
       ecoscore: produto.ecoscore || "",
       nova: produto.nova || "",
       foto: produto.foto || "",
-      fonte: produto.fonte || "sistema"
+      fonte: produto.fonte || "sistema",
+      ativo: produto.ativo !== false
     };
 
-    const { data, error } = await db
+    let resposta = await db
       .from("produtos")
       .upsert(payload, { onConflict: "ean" })
       .select()
       .single();
 
-    if (error) throw error;
+    if (resposta.error && String(resposta.error.message || "").includes("ativo")) {
+      delete payload.ativo;
 
-    return this.produtoDBParaApp(data);
+      resposta = await db
+        .from("produtos")
+        .upsert(payload, { onConflict: "ean" })
+        .select()
+        .single();
+    }
+
+    if (resposta.error) throw resposta.error;
+
+    return this.produtoDBParaApp(resposta.data);
   },
+
+
+  async excluirProduto(idOuEan) {
+    const db = this.client();
+    const valor = String(idOuEan || "").trim();
+
+    if (!valor) return false;
+
+    let query = db.from("produtos").delete();
+
+    if (valor.includes("-")) {
+      query = query.eq("id", valor);
+    } else {
+      query = query.eq("ean", valor);
+    }
+
+    const { error } = await query;
+
+    if (!error) return true;
+
+    console.warn("Exclusão real de produto bloqueada. Tentando ocultar produto.", error);
+
+    let update = db.from("produtos").update({ ativo: false });
+
+    if (valor.includes("-")) {
+      update = update.eq("id", valor);
+    } else {
+      update = update.eq("ean", valor);
+    }
+
+    const { error: erroFallback } = await update;
+
+    if (erroFallback) throw error;
+
+    return true;
+  },
+
 
   async criarLancamento(item) {
     const db = this.client();
@@ -1113,6 +1357,7 @@ const valisysDB = {
       nova: data.nova || "",
       foto: data.foto || "",
       fonte: data.fonte || "sistema",
+      ativo: data.ativo !== false,
       criadoEm: data.criado_em || ""
     };
   },

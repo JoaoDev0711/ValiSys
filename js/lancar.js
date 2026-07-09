@@ -11,6 +11,7 @@ const form = document.getElementById("form-lancamento");
 const eanInput = document.getElementById("ean");
 const nomeInput = document.getElementById("nomeProduto");
 const produtoPreview = document.getElementById("produto-preview");
+const setorSelect = document.getElementById("setor");
 const buscaCatalogoLancamentoInput = document.getElementById("busca-catalogo-lancamento");
 const btnBuscarCatalogoLancamento = document.getElementById("btn-buscar-catalogo-lancamento");
 const resultadoCatalogoLancamento = document.getElementById("resultado-catalogo-lancamento");
@@ -39,6 +40,31 @@ let ultimoNomeBuscadoAutomatico = "";
 let popupCadastroAberto = false;
 
 const scannerStatus = document.getElementById("scanner-status");
+
+async function carregarSetoresLancamento() {
+  if (!setorSelect || !lojaAtual) return;
+
+  const valorAtual = setorSelect.value;
+
+  try {
+    const setores = await valisysDB.listarSetoresLoja(lojaAtual.id);
+
+    setorSelect.innerHTML = `
+      <option value="">Selecione o setor</option>
+      ${setores.map(setor => `<option value="${esc(setor.nome)}">${esc(setor.nome)}</option>`).join("")}
+    `;
+
+    if ([...setorSelect.options].some(op => op.value === valorAtual)) {
+      setorSelect.value = valorAtual;
+    }
+  } catch (erro) {
+    console.warn("Não foi possível carregar setores da loja.", erro);
+  }
+}
+
+carregarSetoresLancamento();
+
+
 
 
 function cameraPreferencialDoCelular() {
@@ -463,6 +489,9 @@ function garantirPopupCadastroBasico() {
         <label for="popupProdutoFabricante">Fabricante</label>
         <input type="text" id="popupProdutoFabricante" placeholder="Ex: M. Dias Branco">
 
+        <label for="popupProdutoSabor">Sabor ou variação</label>
+        <input type="text" id="popupProdutoSabor" placeholder="Ex: Tradicional, Chocolate, Integral">
+
         <label for="popupProdutoFoto">Foto</label>
         <input type="file" id="popupProdutoFoto" accept="image/*">
 
@@ -504,6 +533,7 @@ async function abrirPopupCadastroBasico({ ean = "", nome = "" } = {}) {
   modal.querySelector("#popupProdutoNome").value = nomeLimpo;
   modal.querySelector("#popupProdutoMarca").value = produtoAtual?.marca || "";
   modal.querySelector("#popupProdutoFabricante").value = produtoAtual?.fabricante || "";
+  modal.querySelector("#popupProdutoSabor").value = produtoAtual?.sabor || "";
   modal.querySelector("#popupProdutoFoto").value = "";
 
   modal.classList.add("active");
@@ -522,6 +552,7 @@ async function salvarPopupCadastroBasico(event) {
   const nome = modal.querySelector("#popupProdutoNome").value.trim();
   const marca = modal.querySelector("#popupProdutoMarca").value.trim();
   const fabricante = modal.querySelector("#popupProdutoFabricante").value.trim();
+  const sabor = modal.querySelector("#popupProdutoSabor").value.trim();
   const fotoArquivo = modal.querySelector("#popupProdutoFoto").files?.[0] || null;
 
   if (!ean || !validarEAN(ean)) {
@@ -535,14 +566,14 @@ async function salvarPopupCadastroBasico(event) {
   }
 
   try {
-    const foto = await arquivoParaBase64(fotoArquivo);
+    const foto = fotoArquivo ? await arquivoParaBase64(fotoArquivo) : (produtoAtual?.foto || "");
 
     const produto = {
       ean,
       nome,
       marca,
       fabricante,
-      sabor: "",
+      sabor,
       categoria: "",
       quantidadePadrao: "",
       porcao: "",
@@ -598,6 +629,39 @@ async function buscarProdutoPorNomeAutomatico(nome) {
     }
   } catch (erro) {
     console.warn("Busca automática por nome falhou.", erro);
+  }
+
+  try {
+    produtoPreview.innerHTML = `
+      <div class="card">
+        <p class="muted">Buscando foto e dados pela base pública...</p>
+      </div>
+    `;
+
+    const produtoFonte = typeof buscarProdutoFontePorNome === "function"
+      ? await buscarProdutoFontePorNome(termo)
+      : null;
+
+    if (produtoFonte && produtoFonte.nome) {
+      produtoAtual = produtoFonte;
+
+      if (produtoFonte.ean && validarEAN(produtoFonte.ean)) {
+        eanInput.value = produtoFonte.ean;
+
+        try {
+          const salvo = await valisysDB.salvarProduto(produtoFonte);
+          produtoAtual = salvo || produtoFonte;
+        } catch (erroSalvarFonteNome) {
+          console.warn("Produto encontrado por nome, mas não foi salvo automaticamente.", erroSalvarFonteNome);
+        }
+      }
+
+      nomeInput.value = produtoAtual.nome || termo;
+      produtoPreview.innerHTML = cardProdutoHTML(produtoAtual, "Produto/foto encontrado pelo nome.");
+      return produtoAtual;
+    }
+  } catch (erroFonteNome) {
+    console.warn("Busca por nome na base pública falhou.", erroFonteNome);
   }
 
   produtoAtual = null;

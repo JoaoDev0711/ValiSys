@@ -1,3 +1,87 @@
+async function buscarProdutoFontePorNome(termo) {
+  const busca = String(termo || "").trim();
+
+  if (busca.length < 3) return null;
+
+  const campos = [
+    "code",
+    "product_name",
+    "product_name_pt",
+    "generic_name",
+    "abbreviated_product_name",
+    "brands",
+    "categories",
+    "main_category",
+    "quantity",
+    "serving_size",
+    "manufacturers",
+    "manufacturer",
+    "producer",
+    "producers",
+    "owner",
+    "packaging",
+    "packaging_text",
+    "image_front_url",
+    "image_url",
+    "selected_images",
+    "images"
+  ].join(",");
+
+  const urls = [
+    `https://br.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(busca)}&search_simple=1&action=process&json=1&page_size=5&fields=${campos}`,
+    `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(busca)}&search_simple=1&action=process&json=1&page_size=5&fields=${campos}`
+  ];
+
+  for (const url of urls) {
+    try {
+      const resposta = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+
+      if (!resposta.ok) continue;
+
+      const dados = await resposta.json();
+      const lista = Array.isArray(dados.products) ? dados.products : [];
+      const produto = lista.find(item => limparTexto(item.product_name_pt || item.product_name || item.generic_name || ""));
+
+      if (!produto) continue;
+
+      const codigo = String(produto.code || "").replace(/\D/g, "");
+      const nome =
+        produto.product_name_pt ||
+        produto.product_name ||
+        produto.abbreviated_product_name ||
+        produto.generic_name ||
+        busca;
+
+      const marca = limparMarca(produto.brands || "");
+
+      return normalizarProdutoCompleto({
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+        ean: codigo,
+        nome: limparTexto(nome),
+        marca,
+        fabricante: identificarFabricante(produto, marca),
+        sabor: identificarSabor(produto),
+        categoria: limparCategoria(produto.categories || produto.main_category || ""),
+        quantidadePadrao: montarQuantidade(produto),
+        porcao: limparTexto(produto.serving_size || ""),
+        embalagem: limparLista(produto.packaging || produto.packaging_text || ""),
+        foto: obterFotoProduto(produto),
+        fonte: url.includes("br.openfoodfacts") ? "busca por nome na base pública Brasil" : "busca por nome na base pública"
+      }, codigo);
+    } catch (erro) {
+      console.warn("Busca de foto/produto por nome falhou nesta fonte.", erro);
+    }
+  }
+
+  return null;
+}
+
+
 async function buscarProdutoFonteProdutos(ean) {
   const codigo = normalizarCodigo(ean);
 
@@ -514,6 +598,7 @@ function cardProdutoHTML(produto, mensagem = "") {
           <p class="muted">EAN: ${esc(produto.ean || "Não informado")}</p>
           <p><strong>Marca:</strong> ${esc(produto.marca || "Não informada")}</p>
           <p><strong>Fabricante:</strong> ${esc(produto.fabricante || "Não informado")}</p>
+          ${produto.sabor ? `<p><strong>Sabor:</strong> ${esc(produto.sabor)}</p>` : ""}
         </div>
         ${
           produto.foto

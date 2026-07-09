@@ -133,6 +133,41 @@ on public.marcas_promotoria(loja_id);
 create index if not exists idx_marcas_promotoria_nome
 on public.marcas_promotoria(nome);
 
+
+-- =========================
+-- TABELA: SETORES DA LOJA
+-- =========================
+create table if not exists public.setores_loja (
+  id uuid primary key default gen_random_uuid(),
+  loja_id uuid references public.lojas(id) on delete cascade,
+  nome text not null,
+  ativo boolean not null default true,
+  criado_em timestamptz not null default now()
+);
+
+alter table public.setores_loja
+add column if not exists loja_id uuid references public.lojas(id) on delete cascade;
+
+alter table public.setores_loja
+add column if not exists nome text;
+
+alter table public.setores_loja
+add column if not exists ativo boolean not null default true;
+
+alter table public.setores_loja
+add column if not exists criado_em timestamptz not null default now();
+
+update public.setores_loja
+set ativo = true
+where ativo is null;
+
+create index if not exists idx_setores_loja_loja
+on public.setores_loja(loja_id);
+
+create index if not exists idx_setores_loja_nome
+on public.setores_loja(nome);
+
+
 -- =========================
 -- TABELA: CATÁLOGO INTERNO DE PRODUTOS
 -- =========================
@@ -433,6 +468,7 @@ create table if not exists public.produtos (
   nova text,
   foto text,
   fonte text,
+  ativo boolean not null default true,
   criado_em timestamptz not null default now()
 );
 
@@ -495,6 +531,13 @@ add column if not exists foto text;
 
 alter table public.produtos
 add column if not exists fonte text;
+
+alter table public.produtos
+add column if not exists ativo boolean not null default true;
+
+update public.produtos
+set ativo = true
+where ativo is null;
 
 alter table public.produtos
 add column if not exists criado_em timestamptz not null default now();
@@ -738,6 +781,7 @@ create index if not exists idx_notificacoes_lida on public.notificacoes(lida);
 alter table public.lojas enable row level security;
 alter table public.funcionarios enable row level security;
 alter table public.marcas_promotoria enable row level security;
+alter table public.setores_loja enable row level security;
 alter table public.catalogo_produtos enable row level security;
 alter table public.produtos enable row level security;
 alter table public.lancamentos enable row level security;
@@ -754,6 +798,10 @@ drop policy if exists "ValiSys update funcionarios" on public.funcionarios;
 drop policy if exists "ValiSys delete funcionarios" on public.funcionarios;
 
 drop policy if exists "ValiSys select marcas_promotoria" on public.marcas_promotoria;
+drop policy if exists "ValiSys select setores_loja" on public.setores_loja;
+drop policy if exists "ValiSys insert setores_loja" on public.setores_loja;
+drop policy if exists "ValiSys update setores_loja" on public.setores_loja;
+drop policy if exists "ValiSys delete setores_loja" on public.setores_loja;
 drop policy if exists "ValiSys insert marcas_promotoria" on public.marcas_promotoria;
 drop policy if exists "ValiSys update marcas_promotoria" on public.marcas_promotoria;
 drop policy if exists "ValiSys delete marcas_promotoria" on public.marcas_promotoria;
@@ -812,6 +860,18 @@ create policy "ValiSys update marcas_promotoria" on public.marcas_promotoria
 for update to anon using (true) with check (true);
 
 create policy "ValiSys delete marcas_promotoria" on public.marcas_promotoria
+for delete to anon using (true);
+
+create policy "ValiSys select setores_loja" on public.setores_loja
+for select to anon using (true);
+
+create policy "ValiSys insert setores_loja" on public.setores_loja
+for insert to anon with check (true);
+
+create policy "ValiSys update setores_loja" on public.setores_loja
+for update to anon using (true) with check (true);
+
+create policy "ValiSys delete setores_loja" on public.setores_loja
 for delete to anon using (true);
 
 create policy "ValiSys select catalogo_produtos" on public.catalogo_produtos

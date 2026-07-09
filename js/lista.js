@@ -177,7 +177,7 @@ async function renderizarLista() {
           statusPrazo = `<span class="badge success">Vence em ${diff} dia(s)</span>`;
         }
 
-        const podeNotificar = podeVerNotificacoes(usuario.cargo) && diff <= 0 && statusItem !== "retirado";
+        const podeNotificar = diff <= 0 && statusItem !== "retirado";
         const podeRetirar = statusItem !== "retirado";
         const podeReativar = statusItem === "retirado" && ["encarregado", "gerente", "admin"].includes(usuario.cargo);
 
@@ -216,7 +216,7 @@ async function renderizarLista() {
             <div class="card-actions stack-actions">
               ${podeRetirar ? `<button type="button" onclick="marcarRetirado('${item.id}')">Marcar como retirado</button>` : ""}
               ${podeReativar ? `<button type="button" onclick="reativarItem('${item.id}')">Reativar item</button>` : ""}
-              ${podeNotificar ? `<button type="button" class="btn-warning" onclick="notificarGerencia('${item.id}')">Notificar gerente/encarregado</button>` : ""}
+              ${podeNotificar ? `<button type="button" class="btn-warning" onclick="notificarGerencia('${item.id}')">Notificar equipe</button>` : ""}
               <button type="button" class="btn-danger" onclick="apagarLancamento('${item.id}')">Apagar lançamento</button>
             </div>
           </article>
@@ -296,7 +296,11 @@ async function notificarGerencia(id) {
       criadoPor: `${usuario.nome} (${nomeCargo(usuario.cargo)})`
     });
 
-    alert("Aviso interno salvo.");
+    if (typeof mostrarToastNotificacao === "function") {
+      mostrarToastNotificacao("Aviso enviado para a equipe.");
+    } else {
+      alert("Aviso interno salvo.");
+    }
   } catch (erro) {
     alert("Erro ao notificar: " + erro.message);
   }

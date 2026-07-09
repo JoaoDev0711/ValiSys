@@ -17,7 +17,7 @@
 <main class="container">
   <section class="card">
     <h2>Cadastrar produto</h2>
-    <p class="muted">Gerente e admin podem cadastrar produtos. Use apenas EAN, nome, marca e fabricante. Ao escanear ou digitar um EAN válido, o sistema busca automaticamente.</p>
+    <p class="muted">Gerente e admin podem cadastrar produtos. Use EAN, nome, marca, fabricante, sabor e foto. Ao escanear ou digitar um EAN válido, o sistema busca automaticamente.</p>
 
     <div class="button-row">
       <button type="button" id="btn-camera">📷 Escanear EAN</button>
@@ -43,6 +43,13 @@
       <label for="fabricante">Fabricante</label>
       <input type="text" id="fabricante" placeholder="Ex: M. Dias Branco">
 
+      <label for="sabor">Sabor ou variação</label>
+      <input type="text" id="sabor" placeholder="Ex: Tradicional, Chocolate, Integral">
+
+      <label for="fotoArquivo">Foto do produto</label>
+      <input type="file" id="fotoArquivo" accept="image/*" capture="environment">
+      <p class="small muted">Se não escolher foto, o sistema tenta puxar automaticamente pelo EAN ou pelo nome.</p>
+
       <div id="preview-foto"></div>
 
       <button type="submit">Salvar produto</button>
@@ -65,6 +72,7 @@
 <script src="js/loja.js"></script>
 <script src="js/site-dialog.js"></script>
 <script src="js/icons.js"></script>
+<script src="js/notificacoes-flutuantes.js"></script>
 <script src="js/produtos-fonte.js"></script>
 <script src="js/produto.js"></script>
 </body>

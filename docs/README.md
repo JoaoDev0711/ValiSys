@@ -735,3 +735,74 @@ Leitor de código:
 Não mostra mais mensagem de resolução da câmera.
 Mostra apenas status de leitura: abrindo câmera, tentando ler, EAN detectado/confirmado ou erro.
 ```
+
+
+---
+
+## Correção exclusão real de loja e SVG admin
+
+Exclusão de loja:
+
+```txt
+Agora o botão Excluir loja tenta apagar a loja do banco.
+Se o banco bloquear por causa de vínculos antigos, a loja é marcada como "excluida".
+Lojas com status "excluida" não aparecem mais na dashboard admin nem na seleção de lojas.
+```
+
+SVG do admin:
+
+```txt
+O ícone de admin foi trocado por um SVG simples de escudo.
+Foi removido o SVG bugado de engrenagem no avatar/menu do admin.
+```
+
+
+---
+
+## Produtos, notificações, setores e pré-cadastro
+
+Ajustes desta versão:
+
+```txt
+Produtos
+- voltou o campo Sabor/variação
+- voltou cadastro de foto do produto
+- tenta puxar foto automaticamente pelo EAN
+- tenta puxar foto/dados automaticamente pelo nome digitado
+- produto cadastrado agora pode ser excluído na tela Cadastrar produto
+```
+
+```txt
+Notificações
+- voltou o botão para notificar a equipe nos itens vencidos/vencendo hoje
+- a notificação aparece de forma discreta no canto da tela
+- não polui a dashboard com blocos grandes
+```
+
+```txt
+Setores da loja
+- admin define os setores na criação da loja
+- os setores aparecem automaticamente no lançamento
+- os setores aparecem automaticamente no cadastro de funcionários
+```
+
+```txt
+Pré-cadastro
+- admin pode pré-cadastrar gerentes ao criar a loja
+- admin pode pré-cadastrar encarregados ao criar a loja
+- formato do encarregado: Nome | Setor | Código opcional
+```
+
+Importante para Supabase:
+
+```txt
+Rode novamente database/valisys-sql-unico.sql no SQL Editor.
+```
+
+Isso cria/atualiza:
+
+```txt
+setores_loja
+produtos.ativo
+políticas de acesso dos setores
+```
