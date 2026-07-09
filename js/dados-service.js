@@ -431,6 +431,173 @@ const valisysDB = {
     return (data || []).map(this.funcionarioDBParaApp);
   },
 
+
+  catalogoProdutoDBParaApp(data) {
+    return {
+      id: data.id || data.codigo_interno || gerarIdLocal("catalogo"),
+      codigoInterno: data.codigo_interno || "",
+      ean: data.ean || "",
+      nome: data.nome || "",
+      marca: data.marca || "",
+      fabricante: data.fabricante || "",
+      sabor: data.sabor || "",
+      categoria: data.categoria || "",
+      quantidadePadrao: data.quantidade_padrao || "",
+      porcao: data.porcao || "",
+      embalagem: data.embalagem || "",
+      origem: data.origem || "",
+      paises: data.paises || "",
+      lojas: data.lojas_encontradas || "",
+      ingredientes: data.ingredientes || "",
+      alergicos: data.alergicos || "",
+      rastros: data.rastros || "",
+      nutriscore: data.nutriscore || "",
+      ecoscore: data.ecoscore || "",
+      nova: data.nova || "",
+      foto: data.foto || "",
+      fonte: data.fonte || "Catálogo interno ValiSys",
+      ativo: data.ativo !== false,
+      criadoEm: data.criado_em || ""
+    };
+  },
+
+  catalogoFallbackParaApp(item) {
+    return {
+      id: item.id || item.codigoInterno || gerarIdLocal("catalogo"),
+      codigoInterno: item.codigoInterno || "",
+      ean: item.ean || "",
+      nome: item.nome || "",
+      marca: item.marca || "",
+      fabricante: item.fabricante || "",
+      sabor: item.sabor || "",
+      categoria: item.categoria || "",
+      quantidadePadrao: item.quantidadePadrao || "",
+      porcao: item.porcao || "",
+      embalagem: item.embalagem || "",
+      origem: item.origem || "",
+      paises: item.paises || "",
+      lojas: item.lojas || "",
+      ingredientes: item.ingredientes || "",
+      alergicos: item.alergicos || "",
+      rastros: item.rastros || "",
+      nutriscore: item.nutriscore || "",
+      ecoscore: item.ecoscore || "",
+      nova: item.nova || "",
+      foto: item.foto || "",
+      fonte: item.fonte || "Catálogo interno ValiSys",
+      ativo: item.ativo !== false
+    };
+  },
+
+  filtrarCatalogoFallback(termo = "", limite = 20) {
+    const lista = (window.VALISYS_CATALOGO_PRODUTOS || []).map(this.catalogoFallbackParaApp);
+    const busca = String(termo || "").trim().toLowerCase();
+
+    const filtrados = busca
+      ? lista.filter(item => [
+          item.ean,
+          item.codigoInterno,
+          item.nome,
+          item.marca,
+          item.fabricante,
+          item.categoria,
+          item.quantidadePadrao,
+          item.embalagem
+        ].join(" ").toLowerCase().includes(busca))
+      : lista;
+
+    return filtrados.slice(0, limite);
+  },
+
+  async buscarCatalogoProdutoPorEAN(ean) {
+    const codigo = String(ean || "").trim();
+
+    if (!codigo) return null;
+
+    try {
+      const db = this.client();
+
+      const { data, error } = await db
+        .from("catalogo_produtos")
+        .select("*")
+        .eq("ean", codigo)
+        .eq("ativo", true)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      return data ? this.catalogoProdutoDBParaApp(data) : null;
+    } catch (erro) {
+      console.warn("Catálogo no banco indisponível. Usando fallback JS.", erro);
+
+      return this.filtrarCatalogoFallback(codigo, 1)[0] || null;
+    }
+  },
+
+  async buscarCatalogoProdutos(termo = "", limite = 20) {
+    const busca = String(termo || "").trim();
+
+    try {
+      const db = this.client();
+
+      let query = db
+        .from("catalogo_produtos")
+        .select("*")
+        .eq("ativo", true)
+        .limit(limite);
+
+      if (busca) {
+        const seguro = busca
+          .replaceAll("%", "")
+          .replaceAll(",", " ")
+          .replaceAll("(", " ")
+          .replaceAll(")", " ")
+          .trim();
+
+        query = query.or(`nome.ilike.%${seguro}%,marca.ilike.%${seguro}%,fabricante.ilike.%${seguro}%,categoria.ilike.%${seguro}%,quantidade_padrao.ilike.%${seguro}%`);
+      }
+
+      const { data, error } = await query.order("nome", { ascending: true });
+
+      if (error) throw error;
+
+      return (data || []).map(this.catalogoProdutoDBParaApp);
+    } catch (erro) {
+      console.warn("Busca no catálogo do banco falhou. Usando catálogo JS interno.", erro);
+
+      return this.filtrarCatalogoFallback(busca, limite);
+    }
+  },
+
+  produtoDeCatalogoParaProduto(item, eanManual = "") {
+    const eanFinal = String(eanManual || item.ean || "").trim();
+
+    return {
+      id: item.id,
+      ean: eanFinal,
+      nome: item.nome || "",
+      marca: item.marca || "",
+      fabricante: item.fabricante || "",
+      sabor: item.sabor || "",
+      categoria: item.categoria || "",
+      quantidadePadrao: item.quantidadePadrao || "",
+      porcao: item.porcao || "",
+      embalagem: item.embalagem || "",
+      origem: item.origem || "",
+      paises: item.paises || "",
+      lojas: item.lojas || "",
+      ingredientes: item.ingredientes || "",
+      alergicos: item.alergicos || "",
+      rastros: item.rastros || "",
+      nutriscore: item.nutriscore || "",
+      ecoscore: item.ecoscore || "",
+      nova: item.nova || "",
+      foto: item.foto || "",
+      fonte: item.fonte || "Catálogo interno ValiSys",
+      criadoEm: new Date().toLocaleString("pt-BR")
+    };
+  },
+
   async listarProdutos() {
     const db = this.client();
 

@@ -11,6 +11,11 @@ const form = document.getElementById("form-lancamento");
 const eanInput = document.getElementById("ean");
 const nomeInput = document.getElementById("nomeProduto");
 const produtoPreview = document.getElementById("produto-preview");
+const buscaCatalogoLancamentoInput = document.getElementById("busca-catalogo-lancamento");
+const btnBuscarCatalogoLancamento = document.getElementById("btn-buscar-catalogo-lancamento");
+const resultadoCatalogoLancamento = document.getElementById("resultado-catalogo-lancamento");
+
+let catalogoLancamentoCache = [];
 
 const btnCamera = document.getElementById("btn-camera");
 const btnPararCamera = document.getElementById("btn-parar-camera");
@@ -27,6 +32,8 @@ let leitorCamera = null;
 let ultimoCodigoLido = "";
 let repeticoesCodigo = 0;
 let audioLiberado = false;
+let timerBuscaEANAutomatica = null;
+let ultimoEANBuscadoAutomatico = "";
 
 const scannerStatus = document.getElementById("scanner-status");
 
@@ -193,36 +200,41 @@ function normalizarCodigo(codigo) {
   return String(codigo || "").replace(/\D/g, "");
 }
 
+function validarGTIN(codigo) {
+  const gtin = normalizarCodigo(codigo);
+
+  if (![8, 12, 13, 14].includes(gtin.length)) return false;
+
+  const digitos = gtin.split("").map(Number);
+  const verificadorInformado = digitos.pop();
+
+  let soma = 0;
+  let peso = 3;
+
+  for (let i = digitos.length - 1; i >= 0; i--) {
+    soma += digitos[i] * peso;
+    peso = peso === 3 ? 1 : 3;
+  }
+
+  const verificadorCalculado = (10 - (soma % 10)) % 10;
+
+  return verificadorCalculado === verificadorInformado;
+}
+
 function validarEAN8(ean) {
-  if (!/^\d{8}$/.test(ean)) return false;
-
-  const digitos = ean.split("").map(Number);
-  const soma =
-    (digitos[0] + digitos[2] + digitos[4] + digitos[6]) * 3 +
-    (digitos[1] + digitos[3] + digitos[5]);
-
-  const verificador = (10 - (soma % 10)) % 10;
-
-  return verificador === digitos[7];
+  return normalizarCodigo(ean).length === 8 && validarGTIN(ean);
 }
 
 function validarEAN13(ean) {
-  if (!/^\d{13}$/.test(ean)) return false;
-
-  const digitos = ean.split("").map(Number);
-  let soma = 0;
-
-  for (let i = 0; i < 12; i++) {
-    soma += digitos[i] * (i % 2 === 0 ? 1 : 3);
-  }
-
-  const verificador = (10 - (soma % 10)) % 10;
-
-  return verificador === digitos[12];
+  return normalizarCodigo(ean).length === 13 && validarGTIN(ean);
 }
 
 function validarEAN(ean) {
-  return validarEAN13(ean) || validarEAN8(ean);
+  return validarGTIN(ean);
+}
+
+function tamanhoPossivelGTIN(codigo) {
+  return [8, 12, 13, 14].includes(normalizarCodigo(codigo).length);
 }
 
 function confirmarLeitura(codigo) {
@@ -295,6 +307,125 @@ async function pararCamera() {
 }
 
 
+
+function produtoCatalogoParaAtual(item) {
+  const eanManual = normalizarCodigo(eanInput.value);
+  return valisysDB.produtoDeCatalogoParaProduto(item, validarEAN(eanManual) ? eanManual : "");
+}
+
+function renderizarResultadosCatalogoLancamento(resultados) {
+  if (!resultadoCatalogoLancamento) return;
+
+  if (!resultados || resultados.length === 0) {
+    resultadoCatalogoLancamento.innerHTML = `<p class="muted">Nenhum produto encontrado na lista interna.</p>`;
+    return;
+  }
+
+  catalogoLancamentoCache = resultados;
+
+  resultadoCatalogoLancamento.innerHTML = `
+    <div class="catalogo-resultados">
+      ${resultados.map((item, index) => `
+        <article class="catalogo-item">
+          <div>
+            <strong>${esc(item.nome)}</strong>
+            <p>${esc(item.marca || "Sem marca")} • ${esc(item.fabricante || "Sem fabricante")}</p>
+            <small>${esc(item.categoria || "Sem categoria")} ${item.quantidadePadrao ? "• " + esc(item.quantidadePadrao) : ""}</small>
+          </div>
+          <button type="button" class="secondary" onclick="selecionarCatalogoLancamento(${index})">Usar</button>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+async function buscarCatalogoLancamento(termoManual = "") {
+  const termo = String(termoManual || buscaCatalogoLancamentoInput?.value || nomeInput.value || "").trim();
+
+  if (!termo) {
+    if (resultadoCatalogoLancamento) {
+      resultadoCatalogoLancamento.innerHTML = `<p class="muted">Digite nome, marca ou fabricante para buscar na lista interna.</p>`;
+    }
+    return [];
+  }
+
+  if (resultadoCatalogoLancamento) {
+    resultadoCatalogoLancamento.innerHTML = `<p class="muted">Buscando na lista interna...</p>`;
+  }
+
+  try {
+    const resultados = await valisysDB.buscarCatalogoProdutos(termo, 12);
+    renderizarResultadosCatalogoLancamento(resultados);
+    return resultados;
+  } catch (erro) {
+    console.error(erro);
+    if (resultadoCatalogoLancamento) {
+      resultadoCatalogoLancamento.innerHTML = `<p class="danger">Erro ao buscar na lista interna.</p>`;
+    }
+    return [];
+  }
+}
+
+function selecionarCatalogoLancamento(index) {
+  const item = catalogoLancamentoCache[index];
+
+  if (!item) return;
+
+  produtoAtual = produtoCatalogoParaAtual(item);
+  nomeInput.value = produtoAtual.nome || "";
+
+  if (buscaCatalogoLancamentoInput) {
+    buscaCatalogoLancamentoInput.value = `${produtoAtual.nome} ${produtoAtual.marca || ""}`.trim();
+  }
+
+  produtoPreview.innerHTML = cardProdutoHTML(produtoAtual, "Produto selecionado da lista interna.");
+}
+
+window.selecionarCatalogoLancamento = selecionarCatalogoLancamento;
+
+if (btnBuscarCatalogoLancamento) {
+  btnBuscarCatalogoLancamento.addEventListener("click", () => buscarCatalogoLancamento());
+}
+
+if (buscaCatalogoLancamentoInput) {
+  buscaCatalogoLancamentoInput.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      buscarCatalogoLancamento();
+    }
+  });
+}
+
+
+
+function agendarBuscaAutomaticaEAN() {
+  const ean = normalizarCodigo(eanInput.value);
+  eanInput.value = ean;
+
+  if (timerBuscaEANAutomatica) {
+    clearTimeout(timerBuscaEANAutomatica);
+  }
+
+  if (!tamanhoPossivelGTIN(ean)) {
+    return;
+  }
+
+  timerBuscaEANAutomatica = setTimeout(async () => {
+    const codigoAtual = normalizarCodigo(eanInput.value);
+
+    if (!validarEAN(codigoAtual)) {
+      return;
+    }
+
+    if (codigoAtual === ultimoEANBuscadoAutomatico) {
+      return;
+    }
+
+    ultimoEANBuscadoAutomatico = codigoAtual;
+    await buscarProdutoCompleto(codigoAtual);
+  }, 450);
+}
+
 async function buscarProdutoCompleto(ean) {
   const codigo = normalizarCodigo(ean);
 
@@ -326,6 +457,19 @@ async function buscarProdutoCompleto(ean) {
     return produto;
   }
 
+  try {
+    const itemCatalogo = await valisysDB.buscarCatalogoProdutoPorEAN(codigo);
+
+    if (itemCatalogo) {
+      produtoAtual = produtoCatalogoParaAtual(itemCatalogo);
+      nomeInput.value = produtoAtual.nome || "";
+      produtoPreview.innerHTML = cardProdutoHTML(produtoAtual, "Produto encontrado na lista interna.");
+      return produtoAtual;
+    }
+  } catch (erroCatalogo) {
+    console.warn("Catálogo interno por EAN não retornou produto.", erroCatalogo);
+  }
+
   produtoPreview.innerHTML = `
     <div class="card">
       <p class="muted">Produto não estava cadastrado. Buscando na base de produtos...</p>
@@ -354,6 +498,11 @@ async function buscarProdutoCompleto(ean) {
       </div>
     `;
     produtoAtual = null;
+
+    if (resultadoCatalogoLancamento) {
+      resultadoCatalogoLancamento.innerHTML = `<p class="muted">EAN não encontrado. Digite o nome, marca ou fabricante para buscar na lista interna.</p>`;
+    }
+
     return null;
   }
 
@@ -375,11 +524,38 @@ async function buscarProdutoCompleto(ean) {
 
 eanInput.addEventListener("blur", async () => {
   const ean = normalizarCodigo(eanInput.value);
+  eanInput.value = ean;
 
-  if (ean !== "") {
-    eanInput.value = ean;
-    await buscarProdutoCompleto(ean);
+  if (!ean) return;
+
+  if (!validarEAN(ean)) {
+    if (tamanhoPossivelGTIN(ean)) {
+      alert("Código de barras inválido. Confira se digitou todos os números corretamente.");
+    }
+    return;
   }
+
+  ultimoEANBuscadoAutomatico = ean;
+  await buscarProdutoCompleto(ean);
+});
+
+eanInput.addEventListener("input", agendarBuscaAutomaticaEAN);
+
+eanInput.addEventListener("keydown", async event => {
+  if (event.key !== "Enter") return;
+
+  event.preventDefault();
+
+  const ean = normalizarCodigo(eanInput.value);
+  eanInput.value = ean;
+
+  if (!validarEAN(ean)) {
+    alert("Código de barras inválido. Confira se digitou todos os números corretamente.");
+    return;
+  }
+
+  ultimoEANBuscadoAutomatico = ean;
+  await buscarProdutoCompleto(ean);
 });
 
 btnCamera.addEventListener("click", async () => {
@@ -445,6 +621,46 @@ form.addEventListener("submit", async function(event) {
   if (!nomeProduto) {
     alert("Informe o nome do produto.");
     return;
+  }
+
+  if (!produtoAtual || String(produtoAtual.ean || "") !== ean) {
+    produtoAtual = {
+      ean,
+      nome: nomeProduto,
+      marca: "",
+      fabricante: "",
+      sabor: "",
+      categoria: "",
+      quantidadePadrao: "",
+      porcao: "",
+      embalagem: "",
+      origem: "",
+      paises: "",
+      lojas: "",
+      ingredientes: "",
+      alergicos: "",
+      rastros: "",
+      nutriscore: "",
+      ecoscore: "",
+      nova: "",
+      foto: "",
+      fonte: "Cadastro manual pelo lançamento"
+    };
+  } else {
+    produtoAtual.ean = ean;
+    produtoAtual.nome = produtoAtual.nome || nomeProduto;
+  }
+
+  try {
+    const produtoSalvo = await valisysDB.salvarProduto({
+      ...produtoAtual,
+      ean,
+      nome: produtoAtual.nome || nomeProduto
+    });
+
+    produtoAtual = produtoSalvo || produtoAtual;
+  } catch (erroProdutoManual) {
+    console.warn("Não foi possível salvar o produto no cadastro antes do lançamento. O lançamento continuará.", erroProdutoManual);
   }
 
   const novo = {

@@ -516,3 +516,103 @@ Salva nome, cargo e marca da promotoria na sessão
 ```
 
 Gerente, encarregado e admin não precisam informar marca.
+
+
+---
+
+## Catálogo interno amplo de produtos
+
+Esta versão adiciona um catálogo interno de produtos para quando o EAN/API não retornar.
+
+Arquivos novos:
+
+```txt
+database/catalogo-produtos-base.sql
+js/catalogo-produtos-base.js
+```
+
+O SQL único também cria e popula a tabela:
+
+```txt
+catalogo_produtos
+```
+
+Campos do catálogo:
+
+```txt
+código interno
+EAN opcional
+nome
+marca
+fabricante
+sabor/variação
+categoria
+quantidade padrão
+porção
+embalagem
+origem
+países
+lojas encontradas
+ingredientes
+alérgicos
+rastros
+Nutri-Score
+Eco-Score
+NOVA
+foto
+fonte
+ativo
+```
+
+Fluxo de busca:
+
+```txt
+1. Busca no banco principal produtos
+2. Busca no catálogo interno por EAN
+3. Busca nas APIs gratuitas
+4. Se ainda não achar, permite buscar por nome/marca/fabricante/categoria
+5. Ao selecionar da lista interna, preenche o formulário automaticamente
+```
+
+Observação importante:
+
+```txt
+Produtos sem EAN oficial ficam com código interno.
+Isso evita inventar código de barras falso.
+Quando você tiver o EAN real, basta preencher o EAN no cadastro e salvar.
+```
+
+
+---
+
+## EAN automático como fluxo principal
+
+Nesta versão o EAN/GTIN é o centro do processo.
+
+Fluxo:
+
+```txt
+Escaneou pela câmera → validou o código → puxa produto automaticamente
+Digitou manualmente → quando o código fica válido → puxa produto automaticamente
+Pressionou Enter no campo EAN → puxa produto automaticamente
+Saiu do campo EAN → puxa produto automaticamente
+```
+
+Suporte de código:
+
+```txt
+GTIN-8
+GTIN-12 / UPC-A
+GTIN-13 / EAN-13
+GTIN-14
+```
+
+Se o EAN não existir nas fontes gratuitas:
+
+```txt
+O usuário pode digitar o nome manualmente.
+Ao salvar o lançamento/cadastro, o EAN fica salvo no banco interno.
+Na próxima leitura daquele mesmo EAN, o produto será puxado do banco do ValiSys.
+```
+
+A busca por nome/marca/fabricante continua apenas como apoio, não como fluxo principal.

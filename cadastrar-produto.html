@@ -17,7 +17,7 @@
 <main class="container">
   <section class="card">
     <h2>Cadastrar produto</h2>
-    <p class="muted">Gerente e admin podem cadastrar produtos. Ao ler o EAN, o sistema tenta preencher nome, marca, fabricante, sabor, categoria e foto em múltiplas fontes.</p>
+    <p class="muted">Gerente e admin podem cadastrar produtos. Ao escanear ou digitar um EAN válido, o sistema puxa os dados automaticamente.</p>
 
     <div class="button-row">
       <button type="button" id="btn-camera">📷 Escanear EAN</button>
@@ -31,9 +31,19 @@
       <small>Deixe o código bem iluminado, reto e um pouco afastado da câmera.</small>
     </div>
 
+    <div class="catalogo-busca-box">
+      <h3>Buscar na lista interna</h3>
+      <p class="muted">Use quando o EAN não retornar. Busque por nome, marca, fabricante ou categoria.</p>
+      <div class="input-action-row">
+        <input type="text" id="busca-catalogo-produto" placeholder="Ex: arroz Camil, sabonete Dove, leite Piracanjuba">
+        <button type="button" class="secondary" id="btn-buscar-catalogo-produto">Buscar</button>
+      </div>
+      <div id="resultado-catalogo-produto"></div>
+    </div>
+
     <form id="form-produto">
       <label for="ean">Código EAN</label>
-      <input type="text" id="ean" placeholder="Ex: 789..." inputmode="numeric" required>
+      <input type="text" id="ean" placeholder="Digite ou escaneie o EAN/GTIN" inputmode="numeric" required>
 
       <label for="nome">Nome do produto</label>
       <input type="text" id="nome" placeholder="Ex: Leite Integral 1L" required>
@@ -122,6 +132,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/dados-config.js"></script>
 <script src="js/dados-service.js"></script>
+<script src="js/catalogo-produtos-base.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/cookies.js"></script>
 <script src="js/loja.js"></script>

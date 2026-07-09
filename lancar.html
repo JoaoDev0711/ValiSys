@@ -27,7 +27,7 @@
 
   <section class="card">
     <h2>Novo lançamento</h2>
-    <p class="muted">Aponte para o código de barras inteiro. Se o produto não estiver salvo, o sistema tenta buscar nome, marca, fabricante, sabor e foto em múltiplas fontes.</p>
+    <p class="muted">Aponte para o código de barras inteiro ou digite o EAN. Assim que o código for válido, o sistema puxa o produto automaticamente.</p>
 
     <div class="button-row">
       <button type="button" id="btn-camera">📷 Escanear EAN</button>
@@ -43,10 +43,19 @@
 
     <form id="form-lancamento">
       <label for="ean">Código EAN</label>
-      <input type="text" id="ean" placeholder="Ex: 789..." inputmode="numeric" required>
+      <input type="text" id="ean" placeholder="Digite ou escaneie o EAN/GTIN" inputmode="numeric" required>
 
       <label for="nomeProduto">Nome do produto</label>
-      <input type="text" id="nomeProduto" placeholder="Será preenchido se o produto estiver cadastrado" required>
+      <input type="text" id="nomeProduto" placeholder="Digite nome, marca ou fabricante se o EAN não encontrar" required>
+
+      <div class="catalogo-busca-box">
+        <label for="busca-catalogo-lancamento">Buscar na lista interna</label>
+        <div class="input-action-row">
+          <input type="text" id="busca-catalogo-lancamento" placeholder="Ex: arroz Camil, leite Italac, OMO">
+          <button type="button" class="secondary" id="btn-buscar-catalogo-lancamento">Buscar</button>
+        </div>
+        <div id="resultado-catalogo-lancamento"></div>
+      </div>
 
       <div id="produto-preview"></div>
 
@@ -81,6 +90,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/dados-config.js"></script>
 <script src="js/dados-service.js"></script>
+<script src="js/catalogo-produtos-base.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/cookies.js"></script>
 <script src="js/loja.js"></script>
