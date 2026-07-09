@@ -46,18 +46,8 @@
       <input type="text" id="ean" placeholder="Digite ou escaneie o EAN/GTIN" inputmode="numeric" required>
 
       <label for="nomeProduto">Nome do produto</label>
-      <input type="text" id="nomeProduto" placeholder="Digite nome, marca ou fabricante se o EAN não encontrar" required>
-
-      <div class="catalogo-busca-box">
-        <label for="busca-catalogo-lancamento">Buscar na lista interna</label>
-        <div class="input-action-row">
-          <input type="text" id="busca-catalogo-lancamento" placeholder="Ex: arroz Camil, leite Italac, OMO">
-          <button type="button" class="secondary" id="btn-buscar-catalogo-lancamento">Buscar</button>
-        </div>
-        <div id="resultado-catalogo-lancamento"></div>
-      </div>
-
-      <div id="produto-preview"></div>
+      <input type="text" id="nomeProduto" placeholder="Digite o nome do produto se não tiver EAN" required>
+<div id="produto-preview"></div>
 
       <label for="setor">Setor</label>
       <select id="setor" required>
@@ -95,6 +85,7 @@
 <script src="js/cookies.js"></script>
 <script src="js/loja.js"></script>
 <script src="js/site-dialog.js"></script>
+<script src="js/icons.js"></script>
 <script src="js/produtos-fonte.js"></script>
 <script src="js/lancar.js"></script>
 </body>

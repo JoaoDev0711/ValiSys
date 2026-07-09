@@ -30,24 +30,12 @@
       <p id="scanner-status">Aponte a câmera para o código de barras inteiro.</p>
       <small>Deixe o código bem iluminado, reto e um pouco afastado da câmera.</small>
     </div>
-
-    <div class="catalogo-busca-box">
-      <h3>Buscar na lista interna</h3>
-      <p><a href="catalogo-importar.html">Importar catálogo completo por CSV</a></p>
-      <p class="muted">Use quando o EAN não retornar. Busque por nome, marca, fabricante ou categoria.</p>
-      <div class="input-action-row">
-        <input type="text" id="busca-catalogo-produto" placeholder="Ex: arroz Camil, sabonete Dove, leite Piracanjuba">
-        <button type="button" class="secondary" id="btn-buscar-catalogo-produto">Buscar</button>
-      </div>
-      <div id="resultado-catalogo-produto"></div>
-    </div>
-
-    <form id="form-produto">
+<form id="form-produto">
       <label for="ean">Código EAN</label>
       <input type="text" id="ean" placeholder="Digite ou escaneie o EAN/GTIN" inputmode="numeric" required>
 
       <label for="nome">Nome do produto</label>
-      <input type="text" id="nome" placeholder="Ex: Leite Integral 1L" required>
+      <input type="text" id="nome" placeholder="Digite o nome do produto" required>
 
       <label for="marca">Marca</label>
       <input type="text" id="marca" placeholder="Ex: Finna">
@@ -138,6 +126,7 @@
 <script src="js/cookies.js"></script>
 <script src="js/loja.js"></script>
 <script src="js/site-dialog.js"></script>
+<script src="js/icons.js"></script>
 <script src="js/produtos-fonte.js"></script>
 <script src="js/produto.js"></script>
 </body>

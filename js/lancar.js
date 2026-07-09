@@ -34,6 +34,9 @@ let repeticoesCodigo = 0;
 let audioLiberado = false;
 let timerBuscaEANAutomatica = null;
 let ultimoEANBuscadoAutomatico = "";
+let timerBuscaNomeAutomatica = null;
+let ultimoNomeBuscadoAutomatico = "";
+let popupCadastroAberto = false;
 
 const scannerStatus = document.getElementById("scanner-status");
 
@@ -426,6 +429,219 @@ function agendarBuscaAutomaticaEAN() {
   }, 450);
 }
 
+
+function arquivoParaBase64(arquivo) {
+  return new Promise((resolve, reject) => {
+    if (!arquivo) {
+      resolve("");
+      return;
+    }
+
+    const leitor = new FileReader();
+
+    leitor.onload = () => resolve(leitor.result || "");
+    leitor.onerror = reject;
+    leitor.readAsDataURL(arquivo);
+  });
+}
+
+function garantirPopupCadastroBasico() {
+  let modal = document.getElementById("popup-cadastro-basico-produto");
+
+  if (modal) return modal;
+
+  modal = document.createElement("div");
+  modal.id = "popup-cadastro-basico-produto";
+  modal.className = "produto-popup-overlay";
+  modal.innerHTML = `
+    <div class="produto-popup-card">
+      <button type="button" class="produto-popup-fechar" id="popup-produto-fechar">×</button>
+      <h2>Cadastro básico do produto</h2>
+      <p class="muted">Não encontrei esse produto. Cadastre o básico uma vez e ele será puxado pelo EAN nas próximas leituras.</p>
+
+      <form id="form-popup-produto-basico">
+        <label for="popupProdutoEAN">EAN</label>
+        <input type="text" id="popupProdutoEAN" inputmode="numeric" placeholder="Código de barras">
+
+        <label for="popupProdutoNome">Nome</label>
+        <input type="text" id="popupProdutoNome" placeholder="Nome do produto" required>
+
+        <label for="popupProdutoMarca">Marca</label>
+        <input type="text" id="popupProdutoMarca" placeholder="Ex: M. Dias Branco">
+
+        <label for="popupProdutoFabricante">Fabricante</label>
+        <input type="text" id="popupProdutoFabricante" placeholder="Ex: M. Dias Branco">
+
+        <label for="popupProdutoFoto">Foto</label>
+        <input type="file" id="popupProdutoFoto" accept="image/*">
+
+        <button type="submit">Salvar produto</button>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.querySelector("#popup-produto-fechar").addEventListener("click", fecharPopupCadastroBasico);
+  modal.addEventListener("click", event => {
+    if (event.target === modal) fecharPopupCadastroBasico();
+  });
+
+  modal.querySelector("#form-popup-produto-basico").addEventListener("submit", salvarPopupCadastroBasico);
+
+  return modal;
+}
+
+function fecharPopupCadastroBasico() {
+  const modal = document.getElementById("popup-cadastro-basico-produto");
+
+  if (modal) modal.classList.remove("active");
+
+  popupCadastroAberto = false;
+}
+
+async function abrirPopupCadastroBasico({ ean = "", nome = "" } = {}) {
+  if (popupCadastroAberto) return;
+
+  popupCadastroAberto = true;
+
+  const modal = garantirPopupCadastroBasico();
+  const eanLimpo = normalizarCodigo(ean || eanInput.value || "");
+  const nomeLimpo = String(nome || nomeInput.value || "").trim();
+
+  modal.querySelector("#popupProdutoEAN").value = eanLimpo;
+  modal.querySelector("#popupProdutoNome").value = nomeLimpo;
+  modal.querySelector("#popupProdutoMarca").value = produtoAtual?.marca || "";
+  modal.querySelector("#popupProdutoFabricante").value = produtoAtual?.fabricante || "";
+  modal.querySelector("#popupProdutoFoto").value = "";
+
+  modal.classList.add("active");
+
+  setTimeout(() => {
+    const alvo = nomeLimpo ? modal.querySelector("#popupProdutoMarca") : modal.querySelector("#popupProdutoNome");
+    alvo?.focus();
+  }, 80);
+}
+
+async function salvarPopupCadastroBasico(event) {
+  event.preventDefault();
+
+  const modal = document.getElementById("popup-cadastro-basico-produto");
+  const ean = normalizarCodigo(modal.querySelector("#popupProdutoEAN").value);
+  const nome = modal.querySelector("#popupProdutoNome").value.trim();
+  const marca = modal.querySelector("#popupProdutoMarca").value.trim();
+  const fabricante = modal.querySelector("#popupProdutoFabricante").value.trim();
+  const fotoArquivo = modal.querySelector("#popupProdutoFoto").files?.[0] || null;
+
+  if (!ean || !validarEAN(ean)) {
+    alert("Informe um EAN válido para salvar o produto.");
+    return;
+  }
+
+  if (!nome) {
+    alert("Informe o nome do produto.");
+    return;
+  }
+
+  try {
+    const foto = await arquivoParaBase64(fotoArquivo);
+
+    const produto = {
+      ean,
+      nome,
+      marca,
+      fabricante,
+      sabor: "",
+      categoria: "",
+      quantidadePadrao: "",
+      porcao: "",
+      embalagem: "",
+      origem: "",
+      paises: "",
+      lojas: "",
+      ingredientes: "",
+      alergicos: "",
+      rastros: "",
+      nutriscore: "",
+      ecoscore: "",
+      nova: "",
+      foto,
+      fonte: "Cadastro básico"
+    };
+
+    const salvo = await valisysDB.salvarProduto(produto);
+    produtoAtual = salvo || produto;
+
+    eanInput.value = ean;
+    nomeInput.value = produtoAtual.nome || nome;
+    produtoPreview.innerHTML = cardProdutoHTML(produtoAtual, "Produto cadastrado e selecionado.");
+
+    fecharPopupCadastroBasico();
+  } catch (erro) {
+    alert("Erro ao salvar produto: " + erro.message);
+  }
+}
+
+async function buscarProdutoPorNomeAutomatico(nome) {
+  const termo = String(nome || "").trim();
+
+  if (termo.length < 3) return null;
+
+  produtoPreview.innerHTML = `
+    <div class="card">
+      <p class="muted">Buscando produto pelo nome...</p>
+    </div>
+  `;
+
+  try {
+    const produto = await valisysDB.buscarProdutoPorTexto(termo);
+
+    if (produto) {
+      produtoAtual = produto;
+      nomeInput.value = produto.nome || termo;
+
+      if (produto.ean) eanInput.value = produto.ean;
+
+      produtoPreview.innerHTML = cardProdutoHTML(produtoAtual, "Produto encontrado pelo nome.");
+      return produtoAtual;
+    }
+  } catch (erro) {
+    console.warn("Busca automática por nome falhou.", erro);
+  }
+
+  produtoAtual = null;
+  produtoPreview.innerHTML = `
+    <div class="card">
+      <p class="muted">Produto não encontrado pelo nome.</p>
+    </div>
+  `;
+
+  await abrirPopupCadastroBasico({ ean: eanInput.value, nome: termo });
+  return null;
+}
+
+function agendarBuscaNomeAutomatica() {
+  const termo = String(nomeInput.value || "").trim();
+
+  if (timerBuscaNomeAutomatica) {
+    clearTimeout(timerBuscaNomeAutomatica);
+  }
+
+  if (termo.length < 3) return;
+
+  timerBuscaNomeAutomatica = setTimeout(async () => {
+    const atual = String(nomeInput.value || "").trim();
+
+    if (atual.length < 3) return;
+
+    if (atual === ultimoNomeBuscadoAutomatico) return;
+
+    ultimoNomeBuscadoAutomatico = atual;
+    await buscarProdutoPorNomeAutomatico(atual);
+  }, 900);
+}
+
+
 async function buscarProdutoCompleto(ean) {
   const codigo = normalizarCodigo(ean);
 
@@ -483,26 +699,23 @@ async function buscarProdutoCompleto(ean) {
     produtoPreview.innerHTML = `
       <div class="card">
         <p class="danger">Não consegui puxar esse item pela base de produtos.</p>
-        <p class="muted">Você ainda pode digitar o nome manualmente e lançar normalmente.</p>
+        <p class="muted">Abrindo cadastro básico.</p>
       </div>
     `;
     produtoAtual = null;
+    await abrirPopupCadastroBasico({ ean: codigo, nome: nomeInput.value });
     return null;
   }
 
   if (!produto) {
     produtoPreview.innerHTML = `
       <div class="card">
-        <p class="muted">Produto não encontrado na base de produtos.</p>
-        <p class="muted">Digite o nome manualmente e lance normalmente.</p>
+        <p class="muted">Produto não encontrado pelo EAN.</p>
+        <p class="muted">Abrindo cadastro básico.</p>
       </div>
     `;
     produtoAtual = null;
-
-    if (resultadoCatalogoLancamento) {
-      resultadoCatalogoLancamento.innerHTML = `<p class="muted">EAN não encontrado. Digite o nome, marca ou fabricante para buscar na lista interna.</p>`;
-    }
-
+    await abrirPopupCadastroBasico({ ean: codigo, nome: nomeInput.value });
     return null;
   }
 
@@ -556,6 +769,30 @@ eanInput.addEventListener("keydown", async event => {
 
   ultimoEANBuscadoAutomatico = ean;
   await buscarProdutoCompleto(ean);
+});
+
+nomeInput.addEventListener("input", agendarBuscaNomeAutomatica);
+
+nomeInput.addEventListener("keydown", async event => {
+  if (event.key !== "Enter") return;
+
+  event.preventDefault();
+
+  const termo = String(nomeInput.value || "").trim();
+
+  if (termo.length >= 3) {
+    ultimoNomeBuscadoAutomatico = termo;
+    await buscarProdutoPorNomeAutomatico(termo);
+  }
+});
+
+nomeInput.addEventListener("blur", async () => {
+  const termo = String(nomeInput.value || "").trim();
+
+  if (termo.length >= 3 && !produtoAtual) {
+    ultimoNomeBuscadoAutomatico = termo;
+    await buscarProdutoPorNomeAutomatico(termo);
+  }
 });
 
 btnCamera.addEventListener("click", async () => {

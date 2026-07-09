@@ -618,65 +618,6 @@ Na próxima leitura daquele mesmo EAN, o produto será puxado do banco do ValiSy
 A busca por nome/marca/fabricante continua apenas como apoio, não como fluxo principal.
 
 
----
-
-## Importação de catálogo completo por CSV
-
-Para ter "todos" os produtos, o sistema agora aceita importar uma base grande por CSV.
-
-Tela nova:
-
-```txt
-catalogo-importar.html
-```
-
-Arquivo modelo:
-
-```txt
-database/modelo-catalogo-produtos.csv
-```
-
-Campos aceitos:
-
-```txt
-ean
-nome
-marca
-fabricante
-sabor
-categoria
-quantidade_padrao
-porcao
-embalagem
-origem
-paises
-lojas_encontradas
-ingredientes
-alergicos
-rastros
-nutriscore
-ecoscore
-nova
-foto
-fonte
-```
-
-Fluxo correto:
-
-```txt
-1. Você importa uma lista grande com EAN real dos produtos.
-2. O sistema grava tudo em catalogo_produtos.
-3. Quando a câmera ler o EAN ou alguém digitar o EAN, o produto é puxado do banco.
-4. Se o EAN ainda não existir, pode cadastrar manualmente e ele passa a existir no banco interno.
-```
-
-Observação:
-
-```txt
-Não foi criado EAN falso.
-Para puxar por código de barras, o produto precisa ter o EAN real no CSV ou ser salvo manualmente uma primeira vez.
-```
-
 
 ---
 
@@ -711,15 +652,55 @@ Também foi adicionado campo de marca no cadastro de funcionários, somente quan
 
 ---
 
-## Scanner sem barra verde
+## Busca automática e pop-up de cadastro básico
 
-Removida a linha/barra verde que aparecia no centro do leitor de EAN.
+Foi removido o buscador manual da lista interna nas telas de lançamento/cadastro.
+
+Novo fluxo:
+
+```txt
+Digitou EAN válido → busca automático
+Escaneou EAN → busca automático
+Digitou nome do produto → busca automático
+Não encontrou → abre pop-up de cadastro básico
+```
+
+Pop-up de cadastro básico:
+
+```txt
+EAN
+Nome
+Marca
+Fabricante
+Foto
+```
+
+Depois de salvar pelo pop-up, o produto fica gravado no banco e será puxado pelo EAN nas próximas leituras.
 
 
 ---
 
-## Barra do scanner somente na câmera
+## Versão sem CSV externo e com SVG
 
-A barra verde do leitor foi removida da tela normal.
+Esta versão removeu a importação por CSV da interface.
 
-Agora ela aparece somente quando a câmera está aberta.
+O cadastro de produtos fica dentro do próprio site:
+
+```txt
+Digita ou escaneia o EAN
+Sistema busca automático
+Digita o nome
+Sistema busca automático
+Se não encontrar, abre pop-up de cadastro básico
+```
+
+O site também passou a usar ícones SVG profissionais no lugar de emojis visíveis.
+
+Os SVGs são:
+
+```txt
+sem fundo
+sem caixinha
+com traço limpo
+aplicados automaticamente em menus, cards, botões e conteúdos criados pelo JavaScript
+```

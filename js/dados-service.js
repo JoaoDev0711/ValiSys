@@ -737,6 +737,53 @@ const valisysDB = {
     return (data || []).map(this.produtoDBParaApp);
   },
 
+
+  async buscarProdutoPorTexto(termo = "") {
+    const busca = String(termo || "").trim();
+
+    if (busca.length < 3) return null;
+
+    const seguro = busca
+      .replaceAll("%", "")
+      .replaceAll(",", " ")
+      .replaceAll("(", " ")
+      .replaceAll(")", " ")
+      .replaceAll("'", "")
+      .replaceAll('"', "")
+      .trim();
+
+    try {
+      const db = this.client();
+
+      const { data, error } = await db
+        .from("produtos")
+        .select("*")
+        .or(`nome.ilike.%${seguro}%,marca.ilike.%${seguro}%,fabricante.ilike.%${seguro}%,categoria.ilike.%${seguro}%,ean.ilike.%${seguro}%`)
+        .order("nome", { ascending: true })
+        .limit(1);
+
+      if (error) throw error;
+
+      if (data && data[0]) {
+        return this.produtoDBParaApp(data[0]);
+      }
+    } catch (erro) {
+      console.warn("Busca por texto em produtos falhou. Tentando catálogo.", erro);
+    }
+
+    try {
+      const resultadosCatalogo = await this.buscarCatalogoProdutos(busca, 1);
+
+      if (resultadosCatalogo && resultadosCatalogo[0]) {
+        return this.produtoDeCatalogoParaProduto(resultadosCatalogo[0], resultadosCatalogo[0].ean || "");
+      }
+    } catch (erroCatalogo) {
+      console.warn("Busca por texto no catálogo falhou.", erroCatalogo);
+    }
+
+    return null;
+  },
+
   async buscarProdutoPorEAN(ean) {
     const db = this.client();
 
