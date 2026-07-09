@@ -830,3 +830,38 @@ Observação:
 "Outros" serve apenas para abrir o campo de novo setor.
 Ele não é salvo como setor operacional.
 ```
+
+
+---
+
+## Site público reestilizado
+
+Esta versão mudou o visual da página pública (`index.html`).
+
+Entrou:
+
+```txt
+- nova hero section premium
+- slider coverflow com telas uma atrás da outra
+- imagens/telas mais juntas, igual referência de portfólio
+- troca automática do slider
+- nova seção de recursos
+- nova seção de fluxo
+- nova seção de gestão/admin
+- nova chamada final
+```
+
+Arquivos principais alterados:
+
+```txt
+index.html
+css/styles.css
+js/public-coverflow.js
+```
+
+Para trocar os painéis por imagens reais depois:
+
+```txt
+No index.html, substitua o conteúdo de cada .coverflow-window por uma imagem:
+<img src="img/sua-imagem.jpg" alt="Descrição">
+```

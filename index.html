@@ -3,311 +3,250 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ValiSys - Controle de vencimentos</title>
+  <title>ValiSys - Controle de vencimentos para lojas</title>
+  <meta name="description" content="ValiSys é um sistema para controlar produtos próximos do vencimento por loja, setor, usuário e prazo.">
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="public-page valisys-home">
+<body class="public-page valisys-public-redesign">
 
-<header class="public-header">
-  <a href="index.html" class="brand valisys-brand">
+<header class="public-header redesign-header">
+  <a href="index.html" class="brand valisys-brand redesign-brand">
     <span class="brand-icon">V</span>
     <strong>ValiSys</strong>
   </a>
 
-  <nav class="public-nav">
-    <a href="#demonstracao">Demonstração</a>
-    <a href="#como-funciona">Como funciona</a>
-    <a href="#funcionalidades">Recursos</a>
-    <a href="#planos">Planos</a>
+  <nav class="public-nav redesign-nav">
+    <a href="#visual">Visual</a>
+    <a href="#recursos">Recursos</a>
+    <a href="#fluxo">Fluxo</a>
+    <a href="#gestao">Gestão</a>
     <a href="#contato">Contato</a>
   </nav>
 
-  <a href="escolher-loja.html" class="login-link">Entrar</a>
+  <a href="escolher-loja.html" class="login-link redesign-login">Entrar no sistema</a>
 </header>
 
 <main>
-  <section class="hero hero-valisys">
-    <div class="hero-content">
-      <p class="eyebrow">Sistema para mercados e mercearias</p>
-      <h1>Controle vencimentos antes que virem prejuízo.</h1>
+  <section class="public-hero-redesign">
+    <div class="hero-copy-redesign">
+      <span class="hero-pill">Controle operacional para mercados</span>
+      <h1>Validades organizadas antes de virarem prejuízo.</h1>
       <p>
-        Uma ferramenta simples para registrar produtos próximos da validade, separar por loja,
-        setor e prazo, usando o celular na rotina da operação.
+        O ValiSys ajuda lojas, promotores, encarregados e gerentes a registrar produtos,
+        acompanhar prazos e notificar a equipe com uma interface simples no celular.
       </p>
 
-      <div class="hero-badges clean-badges">
-        <span>Leitura por código de barras</span>
-        <span>Controle por loja</span>
-        <span>Lembretes por prazo</span>
-      </div>
-
-      <div class="hero-actions">
+      <div class="hero-actions redesign-actions">
         <a href="escolher-loja.html" class="primary-link">Acessar demonstração</a>
-        <a href="#demonstracao" class="secondary-link">Ver como funciona</a>
+        <a href="#visual" class="secondary-link">Ver visual</a>
+      </div>
+
+      <div class="hero-metrics">
+        <span><strong>EAN</strong> leitura por câmera</span>
+        <span><strong>Loja</strong> setores personalizados</span>
+        <span><strong>Avisos</strong> notificação discreta</span>
       </div>
     </div>
 
-    <div class="hero-showcase app-showcase">
-      <div class="phone-mock valisys-phone">
-        <div class="phone-speaker"></div>
-
-        <div class="mock-top clean-mock-top">
-          <span>ValiSys</span>
-          <small>Loja atual</small>
-        </div>
-
-        <div class="mock-welcome">
-          <small>Mercado São João</small>
-          <strong>Resumo da validade</strong>
-          <span>Produtos organizados por prioridade</span>
-        </div>
-
-        <div class="mock-grid">
-          <div class="mock-box danger-soft">
-            <strong>3</strong>
-            <span>Vencidos</span>
-          </div>
-
-          <div class="mock-box warning-soft">
-            <strong>5</strong>
-            <span>Hoje</span>
-          </div>
-
-          <div class="mock-box alert-soft">
-            <strong>12</strong>
-            <span>Até 7 dias</span>
-          </div>
-
-          <div class="mock-box ok-soft">
-            <strong>21</strong>
-            <span>Até 30 dias</span>
-          </div>
-        </div>
-
-        <div class="mock-list">
-          <div class="mock-product">
-            <div class="mock-product-img simple-img">LT</div>
-            <div>
-              <strong>Leite integral</strong>
-              <p>Frios • vence hoje</p>
+    <div class="coverflow-area" id="visual" aria-label="Prévia visual do sistema">
+      <div class="coverflow-stage" id="publicCoverflow">
+        <article class="coverflow-slide active" data-title="Dashboard">
+          <div class="coverflow-window panel-dashboard">
+            <div class="browser-bar">
+              <span></span><span></span><span></span>
+              <em>ValiSys / Dashboard</em>
+            </div>
+            <div class="panel-content">
+              <small>Mercado São João</small>
+              <h3>Resumo da validade</h3>
+              <div class="panel-grid">
+                <b>3<small>Vencidos</small></b>
+                <b>5<small>Hoje</small></b>
+                <b>12<small>7 dias</small></b>
+                <b>21<small>30 dias</small></b>
+              </div>
+              <div class="panel-list">
+                <p><span></span>Leite integral • Frios</p>
+                <p><span></span>Farinha Finna • Mercearia</p>
+              </div>
             </div>
           </div>
+        </article>
 
-          <div class="mock-product">
-            <div class="mock-product-img simple-img">FN</div>
-            <div>
-              <strong>Farinha Finna</strong>
-              <p>Mercearia • faltam 2 dias</p>
+        <article class="coverflow-slide right-1" data-title="Leitor">
+          <div class="coverflow-window panel-scanner">
+            <div class="browser-bar">
+              <span></span><span></span><span></span>
+              <em>Leitor EAN</em>
+            </div>
+            <div class="panel-content">
+              <small>Câmera ativa</small>
+              <h3>EAN confirmado</h3>
+              <div class="scanner-visual">
+                <i></i>
+              </div>
+              <p class="panel-note">Produto encontrado automaticamente.</p>
             </div>
           </div>
-        </div>
+        </article>
+
+        <article class="coverflow-slide right-2" data-title="Produtos">
+          <div class="coverflow-window panel-products">
+            <div class="browser-bar">
+              <span></span><span></span><span></span>
+              <em>Produtos</em>
+            </div>
+            <div class="panel-content">
+              <small>Cadastro inteligente</small>
+              <h3>Produto completo</h3>
+              <div class="product-preview">
+                <div>FN</div>
+                <p><strong>Farinha de trigo</strong><br>Marca, fabricante, sabor e foto</p>
+              </div>
+              <p class="panel-note">Busca por EAN ou nome.</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="coverflow-slide left-1" data-title="Setores">
+          <div class="coverflow-window panel-sectors">
+            <div class="browser-bar">
+              <span></span><span></span><span></span>
+              <em>Setores</em>
+            </div>
+            <div class="panel-content">
+              <small>Admin</small>
+              <h3>Setores por seleção</h3>
+              <div class="sector-chips">
+                <span>Mercearia</span>
+                <span>Bebidas</span>
+                <span>Frios</span>
+                <span>Outros +</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="coverflow-slide left-2" data-title="Notificações">
+          <div class="coverflow-window panel-notify">
+            <div class="browser-bar">
+              <span></span><span></span><span></span>
+              <em>Notificações</em>
+            </div>
+            <div class="panel-content">
+              <small>Aviso interno</small>
+              <h3>Notificação enviada</h3>
+              <div class="notify-bubble">
+                Produto vencendo hoje
+              </div>
+              <p class="panel-note">Aparece discreto no canto.</p>
+            </div>
+          </div>
+        </article>
       </div>
 
-      <div class="floating-card card-scan soft-float">
-        <span class="float-label">EAN confirmado</span>
-        <strong>7890000000000</strong>
-        <p>Produto encontrado no cadastro</p>
-      </div>
+      <div class="coverflow-dots" id="coverflowDots" aria-hidden="true"></div>
+    </div>
+  </section>
 
-      <div class="floating-card card-store soft-float">
-        <span class="float-label">Loja selecionada</span>
+  <section id="recursos" class="public-section-redesign">
+    <div class="section-heading-redesign">
+      <span class="hero-pill">Recursos principais</span>
+      <h2>Feito para a rotina real da loja.</h2>
+      <p>Menos planilha solta, menos anotação perdida e mais controle por loja, setor e prazo.</p>
+    </div>
+
+    <div class="feature-grid-redesign">
+      <article>
+        <span class="feature-icon">01</span>
+        <h3>Leitura por código de barras</h3>
+        <p>O funcionário escaneia ou digita o EAN e o sistema tenta preencher os dados do produto.</p>
+      </article>
+
+      <article>
+        <span class="feature-icon">02</span>
+        <h3>Produtos com foto e sabor</h3>
+        <p>Cadastro com nome, marca, fabricante, sabor e foto manual ou puxada automaticamente.</p>
+      </article>
+
+      <article>
+        <span class="feature-icon">03</span>
+        <h3>Setores por loja</h3>
+        <p>O admin escolhe os setores que cada loja usa e adiciona novos quando marcar Outros.</p>
+      </article>
+
+      <article>
+        <span class="feature-icon">04</span>
+        <h3>Notificação discreta</h3>
+        <p>Aviso interno aparece no canto da tela, sem poluir a dashboard da equipe.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="fluxo" class="workflow-redesign">
+    <div>
+      <span class="hero-pill">Fluxo simples</span>
+      <h2>Do lançamento ao aviso em poucos passos.</h2>
+    </div>
+
+    <div class="workflow-line">
+      <article><strong>1</strong><span>Escolhe a loja</span></article>
+      <article><strong>2</strong><span>Lê o EAN</span></article>
+      <article><strong>3</strong><span>Confere produto</span></article>
+      <article><strong>4</strong><span>Salva validade</span></article>
+      <article><strong>5</strong><span>Notifica equipe</span></article>
+    </div>
+  </section>
+
+  <section id="gestao" class="split-redesign">
+    <div class="split-card-redesign">
+      <span class="hero-pill">Administração</span>
+      <h2>Lojas, setores e equipe em um só lugar.</h2>
+      <p>
+        O admin gerencia lojas, setores, gerentes, encarregados e promotores.
+        Cada loja pode ter sua própria estrutura, cor, imagem e equipe.
+      </p>
+
+      <ul class="clean-list-redesign">
+        <li>Pré-cadastro de gerente e encarregado</li>
+        <li>Setores por seleção com opção Outros</li>
+        <li>Exclusão real/ocultação de lojas e produtos</li>
+        <li>Controle de permissões por cargo</li>
+      </ul>
+    </div>
+
+    <div class="management-preview">
+      <div class="management-card m-card-1">
+        <small>Loja</small>
         <strong>Mercado São João</strong>
-        <p>Lançamentos vinculados à loja</p>
+        <span>Ativa</span>
+      </div>
+      <div class="management-card m-card-2">
+        <small>Setores</small>
+        <strong>Mercearia • Bebidas • Frios</strong>
+        <span>+ Outros</span>
+      </div>
+      <div class="management-card m-card-3">
+        <small>Equipe</small>
+        <strong>Gerente • Encarregado • Promotor</strong>
+        <span>Permissões aplicadas</span>
       </div>
     </div>
   </section>
 
-  <section id="demonstracao" class="public-section demo-section">
-    <p class="eyebrow">Demonstração</p>
-    <h2>Uma rotina simples dentro da loja</h2>
-    <p class="section-intro">
-      O sistema foi pensado para o funcionário abrir no celular, confirmar a loja,
-      ler o código de barras e lançar a validade sem complicação.
-    </p>
+  <section id="contato" class="cta-redesign">
+    <span class="hero-pill">Contato</span>
+    <h2>Quer adaptar o ValiSys para sua loja?</h2>
+    <p>Use a demonstração ou fale comigo para personalizar o sistema.</p>
 
-    <div class="demo-grid valisys-demo-grid">
-      <article class="demo-phone valisys-demo-card">
-        <div class="demo-phone-top">01</div>
-        <h3>Escolha a loja</h3>
-
-        <div class="mini-screen clean-mini">
-          <div class="mini-card">
-            <div class="mini-avatar">LJ</div>
-            <div>
-              <strong>Mercado São João</strong>
-              <p>Responsável: Carlos</p>
-            </div>
-          </div>
-
-          <button>Usar esta loja</button>
-        </div>
-
-        <p>Antes de lançar, o usuário confirma onde está trabalhando.</p>
-      </article>
-
-      <article class="demo-phone valisys-demo-card">
-        <div class="demo-phone-top">02</div>
-        <h3>Leia o EAN</h3>
-
-        <div class="mini-screen clean-mini scanner-preview">
-          <div class="scanner-frame">
-            <span></span>
-          </div>
-          <p>EAN confirmado</p>
-          <button>Escanear código</button>
-        </div>
-
-        <p>O sistema valida o código e avisa quando a leitura é confirmada.</p>
-      </article>
-
-      <article class="demo-phone valisys-demo-card">
-        <div class="demo-phone-top">03</div>
-        <h3>Confira o produto</h3>
-
-        <div class="mini-screen clean-mini">
-          <div class="produto-mini">
-            <div class="produto-foto simple-img">FN</div>
-            <div>
-              <strong>Farinha de Trigo</strong>
-              <p>Marca: Finna</p>
-              <p>Fabricante: M. Dias Branco</p>
-            </div>
-          </div>
-        </div>
-
-        <p>Quando a base de produtos encontra, os dados principais são preenchidos automaticamente.</p>
-      </article>
-
-      <article class="demo-phone valisys-demo-card">
-        <div class="demo-phone-top">04</div>
-        <h3>Acompanhe os prazos</h3>
-
-        <div class="mini-screen clean-mini">
-          <div class="mini-alert danger-soft">
-            <strong>Vencidos</strong>
-            <em>3 itens</em>
-          </div>
-
-          <div class="mini-alert warning-soft">
-            <strong>Até 7 dias</strong>
-            <em>12 itens</em>
-          </div>
-        </div>
-
-        <p>Os lembretes ficam agrupados para facilitar a conferência.</p>
-      </article>
+    <div class="hero-actions redesign-actions center-actions">
+      <a href="escolher-loja.html" class="primary-link">Entrar no sistema</a>
+      <a href="mailto:idarkolekdasdorgas@gmail.com" class="secondary-link">Chamar por e-mail</a>
     </div>
-  </section>
-
-  <section id="como-funciona" class="public-section fluxo-section">
-    <p class="eyebrow">Como funciona</p>
-    <h2>Do lançamento ao acompanhamento</h2>
-
-    <div class="fluxo-linha valisys-flow">
-      <article>
-        <span>1</span>
-        <h3>Login por cargo</h3>
-        <p>Cada função acessa apenas o que precisa.</p>
-      </article>
-
-      <article>
-        <span>2</span>
-        <h3>Loja atual</h3>
-        <p>O lançamento fica vinculado à loja selecionada.</p>
-      </article>
-
-      <article>
-        <span>3</span>
-        <h3>Produto</h3>
-        <p>EAN, nome, marca, fabricante, foto e dados disponíveis.</p>
-      </article>
-
-      <article>
-        <span>4</span>
-        <h3>Validade</h3>
-        <p>Setor, quantidade e data de vencimento.</p>
-      </article>
-
-      <article>
-        <span>5</span>
-        <h3>Resumo</h3>
-        <p>Vencidos, hoje, 7 dias e 30 dias.</p>
-      </article>
-    </div>
-  </section>
-
-  <section id="funcionalidades" class="public-section">
-    <p class="eyebrow">Recursos</p>
-    <h2>Feito para uso no mercado</h2>
-
-    <div class="feature-grid valisys-feature-grid">
-      <article>
-        <h3>Leitura por câmera</h3>
-        <p>Escaneamento de EAN pelo celular com confirmação de leitura.</p>
-      </article>
-
-      <article>
-        <h3>Dados automáticos</h3>
-        <p>Busca nome, marca, fabricante, sabor, categoria e imagem quando disponíveis.</p>
-      </article>
-
-      <article>
-        <h3>Controle por loja</h3>
-        <p>Evita lançamento errado quando o usuário trabalha em mais de uma loja.</p>
-      </article>
-
-      <article>
-        <h3>Permissões por cargo</h3>
-        <p>Promotor, encarregado, gerente e admin com acessos diferentes.</p>
-      </article>
-
-      <article>
-        <h3>Lembretes agrupados</h3>
-        <p>Resumo organizado por vencidos, hoje, até 7 dias e até 30 dias.</p>
-      </article>
-
-      <article>
-        <h3>Interface mobile</h3>
-        <p>Telas feitas para uso rápido no celular durante a operação.</p>
-      </article>
-    </div>
-  </section>
-
-  <section id="planos" class="public-section">
-    <p class="eyebrow">Planos</p>
-    <h2>Planos em construção</h2>
-
-    <div class="construction-card valisys-construction">
-      <div>
-        <h3>Em breve</h3>
-        <p>
-          A área de planos ainda está sendo preparada. Por enquanto, o contato é feito
-          diretamente para demonstração, implantação ou personalização.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <section id="contato" class="public-section contato-publico valisys-contact">
-    <p class="eyebrow">Contato</p>
-    <h2>Quer testar na sua loja?</h2>
-    <p>
-      Fale comigo para demonstração, ajustes ou implantação do sistema.
-    </p>
-
-    <div class="contact-grid">
-      <a href="mailto:idarkolekdasdorgas@gmail.com">E-mail</a>
-      <a href="https://instagram.com/idarkolekdasdorgas" target="_blank">Instagram</a>
-      <a href="https://wa.me/5585999999999" target="_blank">WhatsApp</a>
-    </div>
-
-    <p class="small muted">
-      O número do WhatsApp está como exemplo. Troque pelo número real no arquivo index.html.
-    </p>
   </section>
 </main>
 
-<footer class="public-footer">
+<footer class="public-footer redesign-footer">
   <p>ValiSys • Sistema de acompanhamento de vencimentos</p>
   <a href="escolher-loja.html">Acessar sistema</a>
 </footer>
@@ -318,5 +257,6 @@
 <script src="js/dados-service.js"></script>
 <script src="js/site-dialog.js"></script>
 <script src="js/icons.js"></script>
+<script src="js/public-coverflow.js"></script>
 </body>
 </html>
