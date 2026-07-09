@@ -225,6 +225,33 @@
     <h2>Lojas cadastradas</h2>
     <div id="lista-lojas-admin"></div>
   </section>
+
+  <section class="card sac-admin-section chat-admin-section" id="sac-admin-section">
+    <div class="sac-admin-header">
+      <div>
+        <h2>SAC Online</h2>
+        <p class="muted">Chat online do site público. O admin responde por aqui.</p>
+      </div>
+
+      <button type="button" class="secondary" id="btnAtualizarSacAdmin">Atualizar chat</button>
+    </div>
+
+    <div class="chat-admin-layout">
+      <aside class="chat-admin-conversas" id="lista-sac-admin">
+        <div class="card">
+          <p class="muted">Carregando conversas...</p>
+        </div>
+      </aside>
+
+      <section class="chat-admin-painel" id="chatSacAdminPainel">
+        <div class="chat-admin-empty">
+          <p>Selecione uma conversa para responder.</p>
+          <small>As mensagens enviadas pelo site aparecem aqui.</small>
+        </div>
+      </section>
+    </div>
+  </section>
+
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

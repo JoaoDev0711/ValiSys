@@ -865,3 +865,138 @@ Para trocar os painéis por imagens reais depois:
 No index.html, substitua o conteúdo de cada .coverflow-window por uma imagem:
 <img src="img/sua-imagem.jpg" alt="Descrição">
 ```
+
+
+---
+
+## Dados públicos e SAC Online interno
+
+Dados públicos atualizados:
+
+```txt
+E-mail: joaoferreiraneto0711@gmail.com
+Instagram: @jferreira07.11
+```
+
+O WhatsApp foi removido do contato principal e substituído por SAC Online.
+
+Fluxo do SAC:
+
+```txt
+Visitante abre o SAC Online
+Aparece mensagem automática inicial
+Visitante informa nome, contato e mensagem
+A solicitação é salva no banco do ValiSys
+Admin visualiza dentro da Dashboard Admin
+```
+
+Arquivos principais:
+
+```txt
+index.html
+js/public-sac.js
+js/dados-service.js
+js/admin-dashboard.js
+database/valisys-sql-unico.sql
+```
+
+Importante:
+
+```txt
+Esta versão não precisa de tabela nova para o SAC.
+O SAC usa a tabela notificacoes que o sistema já possui.
+```
+
+
+---
+
+## SAC sem SQL novo
+
+Esta versão não cria tabela nova para o SAC.
+
+O SAC Online salva as mensagens dentro da tabela já existente:
+
+```txt
+notificacoes
+```
+
+Usa:
+
+```txt
+tipo = sac_online
+setor = SAC Online
+lida = false/true
+```
+
+Assim o admin consegue ver as mensagens dentro da Dashboard Admin sem rodar SQL novo só para o SAC.
+
+
+---
+
+## SAC Online em formato de chat
+
+O SAC agora funciona como chat online no próprio site, parecido com WhatsApp/ChatGPT.
+
+Fluxo:
+
+```txt
+Visitante abre o balão SAC Online
+Mensagem automática aparece no chat
+Visitante informa nome, contato e mensagem
+Admin vê a conversa na Dashboard Admin
+Admin responde por dentro do painel
+Visitante recebe a resposta ao abrir o chat
+```
+
+Sem tabela nova:
+
+```txt
+Usa a tabela notificacoes
+tipo = sac_chat
+setor = SAC Online
+```
+
+Observação:
+
+```txt
+Para funcionar entre visitantes e admin em aparelhos diferentes, o Supabase precisa estar configurado.
+Não precisa criar tabela nova para o chat.
+```
+
+
+---
+
+## Animações do site público
+
+Esta versão adicionou animações na página pública.
+
+Entrou:
+
+```txt
+- animações suaves de entrada ao rolar
+- efeito de destaque no coverflow
+- cards flutuando levemente
+- seção "Ponto importante" com tela travada/sticky
+```
+
+A seção travada funciona assim:
+
+```txt
+Usuário rola a página
+Chega no ponto importante
+A tela segura o conteúdo por alguns instantes
+O fluxo muda por etapas:
+1. Identificar
+2. Notificar
+3. Retirar
+4. Controlar
+Depois a página continua normalmente
+```
+
+Arquivos principais:
+
+```txt
+index.html
+css/styles.css
+js/public-animations.js
+```

@@ -38,6 +38,9 @@ const graficoGruposAdmin = document.getElementById("grafico-grupos-admin");
 const graficoRegioesAdmin = document.getElementById("grafico-regioes-admin");
 const adminPercentuais = document.getElementById("admin-percentuais");
 const adminLojaAtual = document.getElementById("admin-loja-atual");
+const listaSacAdmin = document.getElementById("lista-sac-admin");
+const btnAtualizarSacAdmin = document.getElementById("btnAtualizarSacAdmin");
+const chatSacAdminPainel = document.getElementById("chatSacAdminPainel");
 
 let imagemLojaBase64 = "";
 let lojasAdminCache = [];
@@ -955,4 +958,184 @@ formLojaAdmin.addEventListener("submit", async event => {
   filtro.addEventListener("change", renderizarListaFiltradaAdmin);
 });
 
+
+let conversaSacSelecionada = "";
+
+async function renderizarSacAdmin() {
+  if (!listaSacAdmin) return;
+
+  listaSacAdmin.innerHTML = `
+    <div class="card">
+      <p class="muted">Carregando conversas...</p>
+    </div>
+  `;
+
+  try {
+    const conversas = await valisysDB.listarConversasChatSac();
+
+    if (conversas.length === 0) {
+      listaSacAdmin.innerHTML = `
+        <div class="sac-empty">
+          <p>Nenhuma conversa no SAC Online.</p>
+          <small>Quando alguém chamar pelo chat do site público, aparece aqui.</small>
+        </div>
+      `;
+
+      if (chatSacAdminPainel) {
+        chatSacAdminPainel.innerHTML = `
+          <div class="chat-admin-empty">
+            <p>Nenhuma conversa selecionada.</p>
+            <small>As mensagens enviadas pelo site aparecem aqui.</small>
+          </div>
+        `;
+      }
+
+      return;
+    }
+
+    listaSacAdmin.innerHTML = conversas.map(item => `
+      <button type="button" class="chat-conversa-item ${item.sessaoId === conversaSacSelecionada ? "active" : ""}" onclick="abrirConversaSacAdmin('${item.sessaoId}')">
+        <span>
+          <strong>${esc(item.nome || "Visitante")}</strong>
+          <small>${esc(item.contato || "Sem contato")}</small>
+        </span>
+        ${item.naoLidas > 0 ? `<em>${item.naoLidas}</em>` : ""}
+        <p>${esc(item.ultimaMensagem || "")}</p>
+      </button>
+    `).join("");
+
+    if (!conversaSacSelecionada && conversas[0]) {
+      conversaSacSelecionada = conversas[0].sessaoId;
+      await abrirConversaSacAdmin(conversaSacSelecionada, false);
+    }
+  } catch (erro) {
+    console.error(erro);
+    listaSacAdmin.innerHTML = `
+      <div class="card">
+        <p class="danger">Erro ao carregar chat do SAC Online.</p>
+        <p class="muted">${esc(erro.message)}</p>
+        <p class="small muted">O chat usa a tabela notificacoes. Verifique se o SQL base do sistema já foi rodado.</p>
+      </div>
+    `;
+  }
+}
+
+async function abrirConversaSacAdmin(sessaoId, atualizarLista = true) {
+  conversaSacSelecionada = sessaoId;
+
+  if (!chatSacAdminPainel) return;
+
+  chatSacAdminPainel.innerHTML = `
+    <div class="chat-admin-empty">
+      <p>Carregando conversa...</p>
+    </div>
+  `;
+
+  try {
+    const mensagens = await valisysDB.listarMensagensChatSac(sessaoId);
+    const primeira = mensagens[0] || {};
+    const nome = primeira.nome || "Visitante";
+    const contato = primeira.contato || "Sem contato";
+
+    chatSacAdminPainel.innerHTML = `
+      <div class="chat-admin-top">
+        <div>
+          <h3>${esc(nome)}</h3>
+          <p class="muted">${esc(contato)}</p>
+        </div>
+
+        <button type="button" class="btn-danger" onclick="apagarConversaSacAdmin('${sessaoId}')">Apagar conversa</button>
+      </div>
+
+      <div class="chat-admin-mensagens" id="chatAdminMensagens">
+        ${mensagens.map(item => `
+          <div class="chat-message ${item.autor === "admin" ? "bot" : "user"}">
+            <small>${item.autor === "admin" ? "Admin" : esc(item.nome || "Cliente")}</small>
+            <p>${esc(item.mensagem)}</p>
+          </div>
+        `).join("")}
+      </div>
+
+      <form class="chat-admin-form" onsubmit="responderConversaSacAdmin(event, '${sessaoId}')">
+        <textarea id="respostaSacAdmin" rows="2" placeholder="Digite sua resposta..." required></textarea>
+        <button type="submit">Responder</button>
+      </form>
+    `;
+
+    const caixa = document.getElementById("chatAdminMensagens");
+    if (caixa) caixa.scrollTop = caixa.scrollHeight;
+
+    await valisysDB.marcarChatSacComoLido(sessaoId);
+
+    if (atualizarLista) {
+      await renderizarSacAdmin();
+    }
+  } catch (erro) {
+    console.error(erro);
+    chatSacAdminPainel.innerHTML = `
+      <div class="chat-admin-empty">
+        <p class="danger">Erro ao abrir conversa.</p>
+        <small>${esc(erro.message)}</small>
+      </div>
+    `;
+  }
+}
+
+async function responderConversaSacAdmin(event, sessaoId) {
+  event.preventDefault();
+
+  const campo = document.getElementById("respostaSacAdmin");
+  const mensagem = campo.value.trim();
+
+  if (!mensagem) return;
+
+  const mensagens = await valisysDB.listarMensagensChatSac(sessaoId);
+  const primeira = mensagens[0] || {};
+
+  try {
+    await valisysDB.criarMensagemChatSac({
+      sessaoId,
+      nome: primeira.nome || "Visitante",
+      contato: primeira.contato || "",
+      mensagem,
+      autor: "admin"
+    });
+
+    campo.value = "";
+    await abrirConversaSacAdmin(sessaoId, true);
+  } catch (erro) {
+    alert("Erro ao responder SAC: " + erro.message);
+  }
+}
+
+async function apagarConversaSacAdmin(sessaoId) {
+  const confirmar = await confirmarAcao("Apagar toda esta conversa do SAC?", "Apagar conversa", "perigo");
+
+  if (!confirmar) return;
+
+  try {
+    await valisysDB.apagarConversaChatSac(sessaoId);
+    conversaSacSelecionada = "";
+    await renderizarSacAdmin();
+  } catch (erro) {
+    alert("Erro ao apagar conversa: " + erro.message);
+  }
+}
+
+window.abrirConversaSacAdmin = abrirConversaSacAdmin;
+window.responderConversaSacAdmin = responderConversaSacAdmin;
+window.apagarConversaSacAdmin = apagarConversaSacAdmin;
+
+if (btnAtualizarSacAdmin) {
+  btnAtualizarSacAdmin.addEventListener("click", async () => {
+    await renderizarSacAdmin();
+
+    if (conversaSacSelecionada) {
+      await abrirConversaSacAdmin(conversaSacSelecionada, false);
+    }
+  });
+}
+
+
 renderizarLojasAdmin();
+renderizarSacAdmin();

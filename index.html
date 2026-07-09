@@ -17,6 +17,7 @@
 
   <nav class="public-nav redesign-nav">
     <a href="#visual">Visual</a>
+    <a href="#impacto">Impacto</a>
     <a href="#recursos">Recursos</a>
     <a href="#fluxo">Fluxo</a>
     <a href="#gestao">Gestão</a>
@@ -34,6 +35,8 @@
       <p>
         O ValiSys ajuda lojas, promotores, encarregados e gerentes a registrar produtos,
         acompanhar prazos e notificar a equipe com uma interface simples no celular.
+        Agora a página pública mostra telas reais do sistema em um slider empilhado,
+        automático e mais próximo do visual que você pediu.
       </p>
 
       <div class="hero-actions redesign-actions">
@@ -48,98 +51,103 @@
       </div>
     </div>
 
-    <div class="coverflow-area" id="visual" aria-label="Prévia visual do sistema">
-      <div class="coverflow-stage" id="publicCoverflow">
-        <article class="coverflow-slide active" data-title="Dashboard">
-          <div class="coverflow-window panel-dashboard">
-            <div class="browser-bar">
-              <span></span><span></span><span></span>
-              <em>ValiSys / Dashboard</em>
-            </div>
-            <div class="panel-content">
-              <small>Mercado São João</small>
-              <h3>Resumo da validade</h3>
-              <div class="panel-grid">
-                <b>3<small>Vencidos</small></b>
-                <b>5<small>Hoje</small></b>
-                <b>12<small>7 dias</small></b>
-                <b>21<small>30 dias</small></b>
-              </div>
-              <div class="panel-list">
-                <p><span></span>Leite integral • Frios</p>
-                <p><span></span>Farinha Finna • Mercearia</p>
-              </div>
+    <div class="coverflow-area real-screens-showcase" id="visual" aria-label="Prévia visual do sistema com telas reais">
+      <div class="coverflow-stage phone-stack-stage" id="publicCoverflow">
+        <article class="coverflow-slide active" data-title="Dashboard de vencimentos">
+          <div class="coverflow-window phone-window">
+            <div class="phone-notch"></div>
+            <img class="coverflow-image phone-screen" src="assets/public-screens/dashboard-vencimentos.jpg" alt="Tela do dashboard de vencimentos do ValiSys" loading="eager">
+            <div class="screen-meta">
+              <strong>Dashboard</strong>
+              <span>Resumo dos vencimentos por loja</span>
             </div>
           </div>
         </article>
 
-        <article class="coverflow-slide right-1" data-title="Leitor">
-          <div class="coverflow-window panel-scanner">
-            <div class="browser-bar">
-              <span></span><span></span><span></span>
-              <em>Leitor EAN</em>
-            </div>
-            <div class="panel-content">
-              <small>Câmera ativa</small>
-              <h3>EAN confirmado</h3>
-              <div class="scanner-visual">
-                <i></i>
-              </div>
-              <p class="panel-note">Produto encontrado automaticamente.</p>
+        <article class="coverflow-slide right-1" data-title="Lançar validade">
+          <div class="coverflow-window phone-window">
+            <div class="phone-notch"></div>
+            <img class="coverflow-image phone-screen" src="assets/public-screens/lancar-ean.jpg" alt="Tela para lançar validade com leitura de EAN" loading="lazy">
+            <div class="screen-meta">
+              <strong>Lançar validade</strong>
+              <span>Leitura por EAN e câmera</span>
             </div>
           </div>
         </article>
 
-        <article class="coverflow-slide right-2" data-title="Produtos">
-          <div class="coverflow-window panel-products">
-            <div class="browser-bar">
-              <span></span><span></span><span></span>
-              <em>Produtos</em>
-            </div>
-            <div class="panel-content">
-              <small>Cadastro inteligente</small>
-              <h3>Produto completo</h3>
-              <div class="product-preview">
-                <div>FN</div>
-                <p><strong>Farinha de trigo</strong><br>Marca, fabricante, sabor e foto</p>
-              </div>
-              <p class="panel-note">Busca por EAN ou nome.</p>
+        <article class="coverflow-slide right-2" data-title="Menu lateral">
+          <div class="coverflow-window phone-window">
+            <div class="phone-notch"></div>
+            <img class="coverflow-image phone-screen" src="assets/public-screens/menu-admin.jpg" alt="Menu lateral do sistema ValiSys" loading="lazy">
+            <div class="screen-meta">
+              <strong>Navegação</strong>
+              <span>Menu completo para operação</span>
             </div>
           </div>
         </article>
 
-        <article class="coverflow-slide left-1" data-title="Setores">
-          <div class="coverflow-window panel-sectors">
-            <div class="browser-bar">
-              <span></span><span></span><span></span>
-              <em>Setores</em>
-            </div>
-            <div class="panel-content">
-              <small>Admin</small>
-              <h3>Setores por seleção</h3>
-              <div class="sector-chips">
-                <span>Mercearia</span>
-                <span>Bebidas</span>
-                <span>Frios</span>
-                <span>Outros +</span>
-              </div>
+        <article class="coverflow-slide left-1" data-title="Lista completa">
+          <div class="coverflow-window phone-window">
+            <div class="phone-notch"></div>
+            <img class="coverflow-image phone-screen" src="assets/public-screens/lista-completa.jpg" alt="Tela da lista completa de lançamentos" loading="lazy">
+            <div class="screen-meta">
+              <strong>Lista completa</strong>
+              <span>Consulta da equipe inteira</span>
             </div>
           </div>
         </article>
 
-        <article class="coverflow-slide left-2" data-title="Notificações">
-          <div class="coverflow-window panel-notify">
-            <div class="browser-bar">
-              <span></span><span></span><span></span>
-              <em>Notificações</em>
+        <article class="coverflow-slide left-2" data-title="Atalhos">
+          <div class="coverflow-window phone-window">
+            <div class="phone-notch"></div>
+            <img class="coverflow-image phone-screen" src="assets/public-screens/atalhos.jpg" alt="Tela de atalhos do sistema" loading="lazy">
+            <div class="screen-meta">
+              <strong>Atalhos</strong>
+              <span>Acesso rápido às áreas principais</span>
             </div>
-            <div class="panel-content">
-              <small>Aviso interno</small>
-              <h3>Notificação enviada</h3>
-              <div class="notify-bubble">
-                Produto vencendo hoje
-              </div>
-              <p class="panel-note">Aparece discreto no canto.</p>
+          </div>
+        </article>
+
+        <article class="coverflow-slide hidden" data-title="Meus lançamentos">
+          <div class="coverflow-window phone-window">
+            <div class="phone-notch"></div>
+            <img class="coverflow-image phone-screen" src="assets/public-screens/meus-lancamentos.jpg" alt="Tela dos meus lançamentos no sistema" loading="lazy">
+            <div class="screen-meta">
+              <strong>Meus lançamentos</strong>
+              <span>Filtro pessoal por usuário</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="coverflow-slide hidden" data-title="Novo lançamento">
+          <div class="coverflow-window phone-window">
+            <div class="phone-notch"></div>
+            <img class="coverflow-image phone-screen" src="assets/public-screens/novo-lancamento.jpg" alt="Tela de novo lançamento de produto" loading="lazy">
+            <div class="screen-meta">
+              <strong>Novo lançamento</strong>
+              <span>Escanear e conferir produto</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="coverflow-slide hidden" data-title="Escolher loja">
+          <div class="coverflow-window phone-window">
+            <div class="phone-notch"></div>
+            <img class="coverflow-image phone-screen" src="assets/public-screens/escolher-loja.jpg" alt="Tela para escolher a loja" loading="lazy">
+            <div class="screen-meta">
+              <strong>Escolher loja</strong>
+              <span>Filtro por grupo e região</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="coverflow-slide hidden" data-title="Cargo no login">
+          <div class="coverflow-window phone-window">
+            <div class="phone-notch"></div>
+            <img class="coverflow-image phone-screen" src="assets/public-screens/cargo-login.jpg" alt="Tela de login com seleção de cargo" loading="lazy">
+            <div class="screen-meta">
+              <strong>Login por cargo</strong>
+              <span>Promotor, encarregado ou gerente</span>
             </div>
           </div>
         </article>
@@ -148,6 +156,86 @@
       <div class="coverflow-dots" id="coverflowDots" aria-hidden="true"></div>
     </div>
   </section>
+  <section class="importance-pin-section" id="impacto">
+    <div class="importance-sticky">
+      <div class="importance-copy">
+        <span class="hero-pill">Ponto importante</span>
+        <h2>Quando a validade aperta, a tela foca no que precisa de atenção.</h2>
+        <p>
+          Essa área segura a rolagem por alguns instantes para mostrar o fluxo crítico:
+          identificar, avisar, retirar e evitar prejuízo.
+        </p>
+      </div>
+
+      <div class="importance-scene" aria-label="Fluxo visual de prioridade do ValiSys">
+        <div class="importance-phone">
+          <div class="importance-phone-top">
+            <span>ValiSys</span>
+            <strong id="importanceTitle">Produto vencendo hoje</strong>
+          </div>
+
+          <div class="importance-main-card">
+            <span class="importance-status" id="importanceStatus">Atenção</span>
+            <h3 id="importanceCardTitle">Leite integral</h3>
+            <p id="importanceCardText">Frios e Laticínios • vence hoje • 8 unidades</p>
+
+            <div class="importance-progress">
+              <i id="importanceProgressBar"></i>
+            </div>
+          </div>
+
+          <div class="importance-mini-list">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+
+        <div class="importance-floating importance-alert active" data-importance-float="0">
+          <strong>01</strong>
+          <span>Produto crítico encontrado</span>
+        </div>
+
+        <div class="importance-floating importance-notify" data-importance-float="1">
+          <strong>02</strong>
+          <span>Equipe notificada</span>
+        </div>
+
+        <div class="importance-floating importance-check" data-importance-float="2">
+          <strong>03</strong>
+          <span>Retirada registrada</span>
+        </div>
+
+        <div class="importance-floating importance-profit" data-importance-float="3">
+          <strong>04</strong>
+          <span>Prejuízo evitado</span>
+        </div>
+      </div>
+
+      <div class="importance-steps" id="importanceSteps">
+        <button type="button" class="active" data-step="0">
+          <strong>Identificar</strong>
+          <span>Produto vencendo hoje aparece em destaque.</span>
+        </button>
+
+        <button type="button" data-step="1">
+          <strong>Notificar</strong>
+          <span>O responsável recebe aviso dentro do sistema.</span>
+        </button>
+
+        <button type="button" data-step="2">
+          <strong>Retirar</strong>
+          <span>A equipe confirma a ação e limpa a pendência.</span>
+        </button>
+
+        <button type="button" data-step="3">
+          <strong>Controlar</strong>
+          <span>O painel mostra o que ainda precisa de atenção.</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
 
   <section id="recursos" class="public-section-redesign">
     <div class="section-heading-redesign">
@@ -239,9 +327,26 @@
     <h2>Quer adaptar o ValiSys para sua loja?</h2>
     <p>Use a demonstração ou fale comigo para personalizar o sistema.</p>
 
+    <div class="contact-public-actions">
+      <a href="mailto:joaoferreiraneto0711@gmail.com" class="contact-pill">
+        <strong>E-mail</strong>
+        <span>joaoferreiraneto0711@gmail.com</span>
+      </a>
+
+      <a href="https://instagram.com/jferreira07.11" target="_blank" class="contact-pill">
+        <strong>Instagram</strong>
+        <span>@jferreira07.11</span>
+      </a>
+
+      <button type="button" class="contact-pill sac-button" id="btnSacOnline">
+        <strong>SAC Online</strong>
+        <span>Chat no próprio site</span>
+      </button>
+    </div>
+
     <div class="hero-actions redesign-actions center-actions">
       <a href="escolher-loja.html" class="primary-link">Entrar no sistema</a>
-      <a href="mailto:idarkolekdasdorgas@gmail.com" class="secondary-link">Chamar por e-mail</a>
+      <button type="button" class="secondary-link sac-open-inline" id="btnSacOnlineInline">Abrir chat online</button>
     </div>
   </section>
 </main>
@@ -251,6 +356,45 @@
   <a href="escolher-loja.html">Acessar sistema</a>
 </footer>
 
+<div class="sac-chat-widget" id="sacChatWidget" aria-live="polite">
+  <button type="button" class="sac-chat-toggle" id="sacChatToggle" aria-label="Abrir SAC Online">
+    <span>SAC</span>
+    <strong>Online</strong>
+  </button>
+
+  <section class="sac-chat-panel" id="sacChatPanel" aria-hidden="true">
+    <header class="sac-chat-header">
+      <div>
+        <strong>SAC Online</strong>
+        <span>Atendimento pelo site</span>
+      </div>
+
+      <button type="button" id="sacChatClose" aria-label="Fechar chat">×</button>
+    </header>
+
+    <div class="sac-chat-body" id="sacChatBody">
+      <div class="chat-message bot">
+        <p>Olá! Sou o atendimento automático do ValiSys.</p>
+      </div>
+      <div class="chat-message bot">
+        <p>Me diga seu nome e uma forma de contato. Depois escreva o que você precisa. Quando o responsável responder, a mensagem aparece aqui.</p>
+      </div>
+    </div>
+
+    <form class="sac-chat-form" id="sacChatForm">
+      <div class="sac-chat-identificacao" id="sacChatIdentificacao">
+        <input type="text" id="sacChatNome" placeholder="Seu nome" autocomplete="name">
+        <input type="text" id="sacChatContato" placeholder="Contato, Instagram ou telefone">
+      </div>
+
+      <div class="sac-chat-send">
+        <textarea id="sacChatMensagem" rows="1" placeholder="Digite sua mensagem..." required></textarea>
+        <button type="submit">Enviar</button>
+      </div>
+    </form>
+  </section>
+</div>
+
 <script src="js/cookies.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/dados-config.js"></script>
@@ -258,5 +402,7 @@
 <script src="js/site-dialog.js"></script>
 <script src="js/icons.js"></script>
 <script src="js/public-coverflow.js"></script>
+<script src="js/public-sac.js"></script>
+<script src="js/public-animations.js"></script>
 </body>
 </html>

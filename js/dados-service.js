@@ -1305,6 +1305,250 @@ const valisysDB = {
     return true;
   },
 
+  sacNotificacaoParaApp(data) {
+    const mensagemCompleta = data.mensagem || "";
+    const linhas = mensagemCompleta.split("\n");
+    const contatoLinha = linhas.find(linha => linha.toLowerCase().startsWith("contato:")) || "";
+    const mensagemLinhaIndex = linhas.findIndex(linha => linha.toLowerCase().startsWith("mensagem:"));
+    const mensagem = mensagemLinhaIndex >= 0
+      ? linhas.slice(mensagemLinhaIndex).join("\n").replace(/^mensagem:\s*/i, "").trim()
+      : mensagemCompleta;
+
+    return {
+      id: data.id,
+      nome: (data.criado_por || "").replace("SAC Online - ", "") || (data.titulo || "").replace("SAC Online - ", "") || "Visitante",
+      contato: contatoLinha.replace(/^contato:\s*/i, "").trim(),
+      mensagem,
+      status: data.lida ? "lida" : "nova",
+      origem: "site_publico",
+      lida: Boolean(data.lida),
+      criadoEm: data.criado_em || ""
+    };
+  },
+
+  async criarSacMensagem(dados) {
+    const db = this.client();
+
+    // Sem SQL novo: o SAC usa a tabela notificacoes que o sistema já possui.
+    const { data, error } = await db
+      .from("notificacoes")
+      .insert({
+        loja_id: null,
+        tipo: "sac_online",
+        titulo: `SAC Online - ${dados.nome || "Visitante"}`,
+        mensagem: `Contato: ${dados.contato || ""}\n\nMensagem: ${dados.mensagem || ""}`,
+        lancamento_id: null,
+        produto: "",
+        setor: "SAC Online",
+        validade: null,
+        criado_por: `SAC Online - ${dados.nome || "Visitante"}`,
+        lida: false
+      })
+      .select("*")
+      .single();
+
+    if (error) throw error;
+
+    return this.sacNotificacaoParaApp(data);
+  },
+
+  async listarSacMensagens({ status = "todas" } = {}) {
+    const db = this.client();
+
+    let query = db
+      .from("notificacoes")
+      .select("*")
+      .eq("tipo", "sac_online")
+      .order("criado_em", { ascending: false });
+
+    if (status === "nova") {
+      query = query.eq("lida", false);
+    }
+
+    if (status === "lida") {
+      query = query.eq("lida", true);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return (data || []).map(this.sacNotificacaoParaApp);
+  },
+
+  async marcarSacMensagemLida(id) {
+    const db = this.client();
+
+    const { data, error } = await db
+      .from("notificacoes")
+      .update({ lida: true })
+      .eq("id", id)
+      .select("*")
+      .single();
+
+    if (error) throw error;
+
+    return this.sacNotificacaoParaApp(data);
+  },
+
+  async apagarSacMensagem(id) {
+    const db = this.client();
+
+    const { error } = await db
+      .from("notificacoes")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+
+    return true;
+  },
+
+  chatSacDBParaApp(data) {
+    let extra = {};
+
+    try {
+      extra = JSON.parse(data.produto || "{}");
+    } catch (_) {
+      extra = {};
+    }
+
+    return {
+      id: data.id,
+      sessaoId: extra.sessaoId || "",
+      nome: extra.nome || "",
+      contato: extra.contato || "",
+      autor: extra.autor || "cliente",
+      mensagem: data.mensagem || "",
+      lida: Boolean(data.lida),
+      criadoEm: data.criado_em || ""
+    };
+  },
+
+  async criarMensagemChatSac(dados) {
+    const db = this.client();
+
+    const sessaoId = dados.sessaoId || `sac_${Date.now()}`;
+    const autor = dados.autor || "cliente";
+
+    const { data, error } = await db
+      .from("notificacoes")
+      .insert({
+        loja_id: null,
+        tipo: "sac_chat",
+        titulo: `SAC Chat - ${sessaoId}`,
+        mensagem: dados.mensagem || "",
+        lancamento_id: null,
+        produto: JSON.stringify({
+          sessaoId,
+          nome: dados.nome || "",
+          contato: dados.contato || "",
+          autor
+        }),
+        setor: "SAC Online",
+        validade: null,
+        criado_por: autor === "admin" ? "Admin SAC" : `Cliente SAC - ${dados.nome || "Visitante"}`,
+        lida: autor === "admin" ? true : false
+      })
+      .select("*")
+      .single();
+
+    if (error) throw error;
+
+    return this.chatSacDBParaApp(data);
+  },
+
+  async listarMensagensChatSac(sessaoId) {
+    const db = this.client();
+
+    const { data, error } = await db
+      .from("notificacoes")
+      .select("*")
+      .eq("tipo", "sac_chat")
+      .eq("titulo", `SAC Chat - ${sessaoId}`)
+      .order("criado_em", { ascending: true });
+
+    if (error) throw error;
+
+    return (data || []).map(this.chatSacDBParaApp);
+  },
+
+  async listarConversasChatSac() {
+    const db = this.client();
+
+    const { data, error } = await db
+      .from("notificacoes")
+      .select("*")
+      .eq("tipo", "sac_chat")
+      .order("criado_em", { ascending: false });
+
+    if (error) throw error;
+
+    const conversas = new Map();
+
+    (data || []).forEach(item => {
+      const mensagem = this.chatSacDBParaApp(item);
+
+      if (!mensagem.sessaoId) return;
+
+      const atual = conversas.get(mensagem.sessaoId) || {
+        sessaoId: mensagem.sessaoId,
+        nome: mensagem.nome || "Visitante",
+        contato: mensagem.contato || "",
+        ultimaMensagem: "",
+        atualizadoEm: "",
+        total: 0,
+        naoLidas: 0
+      };
+
+      if (mensagem.nome) atual.nome = mensagem.nome;
+      if (mensagem.contato) atual.contato = mensagem.contato;
+
+      atual.total += 1;
+
+      if (mensagem.autor === "cliente" && !mensagem.lida) {
+        atual.naoLidas += 1;
+      }
+
+      if (!atual.atualizadoEm || String(mensagem.criadoEm) > String(atual.atualizadoEm)) {
+        atual.ultimaMensagem = mensagem.mensagem;
+        atual.atualizadoEm = mensagem.criadoEm;
+      }
+
+      conversas.set(mensagem.sessaoId, atual);
+    });
+
+    return [...conversas.values()].sort((a, b) => String(b.atualizadoEm).localeCompare(String(a.atualizadoEm)));
+  },
+
+  async marcarChatSacComoLido(sessaoId) {
+    const db = this.client();
+
+    const { error } = await db
+      .from("notificacoes")
+      .update({ lida: true })
+      .eq("tipo", "sac_chat")
+      .eq("titulo", `SAC Chat - ${sessaoId}`);
+
+    if (error) throw error;
+
+    return true;
+  },
+
+  async apagarConversaChatSac(sessaoId) {
+    const db = this.client();
+
+    const { error } = await db
+      .from("notificacoes")
+      .delete()
+      .eq("tipo", "sac_chat")
+      .eq("titulo", `SAC Chat - ${sessaoId}`);
+
+    if (error) throw error;
+
+    return true;
+  },
+
   lojaDBParaApp(data) {
     return {
       id: data.id,

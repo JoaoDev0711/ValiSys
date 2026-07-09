@@ -751,6 +751,41 @@ set lida = false
 where lida is null;
 
 -- =========================
+-- TABELA: SAC ONLINE
+-- =========================
+create table if not exists public.sac_mensagens (
+  id uuid primary key default gen_random_uuid(),
+  nome text not null,
+  contato text not null,
+  mensagem text not null,
+  status text not null default 'nova',
+  origem text,
+  criado_em timestamptz not null default now()
+);
+
+alter table public.sac_mensagens
+add column if not exists nome text;
+
+alter table public.sac_mensagens
+add column if not exists contato text;
+
+alter table public.sac_mensagens
+add column if not exists mensagem text;
+
+alter table public.sac_mensagens
+add column if not exists status text not null default 'nova';
+
+alter table public.sac_mensagens
+add column if not exists origem text;
+
+alter table public.sac_mensagens
+add column if not exists criado_em timestamptz not null default now();
+
+update public.sac_mensagens
+set status = 'nova'
+where status is null or status = '';
+
+-- =========================
 -- ÍNDICES
 -- =========================
 create index if not exists idx_lojas_status on public.lojas(status);
@@ -771,6 +806,8 @@ create index if not exists idx_lancamentos_setor on public.lancamentos(setor);
 
 create index if not exists idx_notificacoes_loja on public.notificacoes(loja_id);
 create index if not exists idx_notificacoes_lida on public.notificacoes(lida);
+create index if not exists idx_sac_mensagens_status on public.sac_mensagens(status);
+create index if not exists idx_sac_mensagens_criado_em on public.sac_mensagens(criado_em);
 
 -- =========================
 -- REGRAS DE ACESSO PARA TESTE
@@ -786,6 +823,7 @@ alter table public.catalogo_produtos enable row level security;
 alter table public.produtos enable row level security;
 alter table public.lancamentos enable row level security;
 alter table public.notificacoes enable row level security;
+alter table public.sac_mensagens enable row level security;
 
 drop policy if exists "ValiSys select lojas" on public.lojas;
 drop policy if exists "ValiSys insert lojas" on public.lojas;
@@ -822,6 +860,10 @@ drop policy if exists "ValiSys update lancamentos" on public.lancamentos;
 drop policy if exists "ValiSys delete lancamentos" on public.lancamentos;
 
 drop policy if exists "ValiSys select notificacoes" on public.notificacoes;
+drop policy if exists "ValiSys select sac_mensagens" on public.sac_mensagens;
+drop policy if exists "ValiSys insert sac_mensagens" on public.sac_mensagens;
+drop policy if exists "ValiSys update sac_mensagens" on public.sac_mensagens;
+drop policy if exists "ValiSys delete sac_mensagens" on public.sac_mensagens;
 drop policy if exists "ValiSys insert notificacoes" on public.notificacoes;
 drop policy if exists "ValiSys update notificacoes" on public.notificacoes;
 drop policy if exists "ValiSys delete notificacoes" on public.notificacoes;
@@ -920,6 +962,18 @@ create policy "ValiSys update notificacoes" on public.notificacoes
 for update to anon using (true) with check (true);
 
 create policy "ValiSys delete notificacoes" on public.notificacoes
+for delete to anon using (true);
+
+create policy "ValiSys select sac_mensagens" on public.sac_mensagens
+for select to anon using (true);
+
+create policy "ValiSys insert sac_mensagens" on public.sac_mensagens
+for insert to anon with check (true);
+
+create policy "ValiSys update sac_mensagens" on public.sac_mensagens
+for update to anon using (true) with check (true);
+
+create policy "ValiSys delete sac_mensagens" on public.sac_mensagens
 for delete to anon using (true);
 
 -- =========================
