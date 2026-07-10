@@ -7065,3 +7065,87 @@ body.camera-aberta #reader {
     display: none !important;
   }
 }
+
+
+/* ===== Aviso da equipe: dentro do card Controle do mercado ===== */
+.comunicado-equipe-card {
+  display: none !important;
+}
+
+.comunicado-dashboard-inline {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(47, 125, 79, .14);
+  background:
+    radial-gradient(circle at top right, rgba(47,125,79,.12), transparent 38%),
+    rgba(47, 125, 79, .055);
+}
+
+.comunicado-inline-topo {
+  display: grid;
+  gap: 4px;
+}
+
+.comunicado-inline-topo span {
+  color: var(--primary-strong);
+  font-size: 12px;
+  font-weight: 1000;
+  letter-spacing: .01em;
+}
+
+.comunicado-inline-topo strong {
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.comunicado-dashboard-inline p {
+  margin: 8px 0 0;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.comunicado-dashboard-inline small {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.gestao-comunicado-card {
+  border: 1px solid rgba(47,125,79,.14);
+  background:
+    radial-gradient(circle at top right, rgba(47,125,79,.10), transparent 36%),
+    var(--card);
+}
+
+.gestao-comunicado-form {
+  display: grid;
+  gap: 10px;
+}
+
+.gestao-comunicado-form label {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.gestao-comunicado-form textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.gestao-comunicado-form button {
+  min-height: 48px;
+}
+
+@media (max-width: 760px) {
+  .comunicado-dashboard-inline {
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 16px;
+  }
+}

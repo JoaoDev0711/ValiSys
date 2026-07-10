@@ -30,10 +30,10 @@
   <a href="#gestao-resumo">📌 Resumo</a>
   <a href="#gestao-vencimentos">⏳ Vencimentos</a>
   <a href="#gestao-equipe" data-gestao="gerente">👥 Equipe</a>
+  <a href="#gestao-comunicado">📣 Aviso da equipe</a>
   <a href="#gestao-acoes">⚡ Ações</a>
   <a href="lancar.html">📦 Lançar validade</a>
   <a href="lista-geral.html">📅 Lista completa</a>
-  <a href="notificacoes.html">🔔 Notificações</a>
   <a href="#" onclick="trocarLojaComConfirmacao()">🏪 Trocar loja</a>
   <a href="#" onclick="sair()">🚪 Sair</a>
 </nav>
@@ -128,6 +128,28 @@
     <div id="gestao-equipe-lista"></div>
   </section>
 
+
+  <section class="card gestao-comunicado-card" id="gestao-comunicado">
+    <div class="section-title">
+      <div>
+        <h2>Enviar aviso para a equipe</h2>
+        <p class="muted">A mensagem aparece no dashboard e também vai por push externo para quem ativou o sino.</p>
+      </div>
+      <span>📣</span>
+    </div>
+
+    <form id="form-comunicado-equipe" class="comunicado-form gestao-comunicado-form">
+      <label for="comunicadoTitulo">Título do aviso</label>
+      <input id="comunicadoTitulo" maxlength="70" placeholder="Ex: Aviso da equipe" value="Aviso da equipe">
+
+      <label for="comunicadoTexto">Mensagem</label>
+      <textarea id="comunicadoTexto" maxlength="300" rows="4" placeholder="Ex: Bom trabalho equipe! Atenção aos produtos próximos da validade hoje."></textarea>
+
+      <button type="submit">Enviar aviso externo</button>
+      <p class="muted" id="status-comunicado-equipe">Gerentes, encarregados e admins podem enviar.</p>
+    </form>
+  </section>
+
   <section class="card" id="gestao-acoes">
     <h2>Ações administrativas</h2>
     <div class="grid-actions gestao-actions">
@@ -144,14 +166,6 @@
         <div>
           <h3>Lista completa</h3>
           <p>Gerente vê a loja; encarregado vê o setor quando configurado.</p>
-        </div>
-      </a>
-
-      <a href="notificacoes.html" class="action-card">
-        <span>🔔</span>
-        <div>
-          <h3>Notificações</h3>
-          <p>Acompanhar avisos internos e produtos críticos.</p>
         </div>
       </a>
 
@@ -185,6 +199,8 @@
 <script src="js/notificacoes-flutuantes.js"></script>
 <script src="js/navbar.js"></script>
 <script src="js/gestao-loja.js"></script>
+<script src="js/comunicados-core.js"></script>
+<script src="js/comunicados-gerencia.js"></script>
 <script src="js/push-notifications-v2.js?v=2"></script>
 <script src="js/pwa-register.js"></script>
 </body>
