@@ -62,7 +62,6 @@ if (usuario) {
   });
 
   carregarResumoInicial();
-  carregarResumoNotificacoes();
 }
 
 async function carregarResumoInicial() {
