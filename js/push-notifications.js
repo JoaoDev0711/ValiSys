@@ -8,7 +8,7 @@
   4) Fazer deploy das Edge Functions em supabase/functions.
 */
 
-const VALISYS_PUSH_PUBLIC_KEY = "BIW4knHLKLF65FEIR_ndLGXfXCS13MtruNHLqYmRyRlzRCdoI3ImN1gO0oQVHkTybXf5fGdwpMVPHDtQptPoFZs";
+const VALISYS_PUSH_PUBLIC_KEY = "COLE_AQUI_SUA_CHAVE_PUBLICA_VAPID";
 
 (function () {
   const SUPORTA_PUSH = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
