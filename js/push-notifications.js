@@ -4,7 +4,7 @@
 */
 
 const VALISYS_PUSH_PUBLIC_KEY = "BIW4knHLKLF65FEIR_ndLGXfXCS13MtruNHLqYmRyRlzRCdoI3ImN1gO0oQVHkTybXf5fGdwpMVPHDtQptPoFZs";
-
+                                 
 (function () {
   const SUPORTA_PUSH = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
   const STORAGE_PUSH_ATIVO = "valisysPushAtivo";
