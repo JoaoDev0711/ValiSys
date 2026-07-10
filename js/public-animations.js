@@ -78,6 +78,17 @@
   ];
 
   function ativarSecaoTravada() {
+  // VALISYS_MOBILE_IMPACT_GUARD: no celular a seção vira layout simples, sem travar rolagem.
+  const mobileImpacto = window.matchMedia && window.matchMedia("(max-width: 760px)").matches;
+  if (mobileImpacto) {
+    const botoesMobile = [...document.querySelectorAll("[data-step]")];
+    botoesMobile.forEach(botao => {
+      botao.addEventListener("click", () => aplicarPasso(Number(botao.dataset.step || 0), 0.35));
+    });
+    aplicarPasso(0, 0.18);
+    return;
+  }
+
     const secao = document.querySelector(".importance-pin-section");
     const title = document.getElementById("importanceTitle");
     const status = document.getElementById("importanceStatus");

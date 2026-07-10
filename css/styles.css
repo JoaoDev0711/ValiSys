@@ -6551,3 +6551,235 @@ body.camera-aberta #reader {
     z-index: 900;
   }
 }
+
+
+/* ===== Correção final: seção de impacto no mobile + logo oficial ===== */
+.public-logo-img {
+  width: 176px !important;
+  max-height: 52px;
+  object-fit: contain;
+}
+
+@media (max-width: 720px) {
+  .public-logo-img {
+    width: 146px !important;
+    max-height: 44px;
+  }
+}
+
+@media (max-width: 760px) {
+  .importance-pin-section {
+    min-height: auto !important;
+    margin: 18px 0 0 !important;
+    padding: 0 14px 82px !important;
+    overflow: visible !important;
+  }
+
+  .importance-sticky {
+    position: relative !important;
+    top: auto !important;
+    min-height: auto !important;
+    width: 100% !important;
+    padding: 18px 0 26px !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    align-items: stretch !important;
+  }
+
+  .importance-copy h2 {
+    font-size: clamp(28px, 9vw, 38px) !important;
+    line-height: 1.02 !important;
+    letter-spacing: -.055em !important;
+  }
+
+  .importance-copy p {
+    font-size: 15px !important;
+    line-height: 1.58 !important;
+    margin-top: 12px !important;
+  }
+
+  .importance-scene {
+    min-height: auto !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    place-items: stretch !important;
+    overflow: visible !important;
+  }
+
+  .importance-scene::before {
+    width: 100% !important;
+    height: 330px !important;
+    inset: 54px 0 auto 0 !important;
+    filter: blur(18px) !important;
+    opacity: .72 !important;
+  }
+
+  .importance-phone {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    min-height: auto !important;
+    padding: 16px !important;
+    border-radius: 30px !important;
+    transform: none !important;
+    overflow: hidden !important;
+  }
+
+  .importance-phone-top span {
+    font-size: 22px !important;
+  }
+
+  .importance-phone-top strong {
+    max-width: 128px !important;
+    font-size: 10px !important;
+    line-height: 1.25 !important;
+  }
+
+  .importance-main-card {
+    margin-top: 42px !important;
+    padding: 18px !important;
+    border-radius: 24px !important;
+  }
+
+  .importance-status {
+    padding: 7px 10px !important;
+    font-size: 11px !important;
+  }
+
+  .importance-main-card h3 {
+    margin-top: 16px !important;
+    font-size: clamp(30px, 10vw, 40px) !important;
+    line-height: 1 !important;
+  }
+
+  .importance-main-card p {
+    min-height: auto !important;
+    font-size: 15px !important;
+    line-height: 1.42 !important;
+  }
+
+  .importance-progress {
+    margin-top: 18px !important;
+  }
+
+  .importance-mini-list {
+    margin-top: 14px !important;
+    gap: 8px !important;
+  }
+
+  .importance-mini-list span {
+    height: 38px !important;
+    border-radius: 16px !important;
+  }
+
+  .importance-floating {
+    position: relative !important;
+    inset: auto !important;
+    width: auto !important;
+    min-height: 96px !important;
+    padding: 12px !important;
+    border-radius: 20px !important;
+    opacity: 1 !important;
+    transform: none !important;
+    display: grid !important;
+    align-content: start !important;
+    gap: 8px !important;
+  }
+
+  .importance-floating.active {
+    transform: none !important;
+  }
+
+  .importance-floating strong {
+    width: 32px !important;
+    height: 32px !important;
+    margin: 0 !important;
+    border-radius: 13px !important;
+    font-size: 11px !important;
+  }
+
+  .importance-floating span {
+    font-size: 14px !important;
+    line-height: 1.18 !important;
+  }
+
+  .importance-steps {
+    display: none !important;
+  }
+
+  .sac-chat-widget {
+    right: 14px !important;
+    bottom: 14px !important;
+    z-index: 1200 !important;
+  }
+}
+
+
+/* ===== Correção final dos cards de vencimento no dashboard ===== */
+@media (max-width: 760px) {
+  .resumo-vencimentos {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin: 10px 0 12px !important;
+  }
+
+  .resumo-card {
+    min-width: 0 !important;
+    height: 58px !important;
+    min-height: 58px !important;
+    padding: 7px 3px !important;
+    border-radius: 14px !important;
+    display: grid !important;
+    place-items: center !important;
+    text-align: center !important;
+    gap: 0 !important;
+  }
+
+  .resumo-card > span,
+  .resumo-card > .svg-icon,
+  .resumo-card > span .svg-icon {
+    display: none !important;
+  }
+
+  .resumo-card > div {
+    min-width: 0 !important;
+    width: 100% !important;
+    display: grid !important;
+    place-items: center !important;
+    gap: 2px !important;
+  }
+
+  .resumo-card strong {
+    display: block !important;
+    font-size: 20px !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+  }
+
+  .resumo-card p {
+    display: block !important;
+    margin: 0 !important;
+    font-size: 11px !important;
+    line-height: 1.05 !important;
+    white-space: nowrap !important;
+    letter-spacing: -.03em !important;
+  }
+}
+
+
+/* ===== Logo oficial enviada pelo usuário ===== */
+.public-logo-img {
+  width: 168px !important;
+  max-height: 48px !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+@media (max-width: 720px) {
+  .public-logo-img {
+    width: 142px !important;
+    max-height: 42px !important;
+  }
+}
