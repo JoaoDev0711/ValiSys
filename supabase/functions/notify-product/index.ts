@@ -65,21 +65,6 @@ Deno.serve(async (req) => {
     const titulo = "Produto lançado no ValiSys";
     const mensagem = `${produto} foi lançado em ${lojaNome} com validade ${validade}.`;
 
-    await supabase
-      .from("notificacoes")
-      .insert({
-        loja_id: lojaId,
-        tipo,
-        titulo,
-        mensagem,
-        lancamento_id: lancamento.id,
-        produto,
-        setor: lancamento.setor || "",
-        validade: lancamento.validade || null,
-        criado_por: lancamento.usuario_nome || "Sistema",
-        lida: false,
-      });
-
     const resultadoPush = await enviarPushParaLoja(supabase, lojaId, {
       title: titulo,
       body: mensagem,
@@ -92,7 +77,8 @@ Deno.serve(async (req) => {
 
     return jsonResponse({
       ok: true,
-      notificacao: mensagem,
+      modo: "push_externo",
+      mensagem,
       push: resultadoPush,
     });
   } catch (erro) {

@@ -112,21 +112,6 @@ Deno.serve(async (req) => {
 
       const mensagem = `${alerta.prefixo}: ${produto} em ${lojaNome}. Validade ${formatarData(item.validade)}.`;
 
-      await supabase
-        .from("notificacoes")
-        .insert({
-          loja_id: lojaId,
-          tipo: alerta.tipo,
-          titulo: alerta.titulo,
-          mensagem,
-          lancamento_id: item.id,
-          produto,
-          setor: item.setor || "",
-          validade: item.validade || null,
-          criado_por: "Sistema automático",
-          lida: false,
-        });
-
       const resultadoPush = await enviarPushParaLoja(supabase, lojaId, {
         title: alerta.titulo,
         body: mensagem,
