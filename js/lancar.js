@@ -996,7 +996,11 @@ form.addEventListener("submit", async function(event) {
   }
 
   try {
-    await valisysDB.criarLancamento(novo);
+    const lancamentoSalvo = await valisysDB.criarLancamento(novo);
+
+    if (window.valisysPush?.enviarProdutoLancado) {
+      window.valisysPush.enviarProdutoLancado(lancamentoSalvo);
+    }
 
     alert("Lançamento salvo!");
     form.reset();

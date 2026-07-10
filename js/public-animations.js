@@ -87,6 +87,7 @@
     const steps = [...document.querySelectorAll("#importanceSteps button")];
     const floats = [...document.querySelectorAll("[data-importance-float]")];
     const phone = document.querySelector(".importance-phone");
+    const mobileLayout = window.matchMedia("(max-width: 760px)");
 
     if (!secao || !title || !status || !cardTitle || !cardText || !progressBar) return;
 
@@ -118,6 +119,11 @@
     }
 
     function calcular() {
+      if (mobileLayout.matches) {
+        aplicarPasso(Math.max(passoAtual, 0), (Math.max(passoAtual, 0) + 1) / dadosImpacto.length);
+        return;
+      }
+
       const rect = secao.getBoundingClientRect();
       const total = secao.offsetHeight - window.innerHeight;
 
@@ -133,6 +139,11 @@
 
     steps.forEach((btn, index) => {
       btn.addEventListener("click", () => {
+        if (mobileLayout.matches) {
+          aplicarPasso(index, (index + 1) / dadosImpacto.length);
+          return;
+        }
+
         const total = secao.offsetHeight - window.innerHeight;
         const alvo = secao.offsetTop + (total * (index / dadosImpacto.length)) + 8;
 
@@ -143,9 +154,13 @@
       });
     });
 
+    aplicarPasso(0, 0.18);
     calcular();
     window.addEventListener("scroll", calcular, { passive: true });
     window.addEventListener("resize", calcular);
+    if (mobileLayout.addEventListener) {
+      mobileLayout.addEventListener("change", calcular);
+    }
   }
 
   ativarReveals();

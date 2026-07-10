@@ -6182,3 +6182,290 @@ body.valisys-public-redesign::before {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ===== Ajustes extras da vitrine pública ===== */
+.phone-window {
+  overflow: hidden;
+}
+
+.phone-window .phone-screen {
+  object-position: center top;
+}
+
+.phone-stack-stage .coverflow-slide {
+  transition: transform .45s ease, filter .45s ease, opacity .45s ease;
+}
+
+.phone-stack-stage .coverflow-slide:not(.active) .coverflow-window {
+  box-shadow: 0 22px 52px rgba(23, 32, 25, .16);
+}
+
+/* Corrige a seção de fluxo no mobile para não quebrar e não sobrepor o SAC */
+@media (max-width: 760px) {
+  .importance-pin-section {
+    min-height: auto;
+    overflow: hidden;
+  }
+
+  .importance-sticky {
+    position: relative;
+    top: auto;
+    width: calc(100% - 20px);
+    min-height: auto;
+    display: block;
+    padding: 34px 0 28px;
+  }
+
+  .importance-copy h2 {
+    font-size: clamp(30px, 9vw, 44px);
+    line-height: 1.02;
+    letter-spacing: -.045em;
+  }
+
+  .importance-copy p {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .importance-scene {
+    min-height: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+  }
+
+  .importance-scene::before {
+    inset: 4% 6%;
+    width: auto;
+    height: auto;
+    border-radius: 32px;
+    filter: blur(18px);
+  }
+
+  .importance-phone {
+    grid-column: 1 / -1;
+    width: min(100%, 400px);
+    min-height: 400px;
+    margin: 0 auto;
+  }
+
+  .importance-main-card h3 {
+    font-size: 32px;
+  }
+
+  .importance-floating {
+    position: static;
+    width: auto;
+    min-height: 104px;
+    opacity: 1;
+    transform: none;
+    box-shadow: 0 16px 34px rgba(23,32,25,.10);
+  }
+
+  .importance-floating.active {
+    transform: none;
+    box-shadow: 0 18px 42px rgba(23,32,25,.16);
+  }
+
+  .importance-steps {
+    margin-top: 14px;
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .phone-stack-stage {
+    height: 455px;
+  }
+
+  .phone-stack-stage .coverflow-slide {
+    width: min(208px, 62vw);
+  }
+
+  .screen-meta {
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    padding: 10px 12px;
+  }
+
+  .screen-meta strong {
+    font-size: 13px;
+  }
+
+  .screen-meta span {
+    font-size: 10px;
+  }
+
+  .importance-scene {
+    grid-template-columns: 1fr;
+  }
+
+  .importance-phone {
+    min-height: 380px;
+    padding: 16px;
+  }
+
+  .importance-main-card {
+    margin-top: 48px;
+    padding: 18px;
+  }
+
+  .importance-main-card h3 {
+    font-size: 28px;
+  }
+
+  .importance-phone-top strong {
+    max-width: 142px;
+    font-size: 11px;
+  }
+
+  .importance-floating {
+    min-height: auto;
+  }
+
+  .sac-chat-widget {
+    bottom: 14px;
+    right: 14px;
+  }
+}
+
+
+/* Logo pública ValiSys */
+.public-logo-link {
+  gap: 0;
+  min-width: fit-content;
+}
+
+.public-logo-img {
+  width: 154px;
+  height: auto;
+  display: block;
+}
+
+@media (max-width: 720px) {
+  .public-logo-img {
+    width: 128px;
+  }
+}
+
+
+/* ===== PWA / Notificações push ===== */
+.push-widget {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 1300;
+  display: grid;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.push-widget-toggle {
+  width: 58px;
+  height: 58px;
+  min-height: 58px;
+  border: 0;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #153B2A, #23764D);
+  color: #fff;
+  box-shadow: 0 18px 46px rgba(21, 59, 42, .28);
+  font-size: 23px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.push-widget-card {
+  width: min(330px, calc(100vw - 34px));
+  padding: 16px;
+  border-radius: 24px;
+  background: rgba(255,255,255,.94);
+  border: 1px solid rgba(21,59,42,.12);
+  box-shadow: 0 24px 70px rgba(21, 32, 24, .18);
+  backdrop-filter: blur(18px);
+  display: none;
+  gap: 14px;
+  pointer-events: auto;
+}
+
+.push-widget.open .push-widget-card {
+  display: grid;
+}
+
+.push-widget-card strong {
+  display: block;
+  color: var(--text, #172019);
+  font-size: 16px;
+}
+
+.push-widget-card p {
+  margin: 6px 0 0;
+  color: var(--muted, #6e746f);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.push-widget-card button {
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  border-radius: 16px;
+  background: #153B2A;
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.push-widget-card button:disabled {
+  opacity: .7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 760px) {
+  .push-widget {
+    left: 14px;
+    bottom: 14px;
+  }
+
+  .push-widget-toggle {
+    width: 54px;
+    height: 54px;
+    min-height: 54px;
+    border-radius: 18px;
+    font-size: 21px;
+  }
+}
+
+
+/* Ajuste pedido: reorganização visual do scanner */
+#reader::after {
+  content: none !important;
+  display: none !important;
+}
+
+#reader {
+  display: none;
+  min-height: 0 !important;
+  height: 0;
+  overflow: hidden;
+  background: transparent !important;
+}
+
+body.camera-aberta #reader {
+  display: block !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9998 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  overflow: hidden !important;
+}

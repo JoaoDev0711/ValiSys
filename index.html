@@ -5,14 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ValiSys - Controle de vencimentos para lojas</title>
   <meta name="description" content="ValiSys é um sistema para controlar produtos próximos do vencimento por loja, setor, usuário e prazo.">
+  <link rel="icon" href="assets/logo/valisys-mark.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#153B2A">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="public-page valisys-public-redesign">
 
 <header class="public-header redesign-header">
-  <a href="index.html" class="brand valisys-brand redesign-brand">
-    <span class="brand-icon">V</span>
-    <strong>ValiSys</strong>
+  <a href="index.html" class="brand valisys-brand redesign-brand public-logo-link" aria-label="ValiSys">
+    <img src="assets/logo/valisys-logo.svg" alt="ValiSys" class="public-logo-img">
   </a>
 
   <nav class="public-nav redesign-nav">
@@ -33,15 +35,14 @@
       <span class="hero-pill">Controle operacional para mercados</span>
       <h1>Validades organizadas antes de virarem prejuízo.</h1>
       <p>
-        O ValiSys ajuda lojas, promotores, encarregados e gerentes a registrar produtos,
-        acompanhar prazos e notificar a equipe com uma interface simples no celular.
-        Agora a página pública mostra telas reais do sistema em um slider empilhado,
-        automático e mais próximo do visual que você pediu.
+        Controle de validade para mercados de forma simples e organizada.
+        Registre produtos por EAN, acompanhe prazos por loja e setor e mantenha
+        a equipe avisada antes que os itens virem prejuízo.
       </p>
 
       <div class="hero-actions redesign-actions">
         <a href="escolher-loja.html" class="primary-link">Acessar demonstração</a>
-        <a href="#visual" class="secondary-link">Ver visual</a>
+        <a href="#visual" class="secondary-link">Conhecer o sistema</a>
       </div>
 
       <div class="hero-metrics">
@@ -162,8 +163,8 @@
         <span class="hero-pill">Ponto importante</span>
         <h2>Quando a validade aperta, a tela foca no que precisa de atenção.</h2>
         <p>
-          Essa área segura a rolagem por alguns instantes para mostrar o fluxo crítico:
-          identificar, avisar, retirar e evitar prejuízo.
+          O fluxo mais crítico aparece em destaque para mostrar como a equipe identifica,
+          avisa, retira e acompanha os itens antes que virem prejuízo.
         </p>
       </div>
 
@@ -413,5 +414,6 @@
 <script src="js/public-coverflow.js"></script>
 <script src="js/public-sac.js"></script>
 <script src="js/public-animations.js"></script>
+<script src="js/pwa-register.js"></script>
 </body>
 </html>
