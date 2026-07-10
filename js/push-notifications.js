@@ -1,17 +1,13 @@
 /*
   ValiSys - Notificações Push pelo navegador
-
-  Para funcionar de verdade:
-  1) Rodar database/push-notifications.sql no Supabase.
-  2) Gerar chaves VAPID.
-  3) Colar a chave pública em VALISYS_PUSH_PUBLIC_KEY.
-  4) Fazer deploy das Edge Functions em supabase/functions.
+  Versão otimizada: não deixa botão ativo depois que o aparelho já está inscrito.
 */
 
-const VALISYS_PUSH_PUBLIC_KEY = "COLE_AQUI_SUA_CHAVE_PUBLICA_VAPID";
+const VALISYS_PUSH_PUBLIC_KEY = "BIW4knHLKLF65FEIR_ndLGXfXCS13MtruNHLqYmRyRlzRCdoI3ImN1gO0oQVHkTybXf5fGdwpMVPHDtQptPoFZs";
 
 (function () {
   const SUPORTA_PUSH = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+  const STORAGE_PUSH_ATIVO = "valisysPushAtivo";
 
   function pushConfigurado() {
     return (
@@ -19,16 +15,6 @@ const VALISYS_PUSH_PUBLIC_KEY = "COLE_AQUI_SUA_CHAVE_PUBLICA_VAPID";
       VALISYS_PUSH_PUBLIC_KEY &&
       !VALISYS_PUSH_PUBLIC_KEY.includes("COLE_AQUI")
     );
-  }
-
-  function getClienteSupabaseSeguro() {
-    if (typeof getDadosOnlineClient !== "function") return null;
-
-    try {
-      return getDadosOnlineClient();
-    } catch (erro) {
-      return null;
-    }
   }
 
   function getUsuarioSeguro() {
@@ -47,6 +33,15 @@ const VALISYS_PUSH_PUBLIC_KEY = "COLE_AQUI_SUA_CHAVE_PUBLICA_VAPID";
     } catch (erro) {
       return null;
     }
+  }
+
+  function aparelhoJaAtivado() {
+    return localStorage.getItem(STORAGE_PUSH_ATIVO) === "true" && Notification?.permission === "granted";
+  }
+
+  function removerWidget() {
+    const widget = document.querySelector("[data-push-widget]");
+    if (widget) widget.remove();
   }
 
   function urlBase64ParaUint8Array(base64String) {
@@ -99,34 +94,33 @@ const VALISYS_PUSH_PUBLIC_KEY = "COLE_AQUI_SUA_CHAVE_PUBLICA_VAPID";
   }
 
   function criarWidget() {
+    if (!SUPORTA_PUSH) return;
+    if (!pushConfigurado()) return;
+    if (!getUsuarioSeguro()) return;
+    if (aparelhoJaAtivado()) return;
     if (document.querySelector("[data-push-widget]")) return;
-
-    const usuario = getUsuarioSeguro();
-
-    if (!usuario) return;
 
     const widget = document.createElement("aside");
     widget.className = "push-widget";
     widget.setAttribute("data-push-widget", "true");
 
     widget.innerHTML = `
-      <button type="button" class="push-widget-toggle" data-push-toggle aria-label="Notificações push">
+      <button type="button" class="push-widget-toggle" data-push-toggle aria-label="Ativar notificações">
         🔔
       </button>
 
       <div class="push-widget-card" data-push-card>
         <div>
-          <strong>Notificações do celular</strong>
-          <p data-push-status>Receba avisos quando produtos forem lançados, estiverem perto de vencer ou vencidos.</p>
+          <strong>Ativar notificações</strong>
+          <p data-push-status>Receba avisos de produtos lançados, próximos do vencimento e vencidos.</p>
         </div>
 
-        <button type="button" data-push-ativar>Ativar notificações</button>
+        <button type="button" data-push-ativar>Ativar no celular</button>
       </div>
     `;
 
     document.body.appendChild(widget);
 
-    const card = widget.querySelector("[data-push-card]");
     const status = widget.querySelector("[data-push-status]");
     const ativar = widget.querySelector("[data-push-ativar]");
     const toggle = widget.querySelector("[data-push-toggle]");
@@ -135,55 +129,28 @@ const VALISYS_PUSH_PUBLIC_KEY = "COLE_AQUI_SUA_CHAVE_PUBLICA_VAPID";
       widget.classList.toggle("open");
     });
 
-    ativar.addEventListener("click", async () => {
-      ativar.disabled = true;
-      status.textContent = "Ativando notificações...";
-
-      try {
-        await ativarPush();
-        status.textContent = "Notificações ativadas neste aparelho.";
-        ativar.textContent = "Ativado";
-      } catch (erro) {
-        console.warn(erro);
-        status.textContent = erro.message || "Não foi possível ativar as notificações.";
-        ativar.disabled = false;
-      }
-    });
-
-    atualizarEstadoWidget(widget);
-  }
-
-  async function atualizarEstadoWidget(widget) {
-    const status = widget.querySelector("[data-push-status]");
-    const ativar = widget.querySelector("[data-push-ativar]");
-
-    if (!SUPORTA_PUSH) {
-      status.textContent = "Este navegador não suporta push.";
-      ativar.disabled = true;
-      return;
-    }
-
-    if (!pushConfigurado()) {
-      status.textContent = "Push pronto no site. Falta configurar a chave VAPID pública.";
-      ativar.textContent = "Configurar VAPID";
-      ativar.disabled = true;
-      return;
-    }
-
     if (Notification.permission === "denied") {
       status.textContent = "Notificação bloqueada no navegador. Libere nas configurações do site.";
       ativar.disabled = true;
       return;
     }
 
-    const registro = await navigator.serviceWorker.ready.catch(() => null);
-    const inscricao = registro ? await registro.pushManager.getSubscription() : null;
-
-    if (inscricao) {
-      status.textContent = "Notificações ativadas neste aparelho.";
-      ativar.textContent = "Ativado";
+    ativar.addEventListener("click", async () => {
       ativar.disabled = true;
-    }
+      status.textContent = "Ativando...";
+
+      try {
+        await ativarPush();
+        localStorage.setItem(STORAGE_PUSH_ATIVO, "true");
+        status.textContent = "Notificações ativadas.";
+        widget.classList.add("push-widget-saindo");
+        setTimeout(removerWidget, 450);
+      } catch (erro) {
+        console.warn(erro);
+        status.textContent = erro.message || "Não foi possível ativar.";
+        ativar.disabled = false;
+      }
+    });
   }
 
   async function ativarPush() {
@@ -257,5 +224,17 @@ const VALISYS_PUSH_PUBLIC_KEY = "COLE_AQUI_SUA_CHAVE_PUBLICA_VAPID";
     enviarProdutoLancado
   };
 
-  document.addEventListener("DOMContentLoaded", criarWidget);
+  function iniciarLeve() {
+    if (window.requestIdleCallback) {
+      window.requestIdleCallback(criarWidget, { timeout: 2500 });
+    } else {
+      setTimeout(criarWidget, 1200);
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", iniciarLeve);
+  } else {
+    iniciarLeve();
+  }
 })();

@@ -84,10 +84,10 @@
   };
 
   function iniciar() {
-    atualizarNotificacaoFlutuante();
+    setTimeout(atualizarNotificacaoFlutuante, 3500);
 
     if (intervalo) clearInterval(intervalo);
-    intervalo = setInterval(atualizarNotificacaoFlutuante, 60000);
+    intervalo = setInterval(atualizarNotificacaoFlutuante, 180000);
   }
 
   if (document.readyState === "loading") {
