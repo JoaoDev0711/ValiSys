@@ -7149,3 +7149,91 @@ body.camera-aberta #reader {
     border-radius: 16px;
   }
 }
+
+
+/* ===== Gerenciar usuário: edição global ===== */
+.editor-funcionario-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(8, 18, 13, .58);
+  backdrop-filter: blur(10px);
+}
+
+.editor-funcionario-modal {
+  width: min(720px, 100%);
+  max-height: 92vh;
+  overflow: auto;
+  padding: 20px;
+  border-radius: 28px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: 0 28px 90px rgba(0,0,0,.28);
+}
+
+.editor-funcionario-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.editor-funcionario-topo h2 {
+  margin: 10px 0 4px;
+  line-height: 1.05;
+  letter-spacing: -.045em;
+}
+
+.form-editar-funcionario {
+  display: grid;
+  gap: 10px;
+}
+
+.form-editar-funcionario label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.editor-alerta {
+  margin-top: 4px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 176, 32, .12);
+  border: 1px solid rgba(255, 176, 32, .22);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.editor-funcionario-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.funcionario-card .card-actions button {
+  width: 100%;
+}
+
+@media (max-width: 760px) {
+  .editor-funcionario-overlay {
+    padding: 10px;
+    align-items: end;
+  }
+
+  .editor-funcionario-modal {
+    max-height: 94vh;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .editor-funcionario-actions {
+    grid-template-columns: 1fr;
+  }
+}

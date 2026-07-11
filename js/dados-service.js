@@ -262,6 +262,86 @@ const valisysDB = {
 
 
 
+
+  async atualizarFuncionarioGlobal(id, dados = {}) {
+    const db = this.client();
+
+    const { data: antigo, error: erroAntigo } = await db
+      .from("funcionarios")
+      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+      .eq("id", id)
+      .single();
+
+    if (erroAntigo) throw erroAntigo;
+
+    const payload = {
+      nome: dados.nome,
+      cargo: dados.cargo,
+      setor: dados.setor || "",
+      codigo_acesso: dados.codigoAcesso || "",
+      marca_promotoria: dados.marcaPromotoria || "",
+      ativo: dados.ativo !== false
+    };
+
+    let resposta = await db
+      .from("funcionarios")
+      .update(payload)
+      .eq("id", id)
+      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+      .single();
+
+    if (resposta.error && String(resposta.error.message || "").includes("marca_promotoria")) {
+      delete payload.marca_promotoria;
+      resposta = await db
+        .from("funcionarios")
+        .update(payload)
+        .eq("id", id)
+        .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+        .single();
+    }
+
+    if (resposta.error) throw resposta.error;
+
+    const nomeAntigo = antigo.nome || "";
+    const cargoAntigo = antigo.cargo || "";
+    const lojaId = antigo.loja_id || dados.lojaId || "";
+    const nomeNovo = resposta.data.nome || dados.nome || "";
+    const cargoNovo = resposta.data.cargo || dados.cargo || "";
+
+    if (lojaId && nomeAntigo) {
+      const { error: erroLancamentos } = await db
+        .from("lancamentos")
+        .update({
+          usuario_nome: nomeNovo,
+          usuario_cargo: cargoNovo
+        })
+        .eq("loja_id", lojaId)
+        .eq("usuario_nome", nomeAntigo)
+        .eq("usuario_cargo", cargoAntigo);
+
+      if (erroLancamentos) {
+        console.warn("Funcionário atualizado, mas não foi possível atualizar lançamentos antigos.", erroLancamentos);
+      }
+
+      const { error: erroRetiradas } = await db
+        .from("lancamentos")
+        .update({ retirado_por: nomeNovo })
+        .eq("loja_id", lojaId)
+        .eq("retirado_por", nomeAntigo);
+
+      if (erroRetiradas) {
+        console.warn("Funcionário atualizado, mas não foi possível atualizar retiradas antigas.", erroRetiradas);
+      }
+    }
+
+    return {
+      funcionario: this.funcionarioDBParaApp(resposta.data),
+      antigo: this.funcionarioDBParaApp(antigo)
+    };
+  },
+
+
+
   setoresPadraoLoja() {
     return [
       "Geral",
