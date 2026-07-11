@@ -196,20 +196,32 @@ async function renderizarFuncionarios() {
     }
 
     listaFuncionarios.innerHTML = funcionariosCache.map(func => `
-      <article class="card funcionario-card" id="funcionario-card-${esc(func.id)}">
-        <div>
-          <h3>${esc(func.nome)}</h3>
-          <p><strong>Cargo:</strong> ${esc(nomeCargo(func.cargo))}</p>
-          <p><strong>Setor:</strong> ${esc(func.setor || "Geral")}</p>
-          ${func.cargo === "promotor" ? `<p><strong>Marca da promotoria:</strong> ${esc(func.marcaPromotoria || "Será escolhida no primeiro login")}</p>` : ""}
-          <p><strong>Loja:</strong> ${lojaInlineHTML({ ...lojaAtual, nome: func.lojaNome || lojaAtual.nome }, "loja-inline-small")}</p>
-          ${func.cargo === "encarregado" ? `<p><strong>Código de acesso:</strong> ${esc(func.codigoAcesso || "Não informado")}</p>` : `<p><strong>Código de acesso:</strong> Não usa</p>`}
-          <p class="muted">Código interno: ${esc(String(func.id).slice(0, 8))}</p>
+      <article class="card funcionario-card funcionario-gerenciavel" id="funcionario-card-${esc(func.id)}">
+        <div class="funcionario-gerenciavel-topo">
+          <div class="funcionario-avatar-admin">${esc(String(func.nome || "?").slice(0, 1).toUpperCase())}</div>
+          <div>
+            <span class="funcionario-status-pill">Usuário ativo</span>
+            <h3>${esc(func.nome)}</h3>
+            <p>${esc(nomeCargo(func.cargo))}${func.setor ? " • " + esc(func.setor) : ""}</p>
+          </div>
         </div>
 
-        <div class="card-actions stack-actions">
-          <button type="button" onclick="abrirEditorFuncionario('${func.id}')">Gerenciar usuário</button>
-          <button type="button" class="btn-danger" onclick="removerFuncionario('${func.id}')">Remover funcionário</button>
+        <div class="funcionario-detalhes-grid">
+          <p><strong>Cargo</strong><span>${esc(nomeCargo(func.cargo))}</span></p>
+          <p><strong>Setor</strong><span>${esc(func.setor || "Geral")}</span></p>
+          ${func.cargo === "promotor" ? `<p><strong>Marca</strong><span>${esc(func.marcaPromotoria || "Será escolhida no primeiro login")}</span></p>` : ""}
+          <p><strong>Loja</strong><span>${esc(func.lojaNome || lojaAtual.nome)}</span></p>
+          <p><strong>Código</strong><span>${func.cargo === "encarregado" ? esc(func.codigoAcesso || "Não informado") : "Não usa"}</span></p>
+          <p><strong>ID interno</strong><span>${esc(String(func.id).slice(0, 8))}</span></p>
+        </div>
+
+        <div class="funcionario-gerenciar-alerta">
+          Alterações feitas aqui refletem no cadastro e nos produtos já lançados por este usuário.
+        </div>
+
+        <div class="card-actions stack-actions funcionario-card-actions">
+          <button type="button" class="btn-gerenciar-usuario" onclick="abrirEditorFuncionario('${func.id}')">⚙️ Gerenciar usuário</button>
+          <button type="button" class="btn-danger" onclick="removerFuncionario('${func.id}')">Remover</button>
         </div>
       </article>
     `).join("");

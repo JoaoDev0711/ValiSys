@@ -2,6 +2,23 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders, jsonResponse } from "../_shared/cors.ts";
 import { enviarPushParaLoja } from "../_shared/push.ts";
 
+
+function fimDoDiaBrasilISO() {
+  // Mantém o comunicado visível somente no dia do envio.
+  // Brasil padrão UTC-3: fim do dia local = 02:59:59.999 UTC do dia seguinte.
+  const agora = new Date();
+  const brasilMs = agora.getTime() - 3 * 60 * 60 * 1000;
+  const brasil = new Date(brasilMs);
+
+  const ano = brasil.getUTCFullYear();
+  const mes = brasil.getUTCMonth();
+  const dia = brasil.getUTCDate();
+
+  const fimBrasilComoUtc = new Date(Date.UTC(ano, mes, dia + 1, 2, 59, 59, 999));
+  return fimBrasilComoUtc.toISOString();
+}
+
+
 function limparTexto(valor: unknown, limite = 300) {
   return String(valor || "").trim().slice(0, limite);
 }
@@ -30,6 +47,7 @@ Deno.serve(async (req) => {
     const criadoPor = limparTexto(body.criadoPor || "Equipe", 80);
     const criadoPorCargo = limparTexto(body.criadoPorCargo || "", 40);
     const tipo = limparTexto(body.tipo || "aviso", 40);
+    const expiraEm = fimDoDiaBrasilISO();
 
     if (!lojaId) {
       return jsonResponse({ error: "lojaId é obrigatório." }, 400);
@@ -57,6 +75,7 @@ Deno.serve(async (req) => {
         criado_por: criadoPor,
         criado_por_cargo: criadoPorCargo,
         ativo: true,
+        expira_em: expiraEm,
       })
       .select("*")
       .single();

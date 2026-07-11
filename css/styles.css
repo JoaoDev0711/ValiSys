@@ -7237,3 +7237,224 @@ body.camera-aberta #reader {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ===== Visual completo: Gerenciar usuário ===== */
+.gerenciar-usuario-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(47,125,79,.20), transparent 30%),
+    linear-gradient(135deg, rgba(255,255,255,.94), rgba(238,247,241,.96));
+  border: 1px solid rgba(47,125,79,.14);
+}
+
+.gerenciar-usuario-banner h2 {
+  margin: 10px 0 8px;
+  font-size: clamp(24px, 6vw, 38px);
+  line-height: 1.04;
+  letter-spacing: -.055em;
+}
+
+.gerenciar-usuario-banner p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+  max-width: 680px;
+}
+
+.gerenciar-usuario-banner-icon {
+  flex: 0 0 auto;
+  width: 72px;
+  height: 72px;
+  border-radius: 26px;
+  display: grid;
+  place-items: center;
+  background: var(--primary);
+  color: #fff;
+  font-size: 32px;
+  box-shadow: 0 20px 46px rgba(47,125,79,.22);
+}
+
+.funcionario-gerenciavel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(47,125,79,.14);
+  background:
+    radial-gradient(circle at top right, rgba(47,125,79,.10), transparent 32%),
+    var(--card);
+}
+
+.funcionario-gerenciavel::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: linear-gradient(180deg, var(--primary), rgba(122,217,160,.9));
+}
+
+.funcionario-gerenciavel-topo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding-left: 4px;
+}
+
+.funcionario-avatar-admin {
+  width: 58px;
+  height: 58px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at top right, rgba(255,255,255,.35), transparent 34%),
+    var(--primary);
+  color: #fff;
+  font-size: 24px;
+  font-weight: 1000;
+  box-shadow: 0 16px 34px rgba(47,125,79,.20);
+}
+
+.funcionario-status-pill {
+  display: inline-flex;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(47,125,79,.10);
+  color: var(--primary-strong);
+  font-size: 11px;
+  font-weight: 1000;
+  margin-bottom: 7px;
+}
+
+.funcionario-gerenciavel-topo h3 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: -.025em;
+}
+
+.funcionario-gerenciavel-topo p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.funcionario-detalhes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.funcionario-detalhes-grid p {
+  margin: 0;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, .035);
+  border: 1px solid rgba(15, 23, 42, .06);
+}
+
+.funcionario-detalhes-grid strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.funcionario-detalhes-grid span {
+  display: block;
+  color: var(--text);
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.funcionario-gerenciar-alerta {
+  margin: 12px 0 0;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 176, 32, .12);
+  border: 1px solid rgba(255, 176, 32, .22);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.funcionario-card-actions {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  gap: 10px;
+}
+
+.btn-gerenciar-usuario {
+  background:
+    linear-gradient(135deg, var(--primary), var(--primary-strong)) !important;
+  color: #fff !important;
+  box-shadow: 0 16px 34px rgba(47,125,79,.22);
+}
+
+.editor-funcionario-overlay {
+  animation: editorFadeIn .18s ease both;
+}
+
+.editor-funcionario-modal {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(47,125,79,.13), transparent 28%),
+    var(--card);
+}
+
+.editor-funcionario-topo {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.editor-funcionario-topo .icon-btn {
+  background: rgba(15, 23, 42, .06);
+  color: var(--text);
+}
+
+.form-editar-funcionario input,
+.form-editar-funcionario select,
+.form-editar-funcionario textarea {
+  background: rgba(255,255,255,.92);
+}
+
+@keyframes editorFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 760px) {
+  .gerenciar-usuario-banner {
+    align-items: flex-start;
+    padding: 16px;
+  }
+
+  .gerenciar-usuario-banner-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 18px;
+    font-size: 24px;
+  }
+
+  .funcionario-detalhes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .funcionario-card-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .funcionario-gerenciavel-topo {
+    align-items: flex-start;
+  }
+}

@@ -52,3 +52,10 @@ for select
 using (true);
 
 -- Inserts devem ser feitas pela Edge Function com service_role.
+
+-- Comunicado aparece somente no dia em que foi enviado.
+alter table public.comunicados_equipe
+add column if not exists expira_em timestamptz;
+
+create index if not exists comunicados_equipe_expira_idx
+on public.comunicados_equipe(loja_id, ativo, expira_em desc);
