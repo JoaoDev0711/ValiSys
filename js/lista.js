@@ -17,35 +17,72 @@ if (ehListaGeral && !podeVerListaGeral(usuario.cargo)) {
 }
 
 let lojasCache = [];
+let setoresListaCache = [];
 
 
-const SETORES_PADRAO_LISTA = [
-  "Geral",
-  "Mercearia",
-  "Bebidas",
-  "Frios e Laticínios",
-  "Açougue",
-  "Hortifruti",
-  "Padaria",
-  "Congelados",
-  "Limpeza",
-  "Higiene e Perfumaria",
-  "Pet",
-  "Promotoria",
-  "Outros"
-];
+async function carregarSetoresFiltroLista(lojaId = "") {
+  if (!ehListaGeral) return [];
 
-function setoresComValorAtual(valorAtual = "") {
-  return [...new Set([valorAtual, ...SETORES_PADRAO_LISTA].filter(Boolean))];
+  const lojaFiltro = lojaId || document.getElementById("filtro-loja")?.value || lojaAtual?.id || "";
+
+  try {
+    if (!lojaFiltro || lojaFiltro === "todas") {
+      const ids = lojasCache.length > 0
+        ? lojasCache.map(loja => loja.id).filter(Boolean)
+        : [lojaAtual?.id].filter(Boolean);
+
+      const resultados = await Promise.all(ids.map(id =>
+        valisysDB.listarSetoresLoja(id).catch(() => [])
+      ));
+
+      const nomes = resultados
+        .flat()
+        .map(setor => setor.nome)
+        .filter(Boolean);
+
+      setoresListaCache = [...new Set(nomes)].sort((a, b) => a.localeCompare(b, "pt-BR"));
+    } else {
+      const setores = await valisysDB.listarSetoresLoja(lojaFiltro);
+      setoresListaCache = [...new Set((setores || []).map(setor => setor.nome).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, "pt-BR"));
+    }
+  } catch (erro) {
+    console.warn("Não foi possível carregar setores cadastrados.", erro);
+    setoresListaCache = [];
+  }
+
+  return setoresListaCache;
 }
 
 function opcoesSetorLista(valorAtual = "", incluirTodas = false) {
-  const opcoes = setoresComValorAtual(valorAtual);
+  const opcoes = [...new Set([valorAtual, ...setoresListaCache, "Outros"].filter(Boolean))];
 
   return `
     ${incluirTodas ? `<option value="todos">Todos os setores</option>` : ""}
     ${opcoes.map(setor => `<option value="${esc(setor)}" ${setor === valorAtual ? "selected" : ""}>${esc(setor)}</option>`).join("")}
   `;
+}
+
+async function atualizarSelectFiltroSetor(lojaId = "") {
+  if (!ehListaGeral) return;
+
+  const select = document.getElementById("filtro-setor");
+  if (!select) return;
+
+  const valorAtual = select.value || "todos";
+
+  select.disabled = true;
+  select.innerHTML = `<option value="todos">Carregando setores...</option>`;
+
+  await carregarSetoresFiltroLista(lojaId);
+
+  select.innerHTML = opcoesSetorLista("", true);
+
+  if ([...select.options].some(opcao => opcao.value === valorAtual)) {
+    select.value = valorAtual;
+  }
+
+  select.disabled = false;
 }
 
 function toggleSetorManualLista(id) {
@@ -86,6 +123,7 @@ async function salvarSetorLancamento(id) {
 
   try {
     await valisysDB.atualizarSetorLancamento(id, setorFinal);
+    await carregarSetoresFiltroLista(document.getElementById("filtro-loja")?.value || lojaAtual?.id || "");
     await renderizarLista();
   } catch (erro) {
     alert("Erro ao atualizar setor: " + erro.message);
@@ -94,11 +132,16 @@ async function salvarSetorLancamento(id) {
 
 
 async function iniciarLista() {
-  await criarFiltroLoja();
+  if (ehListaGeral) {
+    await criarFiltroLoja();
+  }
+
   await renderizarLista();
 }
 
 async function criarFiltroLoja() {
+  if (!ehListaGeral) return;
+
   const card = filtro?.closest(".card");
 
   if (!card || document.getElementById("filtro-loja")) return;
@@ -138,16 +181,22 @@ async function criarFiltroLoja() {
     <div>
       <label for="filtro-setor">Setor</label>
       <select id="filtro-setor">
-        ${opcoesSetorLista("", true)}
+        <option value="todos">Carregando setores...</option>
       </select>
     </div>
   `;
 
   card.appendChild(filtrosWrapper);
 
-  document.getElementById("filtro-loja").addEventListener("change", renderizarLista);
+  document.getElementById("filtro-loja").addEventListener("change", async event => {
+    await atualizarSelectFiltroSetor(event.target.value);
+    await renderizarLista();
+  });
+
   document.getElementById("filtro-status").addEventListener("change", renderizarLista);
   document.getElementById("filtro-setor").addEventListener("change", renderizarLista);
+
+  await atualizarSelectFiltroSetor(document.getElementById("filtro-loja").value);
 }
 
 function pertenceAoUsuario(item) {
@@ -176,7 +225,7 @@ async function obterLancamentosFiltrados() {
     );
   }
 
-  if (filtroSetor && filtroSetor !== "todos") {
+  if (ehListaGeral && filtroSetor && filtroSetor !== "todos") {
     lancamentos = lancamentos.filter(item =>
       String(item.setor || "").toLowerCase() === String(filtroSetor || "").toLowerCase()
     );
@@ -303,18 +352,20 @@ async function renderizarLista() {
               ${item.retiradoEm ? `<p><strong>Retirado em:</strong> ${esc(item.retiradoEm)} por ${esc(item.retiradoPor || "não informado")}</p>` : ""}
             </div>
 
-            <div class="setor-editor-lista">
-              <label for="setor-lista-${esc(item.id)}">Alterar setor</label>
-              <div class="setor-editor-row">
-                <select id="setor-lista-${esc(item.id)}" onchange="toggleSetorManualLista('${item.id}')">
-                  ${opcoesSetorLista(item.setor || "Geral")}
-                </select>
-                <button type="button" class="secondary" onclick="salvarSetorLancamento('${item.id}')">Salvar setor</button>
+            ${ehListaGeral ? `
+              <div class="setor-editor-lista">
+                <label for="setor-lista-${esc(item.id)}">Alterar setor</label>
+                <div class="setor-editor-row">
+                  <select id="setor-lista-${esc(item.id)}" onchange="toggleSetorManualLista('${item.id}')">
+                    ${opcoesSetorLista(item.setor || "Geral")}
+                  </select>
+                  <button type="button" class="secondary" onclick="salvarSetorLancamento('${item.id}')">Salvar setor</button>
+                </div>
+                <div id="setor-manual-lista-area-${esc(item.id)}" class="setor-manual-lista-area" style="display:${item.setor === "Outros" ? "block" : "none"};">
+                  <input id="setor-manual-lista-${esc(item.id)}" type="text" placeholder="Digite o setor manual">
+                </div>
               </div>
-              <div id="setor-manual-lista-area-${esc(item.id)}" class="setor-manual-lista-area" style="display:${item.setor === "Outros" ? "block" : "none"};">
-                <input id="setor-manual-lista-${esc(item.id)}" type="text" placeholder="Digite o setor manual">
-              </div>
-            </div>
+            ` : ""}
 
             <div class="card-actions stack-actions">
               ${podeRetirar ? `<button type="button" onclick="marcarRetirado('${item.id}')">Marcar como retirado</button>` : ""}
