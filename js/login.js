@@ -207,6 +207,7 @@ form.addEventListener("submit", async function(event) {
         lojaNomePadrao: lojaAtual.nome,
         setor: promotor.setor || "Promotoria",
         marcaPromotoria: promotor.marcaPromotoria || marcaPromotoria,
+        permiteCaixa: Boolean(promotor.permiteCaixa),
         criadoEm: new Date().toLocaleString("pt-BR")
       });
 
@@ -236,6 +237,7 @@ form.addEventListener("submit", async function(event) {
       lojaNomePadrao: funcionario.lojaNome,
       setor: funcionario.setor || "",
       marcaPromotoria: funcionario.marcaPromotoria || "",
+      permiteCaixa: Boolean(funcionario.permiteCaixa),
       criadoEm: new Date().toLocaleString("pt-BR")
     });
 

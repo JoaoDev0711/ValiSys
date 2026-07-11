@@ -7580,3 +7580,66 @@ body.camera-aberta #reader {
     --tilt-scale: 1.018;
   }
 }
+
+/* ===== Ajustes: gramagem, caixa e lembretes escondidos ===== */
+.checkbox-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(47,125,79,.07);
+  border: 1px solid rgba(47,125,79,.13);
+  font-weight: 800;
+}
+
+.checkbox-line input {
+  width: 18px;
+  height: 18px;
+}
+
+.lembretes-collapse {
+  padding: 0;
+  overflow: hidden;
+}
+
+.lembretes-collapse summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.lembretes-collapse summary::-webkit-details-marker {
+  display: none;
+}
+
+.lembretes-collapse summary h2 {
+  margin: 0;
+}
+
+.lembretes-collapse summary > span {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(47,125,79,.10);
+  color: var(--primary-strong);
+  font-weight: 900;
+  font-size: 12px;
+}
+
+.lembretes-collapse[open] summary > span {
+  font-size: 0;
+}
+
+.lembretes-collapse[open] summary > span::after {
+  content: "Esconder";
+  font-size: 12px;
+}
+
+.lembretes-collapse #lembretes-vencimento {
+  padding: 0 18px 18px;
+}

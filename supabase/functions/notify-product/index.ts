@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
     const resultadoPush = await enviarPushParaLoja(supabase, lojaId, {
       title: titulo,
       body: mensagem,
-      url: "./notificacoes.html",
+      url: "./dashboard.html",
       tag: chave,
       tipo,
       lojaId,

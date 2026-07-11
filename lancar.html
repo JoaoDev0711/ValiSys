@@ -70,6 +70,14 @@
       <label for="quantidade">Quantidade</label>
       <input type="number" id="quantidade" placeholder="Quantidade de itens" min="1" required>
 
+      <label class="checkbox-line area-caixa-lancamento" id="area-caixa-lancamento" style="display:none;">
+        <input type="checkbox" id="isCaixa">
+        <span>Este lançamento é uma caixa</span>
+      </label>
+      <p class="small muted area-caixa-lancamento" id="texto-caixa-lancamento" style="display:none;">
+        Essa opção só aparece para cargos autorizados no cadastro de usuários.
+      </p>
+
       <label for="validade">Data de validade</label>
       <input type="date" id="validade" required>
 
@@ -88,7 +96,6 @@
 <script src="js/loja.js"></script>
 <script src="js/site-dialog.js"></script>
 <script src="js/icons.js"></script>
-<script src="js/notificacoes-flutuantes.js"></script>
 <script src="js/produtos-fonte.js"></script>
 <script src="js/lancar.js"></script>
 <script src="js/push-notifications-v2.js?v=2"></script>

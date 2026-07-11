@@ -104,7 +104,7 @@ async function carregarResumoInicial() {
         ...item,
         dias,
         marcaFinal: item.marca || "",
-        fabricanteFinal: item.fabricante || "",
+        gramagemFinal: item.gramagem || item.quantidadePadrao || "",
         saborFinal: item.sabor || "",
         categoriaFinal: item.categoria || "",
         fotoFinal: item.foto || ""
@@ -262,8 +262,8 @@ function renderizarItemLembrete(item) {
 
       <div class="lembrete-info">
         <h3>${esc(item.nomeProduto)}</h3>
-        ${(item.marcaFinal || item.fabricanteFinal || item.saborFinal) ? `<p>${esc([item.marcaFinal, item.fabricanteFinal, item.saborFinal].filter(Boolean).join(" • "))}</p>` : ""}
-        <p>${esc(item.setor)} • Qtd: ${esc(item.quantidade)}</p>
+        ${(item.marcaFinal || item.gramagemFinal || item.saborFinal) ? `<p>${esc([item.marcaFinal, item.gramagemFinal, item.saborFinal].filter(Boolean).join(" • "))}</p>` : ""}
+        <p>${esc(item.setor)} • Qtd: ${esc(item.quantidade)}${item.isCaixa ? " caixa(s)" : " item(ns)"}</p>
         <p class="muted">Validade: ${esc(item.validade)}</p>
         <p class="muted">Lançado por: ${esc(item.usuarioNome)}</p>
       </div>
@@ -271,23 +271,3 @@ function renderizarItemLembrete(item) {
   `;
 }
 
-async function carregarResumoNotificacoes() {
-  const atalho = document.getElementById("atalho-notificacoes");
-  const contador = document.getElementById("qtd-notificacoes");
-
-  if (!atalho || !contador) return;
-
-  if (!podeVerNotificacoes(usuario.cargo)) {
-    atalho.style.display = "none";
-    return;
-  }
-
-  try {
-    const lojaAtual = getLojaAtual();
-    const notificacoes = await valisysDB.listarNotificacoes(lojaAtual.id);
-    contador.innerText = notificacoes.filter(item => !item.lida).length;
-  } catch (erro) {
-    contador.innerText = "!";
-    console.error(erro);
-  }
-}

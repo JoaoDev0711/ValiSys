@@ -216,7 +216,7 @@ async function renderizarLista() {
             <div class="card-actions stack-actions">
               ${podeRetirar ? `<button type="button" onclick="marcarRetirado('${item.id}')">Marcar como retirado</button>` : ""}
               ${podeReativar ? `<button type="button" onclick="reativarItem('${item.id}')">Reativar item</button>` : ""}
-              ${podeNotificar ? `<button type="button" class="btn-warning" onclick="notificarGerencia('${item.id}')">Notificar equipe</button>` : ""}
+              ${podeNotificar ? `` : ""}
               <button type="button" class="btn-danger" onclick="apagarLancamento('${item.id}')">Apagar lançamento</button>
             </div>
           </article>
@@ -263,46 +263,6 @@ async function reativarItem(id) {
     await renderizarLista();
   } catch (erro) {
     alert("Erro ao reativar item: " + erro.message);
-  }
-}
-
-async function notificarGerencia(id) {
-  try {
-    const todos = await valisysDB.listarLancamentos({ lojaId: "todas", status: "todos" });
-    const item = todos.find(l => l.id === id);
-
-    if (!item) {
-      alert("Lançamento não encontrado.");
-      return;
-    }
-
-    const confirmar = await confirmarAcao(
-      `Produto: ${item.nomeProduto}\nLoja: ${item.lojaNome}\nValidade: ${item.validade}`,
-      "Criar aviso interno?"
-    );
-
-    if (!confirmar) return;
-
-    await valisysDB.criarNotificacao({
-      tipo: "vencimento_hoje",
-      lojaId: item.lojaId,
-      lojaNome: item.lojaNome,
-      titulo: "Produto vencendo hoje",
-      mensagem: `${item.nomeProduto} está vencendo hoje ou já venceu. Verificar setor ${item.setor}.`,
-      lancamentoId: item.id,
-      produto: item.nomeProduto,
-      setor: item.setor,
-      validade: item.validade,
-      criadoPor: `${usuario.nome} (${nomeCargo(usuario.cargo)})`
-    });
-
-    if (typeof mostrarToastNotificacao === "function") {
-      mostrarToastNotificacao("Aviso enviado para a equipe.");
-    } else {
-      alert("Aviso interno salvo.");
-    }
-  } catch (erro) {
-    alert("Erro ao notificar: " + erro.message);
   }
 }
 

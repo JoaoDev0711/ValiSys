@@ -212,6 +212,7 @@ async function renderizarFuncionarios() {
           ${func.cargo === "promotor" ? `<p><strong>Marca</strong><span>${esc(func.marcaPromotoria || "Será escolhida no primeiro login")}</span></p>` : ""}
           <p><strong>Loja</strong><span>${esc(func.lojaNome || lojaAtual.nome)}</span></p>
           <p><strong>Código</strong><span>${func.cargo === "encarregado" ? esc(func.codigoAcesso || "Não informado") : "Não usa"}</span></p>
+          <p><strong>Caixa</strong><span>${func.permiteCaixa ? "Pode lançar caixa" : "Não autorizado"}</span></p>
           <p><strong>ID interno</strong><span>${esc(String(func.id).slice(0, 8))}</span></p>
         </div>
 
@@ -295,6 +296,11 @@ function abrirEditorFuncionario(id) {
           <input type="text" id="editNovaMarcaFuncionario" placeholder="Digite aqui caso queira cadastrar outra marca">
         </div>
 
+        <label class="checkbox-line">
+          <input type="checkbox" id="editPermiteCaixaFuncionario" ${func.permiteCaixa ? "checked" : ""}>
+          <span>Pode lançar produto como caixa</span>
+        </label>
+
         <label for="editStatusFuncionario">Status</label>
         <select id="editStatusFuncionario">
           <option value="ativo" selected>Ativo</option>
@@ -363,6 +369,7 @@ async function salvarEdicaoFuncionario(event) {
   const marcaNova = document.getElementById("editNovaMarcaFuncionario")?.value.trim() || "";
   const marcaPromotoria = cargo === "promotor" ? (marcaNova || marcaSelect) : "";
   const ativo = document.getElementById("editStatusFuncionario").value === "ativo";
+  const permiteCaixa = Boolean(document.getElementById("editPermiteCaixaFuncionario")?.checked);
 
   if (!nome || !cargo) {
     alert("Informe nome e cargo.");
@@ -398,7 +405,8 @@ async function salvarEdicaoFuncionario(event) {
       setor: cargo === "promotor" ? "Promotoria" : (setor || "Geral"),
       codigoAcesso: cargo === "encarregado" ? codigo : "",
       marcaPromotoria,
-      ativo
+      ativo,
+      permiteCaixa
     });
 
     atualizarUsuarioLogadoSeForEditado(resultado.funcionario);
@@ -435,6 +443,7 @@ formFuncionario.addEventListener("submit", async event => {
   const codigoInformado = document.getElementById("codigoFuncionario")?.value.trim() || "";
   const codigoFinal = cargo === "encarregado" ? (codigoInformado || gerarCodigoAcesso()) : "";
   const marcaPromotoria = cargo === "promotor" ? marcaFuncionarioEscolhida() : "";
+  const permiteCaixa = Boolean(document.getElementById("permiteCaixaFuncionario")?.checked);
 
   if (!nome || !cargo) {
     alert("Informe nome e cargo do funcionário.");
@@ -463,7 +472,8 @@ formFuncionario.addEventListener("submit", async event => {
       cargo,
       setor: cargo === "promotor" ? "Promotoria" : (setor || "Geral"),
       codigoAcesso: codigoFinal,
-      marcaPromotoria
+      marcaPromotoria,
+      permiteCaixa
     });
 
     formFuncionario.reset();

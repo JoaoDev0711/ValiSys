@@ -25,11 +25,27 @@ function formatarData(dataIso: string) {
 }
 
 function classificar(dias: number) {
-  if (dias < 0) {
+  if (dias === 15) {
     return {
-      tipo: "produto_vencido",
-      titulo: "Produto vencido",
-      prefixo: "Vencido",
+      tipo: "vence_15_dias",
+      titulo: "Produto vence em 15 dias",
+      prefixo: "Vence em 15 dias",
+    };
+  }
+
+  if (dias === 5) {
+    return {
+      tipo: "vence_5_dias",
+      titulo: "Produto vence em 5 dias",
+      prefixo: "Vence em 5 dias",
+    };
+  }
+
+  if (dias === 1) {
+    return {
+      tipo: "vence_1_dia",
+      titulo: "Produto vence amanhã",
+      prefixo: "Vence amanhã",
     };
   }
 
@@ -38,14 +54,6 @@ function classificar(dias: number) {
       tipo: "vence_hoje",
       titulo: "Produto vence hoje",
       prefixo: "Vence hoje",
-    };
-  }
-
-  if (dias <= 7) {
-    return {
-      tipo: "perto_vencer",
-      titulo: "Produto perto do vencimento",
-      prefixo: `Vence em ${dias} dia(s)`,
     };
   }
 
@@ -68,7 +76,7 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const hoje = dataLocalISO();
-    const limite = dataLocalISO(adicionarDias(new Date(), 7));
+    const limite = dataLocalISO(adicionarDias(new Date(), 15));
 
     const { data: lancamentos, error } = await supabase
       .from("lancamentos")
@@ -115,7 +123,7 @@ Deno.serve(async (req) => {
       const resultadoPush = await enviarPushParaLoja(supabase, lojaId, {
         title: alerta.titulo,
         body: mensagem,
-        url: "./notificacoes.html",
+        url: "./dashboard.html",
         tag: chave,
         tipo: alerta.tipo,
         lojaId,

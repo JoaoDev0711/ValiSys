@@ -5,7 +5,6 @@ const APP_SHELL = [
   "./",
   "./index.html",
   "./dashboard.html",
-  "./notificacoes.html",
   "./css/styles.css",
   "./js/pwa-register.js",
   "./js/push-notifications-v2.js",
@@ -76,7 +75,7 @@ self.addEventListener("push", event => {
     tag: dados.tag || "valisys-notificacao",
     renotify: true,
     data: {
-      url: dados.url || "./notificacoes.html",
+      url: dados.url || "./dashboard.html",
       lojaId: dados.lojaId || "",
       lancamentoId: dados.lancamentoId || "",
       tipo: dados.tipo || ""
@@ -95,13 +94,13 @@ self.addEventListener("push", event => {
 self.addEventListener("notificationclick", event => {
   event.notification.close();
 
-  const destino = event.notification.data?.url || "./notificacoes.html";
+  const destino = event.notification.data?.url || "./dashboard.html";
   const url = new URL(destino, self.registration.scope).href;
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then(janelas => {
       for (const janela of janelas) {
-        if (janela.url.includes("notificacoes.html") && "focus" in janela) {
+        if (janela.url.includes("dashboard.html") && "focus" in janela) {
           return janela.focus();
         }
       }

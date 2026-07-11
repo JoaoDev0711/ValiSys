@@ -216,7 +216,7 @@ const valisysDB = {
     return (data || []).map(this.funcionarioDBParaApp);
   },
 
-  async criarFuncionario({ lojaId, nome, cargo, setor = "", codigoAcesso, marcaPromotoria = "" }) {
+  async criarFuncionario({ lojaId, nome, cargo, setor = "", codigoAcesso, marcaPromotoria = "", permiteCaixa = false }) {
     const db = this.client();
 
     const payload = {
@@ -225,7 +225,8 @@ const valisysDB = {
       cargo,
       setor,
       codigo_acesso: codigoAcesso || "",
-      marca_promotoria: marcaPromotoria || ""
+      marca_promotoria: marcaPromotoria || "",
+      permite_caixa: Boolean(permiteCaixa)
     };
 
     let resposta = await db
@@ -233,6 +234,16 @@ const valisysDB = {
       .insert(payload)
       .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
       .single();
+
+    if (resposta.error && String(resposta.error.message || "").includes("permite_caixa")) {
+      delete payload.permite_caixa;
+
+      resposta = await db
+        .from("funcionarios")
+        .insert(payload)
+        .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+        .single();
+    }
 
     if (resposta.error && String(resposta.error.message || "").includes("marca_promotoria")) {
       delete payload.marca_promotoria;
@@ -280,7 +291,8 @@ const valisysDB = {
       setor: dados.setor || "",
       codigo_acesso: dados.codigoAcesso || "",
       marca_promotoria: dados.marcaPromotoria || "",
-      ativo: dados.ativo !== false
+      ativo: dados.ativo !== false,
+      permite_caixa: Boolean(dados.permiteCaixa)
     };
 
     let resposta = await db
@@ -750,7 +762,8 @@ const valisysDB = {
       ean: data.ean || "",
       nome: data.nome || "",
       marca: data.marca || "",
-      fabricante: data.fabricante || "",
+      fabricante: "",
+      gramagem: data.gramagem || data.quantidade_padrao || "",
       sabor: data.sabor || "",
       categoria: data.categoria || "",
       quantidadePadrao: data.quantidade_padrao || "",
@@ -779,7 +792,8 @@ const valisysDB = {
       ean: item.ean || "",
       nome: item.nome || "",
       marca: item.marca || "",
-      fabricante: item.fabricante || "",
+      fabricante: "",
+      gramagem: item.gramagem || item.quantidadePadrao || "",
       sabor: item.sabor || "",
       categoria: item.categoria || "",
       quantidadePadrao: item.quantidadePadrao || "",
@@ -888,7 +902,8 @@ const valisysDB = {
       ean: eanFinal,
       nome: item.nome || "",
       marca: item.marca || "",
-      fabricante: item.fabricante || "",
+      fabricante: "",
+      gramagem: item.gramagem || item.quantidadePadrao || "",
       sabor: item.sabor || "",
       categoria: item.categoria || "",
       quantidadePadrao: item.quantidadePadrao || "",
@@ -920,7 +935,8 @@ const valisysDB = {
       ean,
       nome,
       marca: item.marca || "",
-      fabricante: item.fabricante || "",
+      fabricante: "",
+      gramagem: item.gramagem || item.quantidadePadrao || "",
       sabor: item.sabor || "",
       categoria: item.categoria || "",
       quantidade_padrao: item.quantidadePadrao || item.quantidade_padrao || "",
@@ -1173,7 +1189,7 @@ const valisysDB = {
       }
     }
 
-    const { data, error } = await db
+    let respostaLancamento = await db
       .from("lancamentos")
       .insert({
         loja_id: item.lojaId,
@@ -1181,10 +1197,46 @@ const valisysDB = {
         ean: item.ean,
         nome_produto: item.nomeProduto,
         marca: item.marca || "",
-        fabricante: item.fabricante || "",
+        fabricante: "",
+        gramagem: item.gramagem || item.quantidadePadrao || "",
         sabor: item.sabor || "",
         categoria: item.categoria || "",
         quantidade_padrao: item.quantidadePadrao || "",
+        porcao: item.porcao || "",
+        embalagem: item.embalagem || "",
+        origem: item.origem || "",
+        paises: item.paises || "",
+        lojas_encontradas: item.lojas || "",
+        ingredientes: item.ingredientes || "",
+        alergicos: item.alergicos || "",
+        rastros: item.rastros || "",
+        nutriscore: item.nutriscore || "",
+        ecoscore: item.ecoscore || "",
+        nova: item.nova || "",
+        fonte: item.fonte || "",
+        setor: item.setor,
+        quantidade: item.quantidade,
+        is_caixa: Boolean(item.isCaixa),
+        validade: item.validade,
+        foto: item.foto || "",
+        status: item.status || "ativo",
+        usuario_nome: item.usuarioNome || "",
+        usuario_cargo: item.usuarioCargo || ""
+      })
+      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+      .single();
+
+    if (respostaLancamento.error && (String(respostaLancamento.error.message || "").includes("gramagem") || String(respostaLancamento.error.message || "").includes("is_caixa"))) {
+      const payloadFallback = {
+        loja_id: item.lojaId,
+        produto_id: produtoId,
+        ean: item.ean,
+        nome_produto: item.nomeProduto,
+        marca: item.marca || "",
+        fabricante: "",
+        sabor: item.sabor || "",
+        categoria: item.categoria || "",
+        quantidade_padrao: item.gramagem || item.quantidadePadrao || "",
         porcao: item.porcao || "",
         embalagem: item.embalagem || "",
         origem: item.origem || "",
@@ -1204,13 +1256,18 @@ const valisysDB = {
         status: item.status || "ativo",
         usuario_nome: item.usuarioNome || "",
         usuario_cargo: item.usuarioCargo || ""
-      })
-      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
-      .single();
+      };
 
-    if (error) throw error;
+      respostaLancamento = await db
+        .from("lancamentos")
+        .insert(payloadFallback)
+        .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+        .single();
+    }
 
-    return this.lancamentoDBParaApp(data);
+    if (respostaLancamento.error) throw respostaLancamento.error;
+
+    return this.lancamentoDBParaApp(respostaLancamento.data);
   },
 
   async listarTodosLancamentos({ status = "todos" } = {}) {
@@ -1319,71 +1376,6 @@ const valisysDB = {
     return true;
   },
 
-  async criarNotificacao(dados) {
-    const db = this.client();
-
-    const { data, error } = await db
-      .from("notificacoes")
-      .insert({
-        loja_id: dados.lojaId,
-        tipo: dados.tipo || "aviso",
-        titulo: dados.titulo || "Aviso",
-        mensagem: dados.mensagem || "",
-        lancamento_id: dados.lancamentoId || null,
-        produto: dados.produto || "",
-        setor: dados.setor || "",
-        validade: dados.validade || null,
-        criado_por: dados.criadoPor || ""
-      })
-      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
-      .single();
-
-    if (error) throw error;
-
-    return this.notificacaoDBParaApp(data);
-  },
-
-  async listarNotificacoes(lojaId) {
-    const db = this.client();
-
-    const { data, error } = await db
-      .from("notificacoes")
-      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
-      .eq("loja_id", lojaId)
-      .order("criado_em", { ascending: false });
-
-    if (error) throw error;
-
-    return (data || []).map(this.notificacaoDBParaApp);
-  },
-
-  async marcarNotificacaoLida(id) {
-    const db = this.client();
-
-    const { data, error } = await db
-      .from("notificacoes")
-      .update({ lida: true })
-      .eq("id", id)
-      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
-      .single();
-
-    if (error) throw error;
-
-    return this.notificacaoDBParaApp(data);
-  },
-
-  async apagarNotificacao(id) {
-    const db = this.client();
-
-    const { error } = await db
-      .from("notificacoes")
-      .delete()
-      .eq("id", id);
-
-    if (error) throw error;
-
-    return true;
-  },
 
   sacNotificacaoParaApp(data) {
     const mensagemCompleta = data.mensagem || "";
@@ -1654,6 +1646,7 @@ const valisysDB = {
       setor: data.setor || "",
       codigoAcesso: data.codigo_acesso || "",
       marcaPromotoria: data.marca_promotoria || "",
+      permiteCaixa: Boolean(data.permite_caixa),
       lojaId: data.loja_id,
       lojaNome: data.lojas?.nome || data.lojaNome || "",
       criadoEm: data.criado_em || ""
@@ -1666,7 +1659,8 @@ const valisysDB = {
       ean: data.ean,
       nome: data.nome,
       marca: data.marca || "",
-      fabricante: data.fabricante || "",
+      fabricante: "",
+      gramagem: data.gramagem || data.quantidade_padrao || "",
       sabor: data.sabor || "",
       categoria: data.categoria || "",
       quantidadePadrao: data.quantidade_padrao || "",
@@ -1700,7 +1694,8 @@ const valisysDB = {
       ean: data.ean || "",
       nomeProduto: data.nome_produto,
       marca: data.marca || "",
-      fabricante: data.fabricante || "",
+      fabricante: "",
+      gramagem: data.gramagem || data.quantidade_padrao || "",
       sabor: data.sabor || "",
       categoria: data.categoria || "",
       quantidadePadrao: data.quantidade_padrao || "",
@@ -1718,6 +1713,7 @@ const valisysDB = {
       fonte: data.fonte || "",
       setor: data.setor,
       quantidade: Number(data.quantidade || 0),
+      isCaixa: Boolean(data.is_caixa),
       validade: data.validade,
       foto: data.foto || "",
       status: data.status || "ativo",

@@ -28,6 +28,22 @@ if (validadeInput) {
   validadeInput.min = new Date().toISOString().split("T")[0];
 }
 
+const areaCaixaLancamento = document.getElementById("area-caixa-lancamento");
+const textoCaixaLancamento = document.getElementById("texto-caixa-lancamento");
+const isCaixaInput = document.getElementById("isCaixa");
+
+function usuarioPodeLancarCaixa() {
+  return Boolean(usuario?.permiteCaixa || usuario?.cargo === "gerente" || usuario?.cargo === "admin");
+}
+
+if (areaCaixaLancamento && textoCaixaLancamento) {
+  const podeCaixa = usuarioPodeLancarCaixa();
+  areaCaixaLancamento.style.display = podeCaixa ? "flex" : "none";
+  textoCaixaLancamento.style.display = podeCaixa ? "block" : "none";
+}
+
+
+
 
 let leitorCamera = null;
 let ultimoCodigoLido = "";
@@ -349,7 +365,7 @@ function renderizarResultadosCatalogoLancamento(resultados) {
         <article class="catalogo-item">
           <div>
             <strong>${esc(item.nome)}</strong>
-            <p>${esc(item.marca || "Sem marca")} • ${esc(item.fabricante || "Sem fabricante")}</p>
+            <p>${esc(item.marca || "Sem marca")} • ${esc(item.gramagem || item.quantidadePadrao || "Sem gramagem")}</p>
             <small>${esc(item.categoria || "Sem categoria")} ${item.quantidadePadrao ? "• " + esc(item.quantidadePadrao) : ""}</small>
           </div>
           <button type="button" class="secondary" onclick="selecionarCatalogoLancamento(${index})">Usar</button>
@@ -364,7 +380,7 @@ async function buscarCatalogoLancamento(termoManual = "") {
 
   if (!termo) {
     if (resultadoCatalogoLancamento) {
-      resultadoCatalogoLancamento.innerHTML = `<p class="muted">Digite nome, marca ou fabricante para buscar na lista interna.</p>`;
+      resultadoCatalogoLancamento.innerHTML = `<p class="muted">Digite nome, marca ou gramagem para buscar na lista interna.</p>`;
     }
     return [];
   }
@@ -961,7 +977,8 @@ form.addEventListener("submit", async function(event) {
     ean,
     nomeProduto,
     marca: produtoAtual?.marca || "",
-    fabricante: produtoAtual?.fabricante || "",
+    gramagem: produtoAtual?.gramagem || produtoAtual?.quantidadePadrao || "",
+    fabricante: "",
     sabor: produtoAtual?.sabor || "",
     categoria: produtoAtual?.categoria || "",
     quantidadePadrao: produtoAtual?.quantidadePadrao || "",
@@ -979,6 +996,7 @@ form.addEventListener("submit", async function(event) {
     fonte: produtoAtual?.fonte || "",
     setor: document.getElementById("setor").value,
     quantidade: Number(document.getElementById("quantidade").value),
+    isCaixa: Boolean(isCaixaInput?.checked && usuarioPodeLancarCaixa()),
     validade: document.getElementById("validade").value,
     foto: produtoAtual?.foto || "",
     status: "ativo",
@@ -987,7 +1005,7 @@ form.addEventListener("submit", async function(event) {
   };
 
   const confirmar = await confirmarAcao(
-    `Loja: ${lojaAtual.nome}\nProduto: ${nomeProduto}\nSetor: ${novo.setor}\nValidade: ${novo.validade}`,
+    `Loja: ${lojaAtual.nome}\nProduto: ${nomeProduto}\nGramagem: ${novo.gramagem || "Não informada"}\nQuantidade: ${novo.quantidade}${novo.isCaixa ? " caixa(s)" : " item(ns)"}\nSetor: ${novo.setor}\nValidade: ${novo.validade}`,
     "Confirmar lançamento?"
   );
 
