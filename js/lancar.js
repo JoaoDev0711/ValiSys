@@ -10,6 +10,7 @@ if (lojaAtual) {
 const form = document.getElementById("form-lancamento");
 const eanInput = document.getElementById("ean");
 const nomeInput = document.getElementById("nomeProduto");
+const gramagemProdutoInput = document.getElementById("gramagemProduto");
 const produtoPreview = document.getElementById("produto-preview");
 const setorSelect = document.getElementById("setor");
 const buscaCatalogoLancamentoInput = document.getElementById("busca-catalogo-lancamento");
@@ -21,7 +22,21 @@ let catalogoLancamentoCache = [];
 const btnCamera = document.getElementById("btn-camera");
 const btnPararCamera = document.getElementById("btn-parar-camera");
 
+
+
 let produtoAtual = null;
+
+
+function atualizarGramagemDoProdutoAtual() {
+  if (!gramagemProdutoInput) return;
+
+  const gramagem = produtoAtual?.gramagem || produtoAtual?.quantidadePadrao || "";
+
+  if (gramagem && !gramagemProdutoInput.value.trim()) {
+    gramagemProdutoInput.value = gramagem;
+  }
+}
+
 
 const validadeInput = document.getElementById("validade");
 if (validadeInput) {
@@ -409,6 +424,10 @@ function selecionarCatalogoLancamento(index) {
 
   produtoAtual = produtoCatalogoParaAtual(item);
   nomeInput.value = produtoAtual.nome || "";
+
+  if (gramagemProdutoInput) {
+    gramagemProdutoInput.value = produtoAtual.gramagem || produtoAtual.quantidadePadrao || "";
+  }
 
   if (buscaCatalogoLancamentoInput) {
     buscaCatalogoLancamentoInput.value = `${produtoAtual.nome} ${produtoAtual.marca || ""}`.trim();
@@ -977,7 +996,7 @@ form.addEventListener("submit", async function(event) {
     ean,
     nomeProduto,
     marca: produtoAtual?.marca || "",
-    gramagem: produtoAtual?.gramagem || produtoAtual?.quantidadePadrao || "",
+    gramagem: gramagemProdutoInput?.value.trim() || produtoAtual?.gramagem || produtoAtual?.quantidadePadrao || "",
     fabricante: "",
     sabor: produtoAtual?.sabor || "",
     categoria: produtoAtual?.categoria || "",
@@ -1022,6 +1041,7 @@ form.addEventListener("submit", async function(event) {
 
     alert("Lançamento salvo!");
     form.reset();
+    if (gramagemProdutoInput) gramagemProdutoInput.value = "";
     produtoAtual = null;
     produtoPreview.innerHTML = "";
   } catch (erro) {

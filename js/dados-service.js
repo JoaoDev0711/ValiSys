@@ -1325,6 +1325,23 @@ const valisysDB = {
     return (data || []).map(this.lancamentoDBParaApp);
   },
 
+
+  async atualizarSetorLancamento(id, setor) {
+    const db = this.client();
+
+    const { data, error } = await db
+      .from("lancamentos")
+      .update({ setor })
+      .eq("id", id)
+      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+      .single();
+
+    if (error) throw error;
+
+    return this.lancamentoDBParaApp(data);
+  },
+
+
   async marcarRetirado(id, usuarioNome) {
     const db = this.client();
 
