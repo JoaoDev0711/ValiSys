@@ -174,7 +174,12 @@ function renderizarCard(item) {
   return `
     <article class="card lancamento-card ${statusItem === "retirado" ? "item-retirado" : ""}">
       <div class="lancamento-topo lancamento-topo-com-foto">
-        ${item.foto ? `<img class="produto-thumb-lista" src="${htmlSeguro(item.foto)}" alt="Foto de ${htmlSeguro(item.nomeProduto || "produto")}" loading="lazy">` : `<div class="produto-thumb-lista produto-thumb-placeholder">Sem foto</div>`}
+        <div class="foto-box-lista">
+          ${item.foto
+            ? `<img class="produto-thumb-lista" src="${htmlSeguro(item.foto)}" alt="Foto de ${htmlSeguro(item.nomeProduto || "produto")}" loading="lazy" decoding="async" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';">`
+            : ""}
+          <div class="produto-thumb-lista produto-thumb-placeholder" style="${item.foto ? "display:none;" : ""}">Sem foto</div>
+        </div>
         <div class="lancamento-titulo">
           <h3>${htmlSeguro(item.nomeProduto || "Produto sem nome")}</h3>
           <p class="muted">${htmlSeguro(lojaNome)}</p>
