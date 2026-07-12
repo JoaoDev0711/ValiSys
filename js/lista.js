@@ -18,7 +18,11 @@ if (ehListaGeral && !podeVerListaGeral(usuario.cargo)) {
 
 let lojasCache = [];
 let setoresListaCache = [];
-const LIMITE_LISTA_LANCAMENTOS = 120;
+const LIMITE_LISTA_LANCAMENTOS = 40;
+let listaJaCarregada = false;
+let timerBuscaLista = null;
+let carregamentoAtualLista = 0;
+let listaRenderizadaDoCache = false;
 
 
 async function carregarSetoresFiltroLista(lojaId = "") {
@@ -26,27 +30,18 @@ async function carregarSetoresFiltroLista(lojaId = "") {
 
   const lojaFiltro = lojaId || document.getElementById("filtro-loja")?.value || lojaAtual?.id || "";
 
+  if (!lojaFiltro || lojaFiltro === "todas") {
+    setoresListaCache = [];
+    return setoresListaCache;
+  }
+
   try {
-    if (!lojaFiltro || lojaFiltro === "todas") {
-      const ids = lojasCache.length > 0
-        ? lojasCache.map(loja => loja.id).filter(Boolean)
-        : [lojaAtual?.id].filter(Boolean);
+    const setores = await valisysDB.listarSetoresLoja(lojaFiltro);
 
-      const resultados = await Promise.all(ids.map(id =>
-        valisysDB.listarSetoresLoja(id).catch(() => [])
-      ));
-
-      const nomes = resultados
-        .flat()
-        .map(setor => setor.nome)
-        .filter(Boolean);
-
-      setoresListaCache = [...new Set(nomes)].sort((a, b) => a.localeCompare(b, "pt-BR"));
-    } else {
-      const setores = await valisysDB.listarSetoresLoja(lojaFiltro);
-      setoresListaCache = [...new Set((setores || []).map(setor => setor.nome).filter(Boolean))]
-        .sort((a, b) => a.localeCompare(b, "pt-BR"));
-    }
+    setoresListaCache = [...new Set((setores || [])
+      .map(setor => setor.nome)
+      .filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b, "pt-BR"));
   } catch (erro) {
     console.warn("Não foi possível carregar setores cadastrados.", erro);
     setoresListaCache = [];
@@ -71,11 +66,20 @@ async function atualizarSelectFiltroSetor(lojaId = "") {
   if (!select) return;
 
   const valorAtual = select.value || "todos";
+  const lojaFiltro = lojaId || document.getElementById("filtro-loja")?.value || lojaAtual?.id || "";
 
   select.disabled = true;
+
+  if (!lojaFiltro || lojaFiltro === "todas") {
+    setoresListaCache = [];
+    select.innerHTML = `<option value="todos">Todos os setores</option>`;
+    select.disabled = false;
+    return;
+  }
+
   select.innerHTML = `<option value="todos">Carregando setores...</option>`;
 
-  await carregarSetoresFiltroLista(lojaId);
+  await carregarSetoresFiltroLista(lojaFiltro);
 
   select.innerHTML = opcoesSetorLista("", true);
 
@@ -135,10 +139,32 @@ async function salvarSetorLancamento(id) {
 async function iniciarLista() {
   if (ehListaGeral) {
     await criarFiltroLoja();
+
+    const cache = carregarListaCacheSessao();
+
+    if (cache && cache.itens?.length) {
+      listaRenderizadaDoCache = true;
+      renderizarLancamentos(cache.itens, {
+        origem: `Dados em cache • ${formatarTempoCache(cache.tempo)}`,
+        avisoLimite: cache.itens.length >= LIMITE_LISTA_LANCAMENTOS
+      });
+    } else {
+      renderizarEstadoListaFluido("Abrindo Lista Geral. Buscando dados sem travar a tela...");
+    }
+
+    setTimeout(() => carregarListaManual({ silencioso: Boolean(cache?.itens?.length) }), 120);
+    return;
   }
 
   await renderizarLista();
 }
+
+async function carregarListaManual({ silencioso = false } = {}) {
+  listaJaCarregada = true;
+  await renderizarLista({ usarCachePrimeiro: silencioso });
+}
+
+window.carregarListaManual = carregarListaManual;
 
 async function criarFiltroLoja() {
   if (!ehListaGeral) return;
@@ -161,7 +187,6 @@ async function criarFiltroLoja() {
     <div>
       <label for="filtro-loja">Loja</label>
       <select id="filtro-loja">
-        <option value="todas">Todas as lojas</option>
         ${lojasCache.map(loja => `
           <option value="${esc(loja.id)}" ${lojaAtual && loja.id === lojaAtual.id ? "selected" : ""}>
             ${esc(loja.nome)}
@@ -185,17 +210,30 @@ async function criarFiltroLoja() {
         <option value="todos">Carregando setores...</option>
       </select>
     </div>
+
+    <div>
+      <label>&nbsp;</label>
+      <button type="button" onclick="carregarListaManual()">Atualizar lista</button>
+    </div>
   `;
 
   card.appendChild(filtrosWrapper);
 
   document.getElementById("filtro-loja").addEventListener("change", async event => {
     await atualizarSelectFiltroSetor(event.target.value);
+    listaJaCarregada = true;
     await renderizarLista();
   });
 
-  document.getElementById("filtro-status").addEventListener("change", renderizarLista);
-  document.getElementById("filtro-setor").addEventListener("change", renderizarLista);
+  document.getElementById("filtro-status").addEventListener("change", () => {
+    listaJaCarregada = true;
+    renderizarLista();
+  });
+
+  document.getElementById("filtro-setor").addEventListener("change", () => {
+    listaJaCarregada = true;
+    renderizarLista();
+  });
 
   await atualizarSelectFiltroSetor(document.getElementById("filtro-loja").value);
 }
@@ -205,9 +243,119 @@ function pertenceAoUsuario(item) {
     item.usuarioCargo === usuario.cargo;
 }
 
+function listaCacheChaveAtual() {
+  const filtroLojaSelecionado = document.getElementById("filtro-loja")?.value || lojaAtual?.id || "";
+  const filtroStatus = document.getElementById("filtro-status")?.value || "ativo";
+  const filtroSetor = document.getElementById("filtro-setor")?.value || "todos";
+
+  return `lista:${filtroLojaSelecionado}:${filtroStatus}:${filtroSetor}`;
+}
+
+function carregarListaCacheSessao() {
+  try {
+    const bruto = sessionStorage.getItem(listaCacheChaveAtual()) ||
+      localStorage.getItem(`valisys-lista-cache:${listaCacheChaveAtual()}`);
+
+    if (!bruto) return null;
+
+    const cache = JSON.parse(bruto);
+    if (!cache || !cache.itens) return null;
+
+    return {
+      itens: cache.itens || [],
+      tempo: cache.tempo || 0
+    };
+  } catch {
+    return null;
+  }
+}
+
+function salvarListaCacheSessao(itens) {
+  try {
+    const payload = JSON.stringify({
+      tempo: Date.now(),
+      itens
+    });
+
+    sessionStorage.setItem(listaCacheChaveAtual(), payload);
+    localStorage.setItem(`valisys-lista-cache:${listaCacheChaveAtual()}`, payload);
+  } catch {
+    // Cache opcional.
+  }
+}
+
+function formatarTempoCache(tempo) {
+  if (!tempo) return "cache anterior";
+
+  const segundos = Math.max(1, Math.round((Date.now() - tempo) / 1000));
+
+  if (segundos < 60) return `atualizado há ${segundos}s`;
+
+  const minutos = Math.round(segundos / 60);
+  return `atualizado há ${minutos}min`;
+}
+
+function promessaComTimeout(promessa, ms = 8500) {
+  let timer;
+
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      const erro = new Error("Tempo de resposta excedido. Mantendo a tela estável.");
+      erro.codigo = "timeout_lista";
+      reject(erro);
+    }, ms);
+  });
+
+  return Promise.race([promessa, timeout]).finally(() => clearTimeout(timer));
+}
+
+function renderizarEstadoListaFluido(mensagem = "Atualizando lista em segundo plano...") {
+  if (!lista) return;
+
+  lista.innerHTML = `
+    <div class="card lista-loading-fluido">
+      <div class="loading-linha"></div>
+      <div class="loading-linha menor"></div>
+      <p class="muted">${esc(mensagem)}</p>
+    </div>
+  `;
+}
+
+function renderizarAvisoLista(texto, tipo = "muted") {
+  const avisoAntigo = document.getElementById("aviso-lista-fluida");
+  if (avisoAntigo) avisoAntigo.remove();
+
+  const aviso = document.createElement("div");
+  aviso.id = "aviso-lista-fluida";
+  aviso.className = `card aviso-lista-fluida ${tipo}`;
+  aviso.innerHTML = `
+    <p>${esc(texto)}</p>
+    <button type="button" class="secondary" onclick="carregarListaManual()">Atualizar agora</button>
+  `;
+
+  lista?.prepend(aviso);
+}
+
+function erroOperacionalLista(erro) {
+  const texto = String(erro?.message || "");
+
+  if (erro?.codigo === "timeout_lista" || texto.toLowerCase().includes("timeout")) {
+    return "O Supabase demorou para responder. Mantive a tela aberta e você pode tentar atualizar novamente.";
+  }
+
+  if (texto.toLowerCase().includes("failed to fetch") || texto.toLowerCase().includes("network")) {
+    return "Falha de internet ou conexão instável. Mantive a tela aberta para não interromper a operação.";
+  }
+
+  return "Não foi possível atualizar agora. A tela continua funcionando; tente novamente em alguns segundos.";
+}
+
 async function obterLancamentosFiltrados() {
   const termo = (filtro?.value || "").toLowerCase().trim();
-  const filtroLoja = document.getElementById("filtro-loja")?.value || (lojaAtual?.id || "todas");
+  const filtroLojaSelecionado = document.getElementById("filtro-loja")?.value || lojaAtual?.id || "";
+  const filtroLoja = filtroLojaSelecionado && filtroLojaSelecionado !== "todas"
+    ? filtroLojaSelecionado
+    : (lojaAtual?.id || "");
   const filtroStatus = document.getElementById("filtro-status")?.value || "ativo";
   const filtroSetor = document.getElementById("filtro-setor")?.value || "todos";
 
@@ -268,13 +416,60 @@ async function obterLancamentosFiltrados() {
   return lancamentos;
 }
 
-async function renderizarLista() {
-  lista.innerHTML = `<div class="card"><p class="muted">Carregando lançamentos...</p></div>`;
+async function renderizarLista({ usarCachePrimeiro = false } = {}) {
+  const cicloAtual = ++carregamentoAtualLista;
+
+  if (!usarCachePrimeiro) {
+    const cache = carregarListaCacheSessao();
+
+    if (cache && cache.itens?.length) {
+      renderizarLancamentos(cache.itens, {
+        origem: `Dados em cache • ${formatarTempoCache(cache.tempo)}`,
+        avisoLimite: cache.itens.length >= LIMITE_LISTA_LANCAMENTOS
+      });
+    } else {
+      renderizarEstadoListaFluido();
+    }
+  }
 
   try {
-    let lancamentos = await obterLancamentosFiltrados();
+    const lancamentos = await promessaComTimeout(obterLancamentosFiltrados(), 8500);
 
-    if (lancamentos.length === 0) {
+    if (cicloAtual !== carregamentoAtualLista) return;
+
+    salvarListaCacheSessao(lancamentos);
+    renderizarLancamentos(lancamentos, {
+      origem: "Dados atualizados agora",
+      avisoLimite: lancamentos.length >= LIMITE_LISTA_LANCAMENTOS
+    });
+  } catch (erro) {
+    console.error(erro);
+
+    if (cicloAtual !== carregamentoAtualLista) return;
+
+    const cache = carregarListaCacheSessao();
+
+    if (cache && cache.itens?.length) {
+      renderizarLancamentos(cache.itens, {
+        origem: `Usando cache • ${formatarTempoCache(cache.tempo)}`,
+        avisoLimite: cache.itens.length >= LIMITE_LISTA_LANCAMENTOS
+      });
+      renderizarAvisoLista(erroOperacionalLista(erro), "warning");
+      return;
+    }
+
+    lista.innerHTML = `
+      <div class="card">
+        <p><strong>Não foi possível atualizar a Lista Geral agora.</strong></p>
+        <p class="muted">${esc(erroOperacionalLista(erro))}</p>
+        <button type="button" onclick="carregarListaManual()">Tentar novamente</button>
+      </div>
+    `;
+  }
+}
+
+function renderizarLancamentos(lancamentos, { origem = "", avisoLimite = false } = {}) {
+  if (lancamentos.length === 0) {
       const filtroLoja = document.getElementById("filtro-loja")?.value || "";
       const filtroStatus = document.getElementById("filtro-status")?.value || "";
 
@@ -283,7 +478,8 @@ async function renderizarLista() {
           <p><strong>Nenhum lançamento encontrado.</strong></p>
           <p class="muted">Filtro de loja: ${esc(nomeFiltroLoja(filtroLoja))}</p>
           <p class="muted">Filtro de status: ${esc(filtroStatus)}</p>
-          <p class="muted">Troque para "Todas as lojas" ou "Todos" em status para conferir.</p>
+          <p class="muted">Troque o status, setor ou loja para conferir outros registros.</p>
+          <button type="button" onclick="carregarListaManual()">Atualizar novamente</button>
         </div>
       `;
       return;
@@ -294,14 +490,14 @@ async function renderizarLista() {
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
 
-    const limiteAvisoLista = lancamentos.length >= LIMITE_LISTA_LANCAMENTOS
-      ? `<p class="muted">Mostrando até ${LIMITE_LISTA_LANCAMENTOS} registros para evitar lentidão. Use busca/filtros para afinar.</p>`
+    const limiteAvisoLista = avisoLimite
+      ? `<p class="muted">Mostrando até ${LIMITE_LISTA_LANCAMENTOS} registros por carregamento para manter rápido. Use filtros para afinar.</p>`
       : "";
 
     lista.innerHTML = `
       <div class="card lista-resumo">
         <strong>${lancamentos.length} lançamento(s) carregado(s)</strong>
-        <p class="muted">Carregamento otimizado para não travar o Supabase.</p>
+        <p class="muted">${esc(origem || "Carregamento fluido operacional")}</p>
         ${limiteAvisoLista}
       </div>
 
@@ -384,19 +580,11 @@ async function renderizarLista() {
         `;
       }).join("")}
     `;
-  } catch (erro) {
-    console.error(erro);
-    lista.innerHTML = `
-      <div class="card">
-        <p class="danger">Erro ao carregar lançamentos do sistema.</p>
-        <p class="muted">${esc(erro.message)}</p>
-      </div>
-    `;
-  }
+
 }
 
 function nomeFiltroLoja(id) {
-  if (!id || id === "todas") return "Todas as lojas";
+  if (!id || id === "todas") return "Loja atual";
   const loja = lojasCache.find(item => item.id === id);
   return loja ? loja.nome : "Loja não encontrada";
 }
@@ -445,7 +633,12 @@ window.toggleSetorManualLista = toggleSetorManualLista;
 window.salvarSetorLancamento = salvarSetorLancamento;
 
 if (filtro) {
-  filtro.addEventListener("input", renderizarLista);
+  filtro.addEventListener("input", () => {
+    if (!listaJaCarregada) return;
+
+    clearTimeout(timerBuscaLista);
+    timerBuscaLista = setTimeout(renderizarLista, 350);
+  });
 }
 
 iniciarLista();

@@ -482,7 +482,9 @@ const valisysDB = {
         ativo: item.ativo !== false
       }));
 
-      return setores.length > 0 ? setores : this.setoresPadraoLoja().map(nome => ({ id: nome, lojaId, nome, ativo: true }));
+      const retorno = setores.length > 0 ? setores : this.setoresPadraoLoja().map(nome => ({ id: nome, lojaId, nome, ativo: true }));
+      this.cacheLeveSet(`setores:${lojaId}`, retorno);
+      return retorno;
     } catch (erro) {
       console.warn("Tabela setores_loja indisponível. Usando setores padrão.", erro);
 
@@ -1528,36 +1530,39 @@ const valisysDB = {
   },
 
 
-  async listarLancamentos({ lojaId = "", status = "ativo", limite = 120 } = {}) {
+  async listarLancamentos({ lojaId = "", status = "ativo", limite = 40 } = {}) {
     const db = this.client();
 
-    let query = db
-      .from("lancamentos")
-      .select("id, loja_id, ean, nome_produto, marca, gramagem, quantidade_padrao, sabor, categoria, setor, quantidade, is_caixa, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em, lojas(nome, grupo, regiao, imagem, cor_tema)")
-      .order("validade", { ascending: true })
-      .limit(limite);
+    const camposComLoja = "id, loja_id, ean, nome_produto, marca, gramagem, quantidade_padrao, sabor, categoria, setor, quantidade, is_caixa, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em, lojas(nome, grupo, regiao, imagem, cor_tema)";
+    const camposSemNovos = "id, loja_id, ean, nome_produto, marca, quantidade_padrao, sabor, categoria, setor, quantidade, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em, lojas(nome, grupo, regiao, imagem, cor_tema)";
+    const camposSemRelacao = "id, loja_id, ean, nome_produto, marca, gramagem, quantidade_padrao, sabor, categoria, setor, quantidade, is_caixa, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em";
+    const camposBasicos = "id, loja_id, ean, nome_produto, marca, quantidade_padrao, sabor, categoria, setor, quantidade, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em";
 
-    if (lojaId && lojaId !== "todas") {
-      query = query.eq("loja_id", lojaId);
-    }
-
-    if (status && status !== "todos") {
-      query = query.eq("status", status);
-    }
-
-    let resposta = await query;
-
-    if (resposta.error && (this.erroColunaAusente?.(resposta.error, "gramagem") || this.erroColunaAusente?.(resposta.error, "is_caixa"))) {
-      let fallback = db
+    const montarQuery = (campos) => {
+      let query = db
         .from("lancamentos")
-        .select("id, loja_id, ean, nome_produto, marca, quantidade_padrao, sabor, categoria, setor, quantidade, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em, lojas(nome, grupo, regiao, imagem, cor_tema)")
+        .select(campos)
         .order("validade", { ascending: true })
         .limit(limite);
 
-      if (lojaId && lojaId !== "todas") fallback = fallback.eq("loja_id", lojaId);
-      if (status && status !== "todos") fallback = fallback.eq("status", status);
+      if (lojaId && lojaId !== "todas") query = query.eq("loja_id", lojaId);
+      if (status && status !== "todos") query = query.eq("status", status);
 
-      resposta = await fallback;
+      return query;
+    };
+
+    let resposta = await montarQuery(camposComLoja);
+
+    if (resposta.error && (this.erroColunaAusente?.(resposta.error, "gramagem") || this.erroColunaAusente?.(resposta.error, "is_caixa"))) {
+      resposta = await montarQuery(camposSemNovos);
+    }
+
+    if (resposta.error && (String(resposta.error.message || "").toLowerCase().includes("relationship") || String(resposta.error.message || "").toLowerCase().includes("lojas"))) {
+      resposta = await montarQuery(camposSemRelacao);
+    }
+
+    if (resposta.error && (this.erroColunaAusente?.(resposta.error, "gramagem") || this.erroColunaAusente?.(resposta.error, "is_caixa"))) {
+      resposta = await montarQuery(camposBasicos);
     }
 
     if (resposta.error) throw resposta.error;
@@ -1569,16 +1574,34 @@ const valisysDB = {
   async atualizarSetorLancamento(id, setor) {
     const db = this.client();
 
-    const { data, error } = await db
+    let resposta = await db
       .from("lancamentos")
       .update({ setor })
       .eq("id", id)
-      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+      .select("id, loja_id, ean, nome_produto, marca, gramagem, quantidade_padrao, sabor, categoria, setor, quantidade, is_caixa, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em, lojas(nome, grupo, regiao, imagem, cor_tema)")
       .single();
 
-    if (error) throw error;
+    if (resposta.error && (this.erroColunaAusente?.(resposta.error, "gramagem") || this.erroColunaAusente?.(resposta.error, "is_caixa"))) {
+      resposta = await db
+        .from("lancamentos")
+        .update({ setor })
+        .eq("id", id)
+        .select("id, loja_id, ean, nome_produto, marca, quantidade_padrao, sabor, categoria, setor, quantidade, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em, lojas(nome, grupo, regiao, imagem, cor_tema)")
+        .single();
+    }
 
-    return this.lancamentoDBParaApp(data);
+    if (resposta.error && (String(resposta.error.message || "").toLowerCase().includes("relationship") || String(resposta.error.message || "").toLowerCase().includes("lojas"))) {
+      resposta = await db
+        .from("lancamentos")
+        .update({ setor })
+        .eq("id", id)
+        .select("id, loja_id, ean, nome_produto, marca, quantidade_padrao, sabor, categoria, setor, quantidade, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em")
+        .single();
+    }
+
+    if (resposta.error) throw resposta.error;
+
+    return this.lancamentoDBParaApp(resposta.data);
   },
 
 

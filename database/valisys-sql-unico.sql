@@ -75,3 +75,16 @@ create index if not exists notificacoes_sac_leve_idx
 on public.notificacoes(tipo, titulo, criado_em desc);
 
 notify pgrst, 'reload schema';
+
+-- Correção final da Lista Geral: busca leve por status/data e loja/status/data.
+create index if not exists lancamentos_status_validade_idx
+on public.lancamentos(status, validade);
+
+create index if not exists lancamentos_loja_status_validade_idx
+on public.lancamentos(loja_id, status, validade);
+
+create index if not exists lancamentos_loja_setor_status_validade_idx
+on public.lancamentos(loja_id, setor, status, validade);
+
+analyze public.lancamentos;
+notify pgrst, 'reload schema';

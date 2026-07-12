@@ -216,16 +216,16 @@ async function carregarResumoInicial() {
     lembretesArea.innerHTML = avisoLimite + gruposComItens.map(grupo => renderizarGrupoLembrete(grupo)).join("");
   } catch (erro) {
     console.error(erro);
-    document.getElementById("qtd-vencidos").innerText = "!";
-    document.getElementById("qtd-hoje").innerText = "!";
-    document.getElementById("qtd-7dias").innerText = "!";
-    document.getElementById("qtd-30dias").innerText = "!";
+    document.getElementById("qtd-vencidos").innerText = "—";
+    document.getElementById("qtd-hoje").innerText = "—";
+    document.getElementById("qtd-7dias").innerText = "—";
+    document.getElementById("qtd-30dias").innerText = "—";
 
     const mensagem = String(erro.message || "");
 
     lembretesArea.innerHTML = `
       <div class="card">
-        <p class="danger">Não consegui carregar os lembretes agora.</p>
+        <p class="danger">Não consegui atualizar os lembretes agora, mas o sistema continua funcionando.</p>
         <p class="muted">${esc(mensagem.includes("timeout") ? "O banco demorou demais para responder. Rode o SQL principal para criar os índices e tente novamente." : mensagem)}</p>
         <a class="mini-link" href="lista-geral.html">Abrir lista completa</a>
       </div>
