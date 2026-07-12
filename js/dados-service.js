@@ -9,6 +9,142 @@ const valisysDB = {
     return getDadosOnlineClient();
   },
 
+  fotoPublica(data = {}) {
+    return data.foto_thumb_url || data.fotoThumbUrl || data.foto_url || data.fotoUrl || data.foto || "";
+  },
+
+  fotoOriginalPublica(data = {}) {
+    return data.foto_url || data.fotoUrl || data.foto_thumb_url || data.fotoThumbUrl || data.foto || "";
+  },
+
+  ehFotoBase64(foto = "") {
+    return String(foto || "").trim().startsWith("data:image/");
+  },
+
+  async imagemDataURLParaBlob(dataUrl, larguraMaxima = 900, qualidade = 0.76) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+
+      img.onload = () => {
+        const escala = Math.min(1, larguraMaxima / img.width);
+        const largura = Math.max(1, Math.round(img.width * escala));
+        const altura = Math.max(1, Math.round(img.height * escala));
+        const canvas = document.createElement("canvas");
+
+        canvas.width = largura;
+        canvas.height = altura;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, largura, altura);
+
+        canvas.toBlob(blob => {
+          if (blob) {
+            resolve(blob);
+            return;
+          }
+
+          canvas.toBlob(blobJpeg => {
+            if (blobJpeg) resolve(blobJpeg);
+            else reject(new Error("Não foi possível compactar a imagem."));
+          }, "image/jpeg", qualidade);
+        }, "image/webp", qualidade);
+      };
+
+      img.onerror = () => reject(new Error("Imagem inválida."));
+      img.src = dataUrl;
+    });
+  },
+
+  async subirFotoProdutoStorage({ ean = "", foto = "" } = {}) {
+    const fotoValor = String(foto || "").trim();
+
+    if (!fotoValor) {
+      return {
+        fotoUrl: "",
+        fotoThumbUrl: "",
+        fotoTabela: ""
+      };
+    }
+
+    if (!this.ehFotoBase64(fotoValor)) {
+      return {
+        fotoUrl: fotoValor,
+        fotoThumbUrl: fotoValor,
+        fotoTabela: fotoValor
+      };
+    }
+
+    const codigo = String(ean || "").replace(/\D/g, "") || `produto-${Date.now()}`;
+    const versao = Date.now();
+    const pasta = `produtos/${codigo}`;
+    const caminhoOriginal = `${pasta}/original-${versao}.webp`;
+    const caminhoThumb = `${pasta}/thumb-${versao}.webp`;
+
+    try {
+      const db = this.client();
+      const bucket = db.storage.from("produtos");
+
+      const blobOriginal = await this.imagemDataURLParaBlob(fotoValor, 900, 0.76);
+      const blobThumb = await this.imagemDataURLParaBlob(fotoValor, 220, 0.64);
+
+      const envioOriginal = await bucket.upload(caminhoOriginal, blobOriginal, {
+        contentType: "image/webp",
+        cacheControl: "31536000",
+        upsert: true
+      });
+
+      if (envioOriginal.error) throw envioOriginal.error;
+
+      const envioThumb = await bucket.upload(caminhoThumb, blobThumb, {
+        contentType: "image/webp",
+        cacheControl: "31536000",
+        upsert: true
+      });
+
+      if (envioThumb.error) throw envioThumb.error;
+
+      const originalUrl = bucket.getPublicUrl(caminhoOriginal).data?.publicUrl || "";
+      const thumbUrl = bucket.getPublicUrl(caminhoThumb).data?.publicUrl || originalUrl;
+
+      return {
+        fotoUrl: originalUrl,
+        fotoThumbUrl: thumbUrl,
+        fotoTabela: thumbUrl
+      };
+    } catch (erro) {
+      console.warn("Upload da foto para o Storage falhou. Mantendo fallback local para não perder a imagem.", erro);
+
+      return {
+        fotoUrl: "",
+        fotoThumbUrl: "",
+        fotoTabela: fotoValor
+      };
+    }
+  },
+
+  async prepararFotoProdutoParaStorage(produto = {}) {
+    const fotoAtual = produto.foto || produto.fotoThumbUrl || produto.foto_thumb_url || produto.fotoUrl || produto.foto_url || "";
+
+    if (!fotoAtual) {
+      return {
+        foto: "",
+        foto_url: produto.fotoUrl || produto.foto_url || "",
+        foto_thumb_url: produto.fotoThumbUrl || produto.foto_thumb_url || ""
+      };
+    }
+
+    const subida = await this.subirFotoProdutoStorage({
+      ean: produto.ean || produto.codigoInterno || "",
+      foto: fotoAtual
+    });
+
+    return {
+      foto: subida.fotoTabela || "",
+      foto_url: subida.fotoUrl || produto.fotoUrl || produto.foto_url || "",
+      foto_thumb_url: subida.fotoThumbUrl || produto.fotoThumbUrl || produto.foto_thumb_url || ""
+    };
+  },
+
   erroColunaAusente(error, coluna) {
     const mensagem = String(error?.message || error?.details || error?.hint || "").toLowerCase();
     return mensagem.includes(String(coluna || "").toLowerCase()) ||

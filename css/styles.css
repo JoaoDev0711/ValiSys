@@ -8102,3 +8102,55 @@ body.camera-aberta #reader {
 .aviso-lista-fluida.warning {
   background: #fff8e8;
 }
+
+
+/* ===== Fotos leves na Lista Geral ===== */
+.lancamento-topo-com-foto {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.produto-thumb-lista {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: #eef4ef;
+  border: 1px solid rgba(21, 59, 42, .10);
+}
+
+.produto-thumb-placeholder {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-size: .72rem;
+  line-height: 1.05;
+  color: var(--muted);
+  padding: 6px;
+}
+
+.lancamento-titulo {
+  min-width: 0;
+}
+
+.lancamento-titulo h3 {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .lancamento-topo-com-foto {
+    grid-template-columns: 56px 1fr;
+  }
+
+  .lancamento-topo-com-foto .badges-line {
+    grid-column: 1 / -1;
+  }
+
+  .produto-thumb-lista {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+  }
+}

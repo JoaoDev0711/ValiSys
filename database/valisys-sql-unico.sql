@@ -342,3 +342,262 @@ grant execute on function public.valisys_listar_lancamentos_paginado(
 
 analyze public.lancamentos;
 notify pgrst, 'reload schema';
+
+-- =========================================================
+-- Fotos profissionais: Storage + thumbnails leves
+-- =========================================================
+
+-- Bucket público para fotos de produtos.
+-- A foto original e a thumb ficam no Storage.
+-- O banco guarda só URL pequena/caminho, sem base64 pesado nas listas.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'produtos',
+  'produtos',
+  true,
+  2097152,
+  array['image/jpeg', 'image/png', 'image/webp']
+)
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage'
+      and tablename = 'objects'
+      and policyname = 'ValiSys fotos produtos leitura publica'
+  ) then
+    create policy "ValiSys fotos produtos leitura publica"
+    on storage.objects
+    for select
+    to anon, authenticated
+    using (bucket_id = 'produtos');
+  end if;
+
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage'
+      and tablename = 'objects'
+      and policyname = 'ValiSys fotos produtos upload'
+  ) then
+    create policy "ValiSys fotos produtos upload"
+    on storage.objects
+    for insert
+    to anon, authenticated
+    with check (bucket_id = 'produtos');
+  end if;
+
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage'
+      and tablename = 'objects'
+      and policyname = 'ValiSys fotos produtos atualizar'
+  ) then
+    create policy "ValiSys fotos produtos atualizar"
+    on storage.objects
+    for update
+    to anon, authenticated
+    using (bucket_id = 'produtos')
+    with check (bucket_id = 'produtos');
+  end if;
+
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage'
+      and tablename = 'objects'
+      and policyname = 'ValiSys fotos produtos apagar'
+  ) then
+    create policy "ValiSys fotos produtos apagar"
+    on storage.objects
+    for delete
+    to anon, authenticated
+    using (bucket_id = 'produtos');
+  end if;
+end $$;
+
+alter table public.produtos
+add column if not exists foto_url text;
+
+alter table public.produtos
+add column if not exists foto_thumb_url text;
+
+alter table public.lancamentos
+add column if not exists foto_url text;
+
+alter table public.lancamentos
+add column if not exists foto_thumb_url text;
+
+create index if not exists produtos_foto_thumb_idx
+on public.produtos(foto_thumb_url)
+where foto_thumb_url is not null and foto_thumb_url <> '';
+
+create index if not exists lancamentos_foto_thumb_idx
+on public.lancamentos(foto_thumb_url)
+where foto_thumb_url is not null and foto_thumb_url <> '';
+
+-- Atualiza a função paginada para retornar somente thumbnail/URL leve.
+-- Base64 antigo em lancamentos.foto NÃO volta para a Lista Geral.
+drop function if exists public.valisys_listar_lancamentos_paginado(
+  uuid,
+  text,
+  text,
+  date,
+  uuid,
+  integer,
+  text,
+  text,
+  text
+);
+
+create or replace function public.valisys_listar_lancamentos_paginado(
+  p_loja_id uuid,
+  p_status text default 'ativo',
+  p_busca text default '',
+  p_cursor_validade date default null,
+  p_cursor_id uuid default null,
+  p_limite integer default 30,
+  p_usuario_nome text default null,
+  p_usuario_cargo text default null,
+  p_setor text default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  limite_final integer;
+  busca_final text;
+  retorno jsonb;
+begin
+  limite_final := least(greatest(coalesce(p_limite, 30), 1), 50);
+  busca_final := lower(trim(coalesce(p_busca, '')));
+
+  with base as (
+    select
+      l.id,
+      l.loja_id,
+      l.ean,
+      l.nome_produto,
+      l.marca,
+      coalesce(l.gramagem, l.quantidade_padrao) as gramagem,
+      l.quantidade_padrao,
+      l.sabor,
+      l.categoria,
+      l.setor,
+      l.quantidade,
+      l.is_caixa,
+      l.validade,
+      case
+        when coalesce(l.foto_thumb_url, '') <> '' then l.foto_thumb_url
+        when coalesce(l.foto_url, '') <> '' then l.foto_url
+        when coalesce(p.foto_thumb_url, '') <> '' then p.foto_thumb_url
+        when coalesce(p.foto_url, '') <> '' then p.foto_url
+        when coalesce(l.foto, '') <> '' and l.foto not like 'data:image%' then l.foto
+        when coalesce(p.foto, '') <> '' and p.foto not like 'data:image%' then p.foto
+        else null
+      end as foto,
+      case
+        when coalesce(l.foto_url, '') <> '' then l.foto_url
+        when coalesce(p.foto_url, '') <> '' then p.foto_url
+        when coalesce(l.foto, '') <> '' and l.foto not like 'data:image%' then l.foto
+        when coalesce(p.foto, '') <> '' and p.foto not like 'data:image%' then p.foto
+        else null
+      end as foto_url,
+      case
+        when coalesce(l.foto_thumb_url, '') <> '' then l.foto_thumb_url
+        when coalesce(p.foto_thumb_url, '') <> '' then p.foto_thumb_url
+        when coalesce(l.foto_url, '') <> '' then l.foto_url
+        when coalesce(p.foto_url, '') <> '' then p.foto_url
+        when coalesce(l.foto, '') <> '' and l.foto not like 'data:image%' then l.foto
+        when coalesce(p.foto, '') <> '' and p.foto not like 'data:image%' then p.foto
+        else null
+      end as foto_thumb_url,
+      l.status,
+      l.usuario_nome,
+      l.usuario_cargo,
+      l.retirado_em,
+      l.retirado_por,
+      l.criado_em
+    from public.lancamentos l
+    left join public.produtos p on p.ean = l.ean
+    where l.loja_id = p_loja_id
+      and (
+        p_status is null
+        or p_status = ''
+        or p_status = 'todos'
+        or l.status = p_status
+      )
+      and (
+        p_usuario_nome is null
+        or p_usuario_nome = ''
+        or (
+          lower(l.usuario_nome) = lower(p_usuario_nome)
+          and (p_usuario_cargo is null or p_usuario_cargo = '' or l.usuario_cargo = p_usuario_cargo)
+        )
+      )
+      and (
+        p_setor is null
+        or p_setor = ''
+        or lower(l.setor) = lower(p_setor)
+      )
+      and (
+        busca_final = ''
+        or length(busca_final) < 2
+        or lower(coalesce(l.nome_produto, '')) like '%' || busca_final || '%'
+        or lower(coalesce(l.ean, '')) like '%' || busca_final || '%'
+        or lower(coalesce(l.marca, '')) like '%' || busca_final || '%'
+        or lower(coalesce(l.setor, '')) like '%' || busca_final || '%'
+        or lower(coalesce(l.usuario_nome, '')) like '%' || busca_final || '%'
+        or lower(coalesce(l.gramagem, l.quantidade_padrao, '')) like '%' || busca_final || '%'
+      )
+      and (
+        p_cursor_validade is null
+        or (l.validade, l.id) > (p_cursor_validade, p_cursor_id)
+      )
+    order by l.validade asc nulls last, l.id asc
+    limit limite_final + 1
+  ),
+  pagina as (
+    select *
+    from base
+    order by validade asc nulls last, id asc
+    limit limite_final
+  ),
+  ultimo as (
+    select validade, id
+    from pagina
+    order by validade desc nulls last, id desc
+    limit 1
+  )
+  select jsonb_build_object(
+    'itens', coalesce((select jsonb_agg(to_jsonb(pagina.*) order by validade asc nulls last, id asc) from pagina), '[]'::jsonb),
+    'tem_mais', (select count(*) from base) > limite_final,
+    'proximo_cursor_validade', (select validade from ultimo),
+    'proximo_cursor_id', (select id from ultimo)
+  )
+  into retorno;
+
+  return retorno;
+end;
+$$;
+
+grant execute on function public.valisys_listar_lancamentos_paginado(
+  uuid,
+  text,
+  text,
+  date,
+  uuid,
+  integer,
+  text,
+  text,
+  text
+) to anon, authenticated;
+
+analyze public.produtos;
+analyze public.lancamentos;
+notify pgrst, 'reload schema';
