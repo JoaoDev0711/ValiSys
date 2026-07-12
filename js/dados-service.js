@@ -9,6 +9,51 @@ const valisysDB = {
     return getDadosOnlineClient();
   },
 
+  erroColunaAusente(error, coluna) {
+    const mensagem = String(error?.message || error?.details || error?.hint || "").toLowerCase();
+    return mensagem.includes(String(coluna || "").toLowerCase()) ||
+      mensagem.includes("schema cache") ||
+      mensagem.includes("could not find");
+  },
+
+  cacheLeveGet(chave, ttlMs = 60000) {
+    try {
+      const bruto = localStorage.getItem(`valisys-cache:${chave}`);
+      if (!bruto) return null;
+
+      const item = JSON.parse(bruto);
+      if (!item || !item.tempo || Date.now() - item.tempo > ttlMs) {
+        localStorage.removeItem(`valisys-cache:${chave}`);
+        return null;
+      }
+
+      return item.valor || null;
+    } catch {
+      return null;
+    }
+  },
+
+  cacheLeveSet(chave, valor) {
+    try {
+      localStorage.setItem(`valisys-cache:${chave}`, JSON.stringify({
+        tempo: Date.now(),
+        valor
+      }));
+    } catch {
+      // Cache local é opcional.
+    }
+  },
+
+  cacheLeveLimpar(prefixo = "") {
+    try {
+      Object.keys(localStorage)
+        .filter(chave => chave.startsWith(`valisys-cache:${prefixo}`))
+        .forEach(chave => localStorage.removeItem(chave));
+    } catch {
+      // Cache local é opcional.
+    }
+  },
+
   async testarConexao() {
     const db = this.client();
 
@@ -23,25 +68,32 @@ const valisysDB = {
   },
 
   async listarLojas() {
+    const cache = this.cacheLeveGet("lojas-ativas", 90000);
+    if (cache) return cache.map(this.lojaDBParaApp);
+
     const db = this.client();
 
     const { data, error } = await db
       .from("lojas")
-      .select("*")
+      .select("id, nome, responsavel, telefone, imagem, regiao, grupo, cor_tema, status, criada_em")
       .eq("status", "ativa")
       .order("nome", { ascending: true });
 
     if (error) throw error;
 
+    this.cacheLeveSet("lojas-ativas", data || []);
     return (data || []).map(this.lojaDBParaApp);
   },
 
   async listarTodasLojas() {
+    const cache = this.cacheLeveGet("lojas-todas", 60000);
+    if (cache) return cache.map(this.lojaDBParaApp);
+
     const db = this.client();
 
     const { data, error } = await db
       .from("lojas")
-      .select("*")
+      .select("id, nome, responsavel, telefone, imagem, regiao, grupo, cor_tema, status, criada_em")
       .neq("status", "excluida")
       .order("nome", { ascending: true });
 
@@ -91,6 +143,7 @@ const valisysDB = {
 
     if (resposta.error) throw resposta.error;
 
+    this.cacheLeveLimpar("lojas");
     return this.lojaDBParaApp(resposta.data);
   },
 
@@ -111,6 +164,7 @@ const valisysDB = {
       setLojaAtual(this.lojaDBParaApp(data));
     }
 
+    this.cacheLeveLimpar("lojas");
     return this.lojaDBParaApp(data);
   },
 
@@ -201,19 +255,30 @@ const valisysDB = {
     return true;
   },
 
-  async listarFuncionarios(lojaId) {
+  async listarFuncionarios(lojaId, { limite = 120 } = {}) {
     const db = this.client();
 
-    const { data, error } = await db
+    let resposta = await db
       .from("funcionarios")
-      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+      .select("id, nome, cargo, setor, codigo_acesso, marca_promotoria, permite_caixa, loja_id, ativo, criado_em, lojas(nome)")
       .eq("loja_id", lojaId)
       .eq("ativo", true)
-      .order("nome", { ascending: true });
+      .order("nome", { ascending: true })
+      .limit(limite);
 
-    if (error) throw error;
+    if (resposta.error && this.erroColunaAusente(resposta.error, "permite_caixa")) {
+      resposta = await db
+        .from("funcionarios")
+        .select("id, nome, cargo, setor, codigo_acesso, marca_promotoria, loja_id, ativo, criado_em, lojas(nome)")
+        .eq("loja_id", lojaId)
+        .eq("ativo", true)
+        .order("nome", { ascending: true })
+        .limit(limite);
+    }
 
-    return (data || []).map(this.funcionarioDBParaApp);
+    if (resposta.error) throw resposta.error;
+
+    return (resposta.data || []).map(this.funcionarioDBParaApp);
   },
 
   async criarFuncionario({ lojaId, nome, cargo, setor = "", codigoAcesso, marcaPromotoria = "", permiteCaixa = false }) {
@@ -232,36 +297,36 @@ const valisysDB = {
     let resposta = await db
       .from("funcionarios")
       .insert(payload)
-      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+      .select("id, nome, cargo, setor, codigo_acesso, marca_promotoria, permite_caixa, loja_id, ativo, criado_em, lojas(nome)")
       .single();
 
-    if (resposta.error && String(resposta.error.message || "").includes("permite_caixa")) {
+    if (resposta.error && this.erroColunaAusente(resposta.error, "permite_caixa")) {
       delete payload.permite_caixa;
 
       resposta = await db
         .from("funcionarios")
         .insert(payload)
-        .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+        .select("id, nome, cargo, setor, codigo_acesso, marca_promotoria, loja_id, ativo, criado_em, lojas(nome)")
         .single();
     }
 
-    if (resposta.error && String(resposta.error.message || "").includes("marca_promotoria")) {
+    if (resposta.error && this.erroColunaAusente(resposta.error, "marca_promotoria")) {
       delete payload.marca_promotoria;
 
       resposta = await db
         .from("funcionarios")
         .insert(payload)
-        .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+        .select("id, nome, cargo, setor, codigo_acesso, loja_id, ativo, criado_em, lojas(nome)")
         .single();
     }
 
-    if (resposta.error && String(resposta.error.message || "").includes("setor")) {
+    if (resposta.error && this.erroColunaAusente(resposta.error, "setor")) {
       delete payload.setor;
 
       resposta = await db
         .from("funcionarios")
         .insert(payload)
-        .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+        .select("id, nome, cargo, codigo_acesso, loja_id, ativo, criado_em, lojas(nome)")
         .single();
     }
 
@@ -279,7 +344,7 @@ const valisysDB = {
 
     const { data: antigo, error: erroAntigo } = await db
       .from("funcionarios")
-      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+      .select("id, nome, cargo, setor, codigo_acesso, marca_promotoria, permite_caixa, loja_id, ativo, criado_em, lojas(nome)")
       .eq("id", id)
       .single();
 
@@ -299,16 +364,28 @@ const valisysDB = {
       .from("funcionarios")
       .update(payload)
       .eq("id", id)
-      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+      .select("id, nome, cargo, setor, codigo_acesso, marca_promotoria, permite_caixa, loja_id, ativo, criado_em, lojas(nome)")
       .single();
 
-    if (resposta.error && String(resposta.error.message || "").includes("marca_promotoria")) {
-      delete payload.marca_promotoria;
+    if (resposta.error && this.erroColunaAusente(resposta.error, "permite_caixa")) {
+      delete payload.permite_caixa;
+
       resposta = await db
         .from("funcionarios")
         .update(payload)
         .eq("id", id)
-        .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+        .select("id, nome, cargo, setor, codigo_acesso, marca_promotoria, loja_id, ativo, criado_em, lojas(nome)")
+        .single();
+    }
+
+    if (resposta.error && this.erroColunaAusente(resposta.error, "marca_promotoria")) {
+      delete payload.marca_promotoria;
+
+      resposta = await db
+        .from("funcionarios")
+        .update(payload)
+        .eq("id", id)
+        .select("id, nome, cargo, setor, codigo_acesso, loja_id, ativo, criado_em, lojas(nome)")
         .single();
     }
 
@@ -354,6 +431,7 @@ const valisysDB = {
 
 
 
+
   setoresPadraoLoja() {
     return [
       "Geral",
@@ -382,12 +460,15 @@ const valisysDB = {
   },
 
   async listarSetoresLoja(lojaId) {
+    const cache = this.cacheLeveGet(`setores:${lojaId}`, 120000);
+    if (cache) return cache.map(this.setorDBParaApp);
+
     const db = this.client();
 
     try {
       const { data, error } = await db
         .from("setores_loja")
-        .select("*")
+        .select("id, loja_id, nome, ativo, criado_em")
         .eq("loja_id", lojaId)
         .eq("ativo", true)
         .order("nome", { ascending: true });
@@ -491,11 +572,14 @@ const valisysDB = {
 
 
   async listarMarcasPromotoria(lojaId) {
+    const cache = this.cacheLeveGet(`marcas:${lojaId}`, 120000);
+    if (cache) return cache.map(this.marcaPromotoriaDBParaApp);
+
     const db = this.client();
 
     const { data, error } = await db
       .from("marcas_promotoria")
-      .select("*")
+      .select("id, loja_id, nome, ativa, criada_em")
       .eq("loja_id", lojaId)
       .eq("ativa", true)
       .order("nome", { ascending: true });
@@ -844,7 +928,7 @@ const valisysDB = {
 
       const { data, error } = await db
         .from("catalogo_produtos")
-        .select("*")
+        .select("id, codigo_interno, ean, nome, marca, gramagem, quantidade_padrao, sabor, categoria, foto, fonte, ativo, criado_em")
         .eq("ean", codigo)
         .eq("ativo", true)
         .maybeSingle();
@@ -867,7 +951,7 @@ const valisysDB = {
 
       let query = db
         .from("catalogo_produtos")
-        .select("*")
+        .select("id, codigo_interno, ean, nome, marca, gramagem, quantidade_padrao, sabor, categoria, foto, fonte, ativo, criado_em")
         .eq("ativo", true)
         .limit(limite);
 
@@ -989,26 +1073,66 @@ const valisysDB = {
     };
   },
 
-  async listarProdutos() {
+  async listarProdutos({ termo = "", limite = 60 } = {}) {
     const db = this.client();
+    const busca = String(termo || "").trim();
 
-    let resposta = await db
+    let query = db
       .from("produtos")
-      .select("*")
-      .eq("ativo", true)
-      .order("nome", { ascending: true });
+      .select("id, ean, nome, marca, gramagem, quantidade_padrao, sabor, categoria, foto, fonte, ativo, criado_em")
+      .order("nome", { ascending: true })
+      .limit(limite);
 
-    if (resposta.error && String(resposta.error.message || "").includes("ativo")) {
-      resposta = await db
+    if (busca) {
+      const seguro = busca
+        .replaceAll("%", "")
+        .replaceAll(",", " ")
+        .replaceAll("(", " ")
+        .replaceAll(")", " ")
+        .replaceAll("'", "")
+        .replaceAll('"', "")
+        .trim();
+
+      query = query.or(`nome.ilike.%${seguro}%,marca.ilike.%${seguro}%,categoria.ilike.%${seguro}%,ean.ilike.%${seguro}%,quantidade_padrao.ilike.%${seguro}%`);
+    }
+
+    let resposta = await query.eq("ativo", true);
+
+    if (resposta.error && this.erroColunaAusente(resposta.error, "ativo")) {
+      let fallback = db
         .from("produtos")
-        .select("*")
-        .order("nome", { ascending: true });
+        .select("id, ean, nome, marca, quantidade_padrao, sabor, categoria, foto, fonte, criado_em")
+        .order("nome", { ascending: true })
+        .limit(limite);
+
+      if (busca) {
+        const seguro = busca.replaceAll("%", "").replaceAll(",", " ").trim();
+        fallback = fallback.or(`nome.ilike.%${seguro}%,marca.ilike.%${seguro}%,categoria.ilike.%${seguro}%,ean.ilike.%${seguro}%,quantidade_padrao.ilike.%${seguro}%`);
+      }
+
+      resposta = await fallback;
+    }
+
+    if (resposta.error && this.erroColunaAusente(resposta.error, "gramagem")) {
+      let fallback = db
+        .from("produtos")
+        .select("id, ean, nome, marca, quantidade_padrao, sabor, categoria, foto, fonte, ativo, criado_em")
+        .order("nome", { ascending: true })
+        .limit(limite);
+
+      if (busca) {
+        const seguro = busca.replaceAll("%", "").replaceAll(",", " ").trim();
+        fallback = fallback.or(`nome.ilike.%${seguro}%,marca.ilike.%${seguro}%,categoria.ilike.%${seguro}%,ean.ilike.%${seguro}%,quantidade_padrao.ilike.%${seguro}%`);
+      }
+
+      resposta = await fallback.eq("ativo", true);
     }
 
     if (resposta.error) throw resposta.error;
 
     return (resposta.data || []).map(this.produtoDBParaApp);
   },
+
 
 
   async buscarProdutoPorTexto(termo = "") {
@@ -1030,7 +1154,7 @@ const valisysDB = {
 
       let resposta = await db
         .from("produtos")
-        .select("*")
+        .select("id, ean, nome, marca, gramagem, quantidade_padrao, sabor, categoria, foto, fonte, ativo, criado_em")
         .or(`nome.ilike.%${seguro}%,marca.ilike.%${seguro}%,fabricante.ilike.%${seguro}%,categoria.ilike.%${seguro}%,ean.ilike.%${seguro}%`)
         .eq("ativo", true)
         .order("nome", { ascending: true })
@@ -1039,8 +1163,8 @@ const valisysDB = {
       if (resposta.error && String(resposta.error.message || "").includes("ativo")) {
         resposta = await db
           .from("produtos")
-          .select("*")
-          .or(`nome.ilike.%${seguro}%,marca.ilike.%${seguro}%,fabricante.ilike.%${seguro}%,categoria.ilike.%${seguro}%,ean.ilike.%${seguro}%`)
+          .select("id, ean, nome, marca, gramagem, quantidade_padrao, sabor, categoria, foto, fonte, criado_em")
+          .or(`nome.ilike.%${seguro}%,marca.ilike.%${seguro}%,categoria.ilike.%${seguro}%,ean.ilike.%${seguro}%,quantidade_padrao.ilike.%${seguro}%`)
           .order("nome", { ascending: true })
           .limit(1);
       }
@@ -1072,7 +1196,7 @@ const valisysDB = {
 
     let resposta = await db
       .from("produtos")
-      .select("*")
+      .select("id, ean, nome, marca, gramagem, quantidade_padrao, sabor, categoria, foto, fonte, ativo, criado_em")
       .eq("ean", ean)
       .eq("ativo", true)
       .maybeSingle();
@@ -1080,7 +1204,7 @@ const valisysDB = {
     if (resposta.error && String(resposta.error.message || "").includes("ativo")) {
       resposta = await db
         .from("produtos")
-        .select("*")
+        .select("id, ean, nome, marca, gramagem, quantidade_padrao, sabor, categoria, foto, fonte, ativo, criado_em")
         .eq("ean", ean)
         .maybeSingle();
     }
@@ -1270,24 +1394,38 @@ const valisysDB = {
     return this.lancamentoDBParaApp(respostaLancamento.data);
   },
 
-  async listarTodosLancamentos({ status = "todos" } = {}) {
+  async listarTodosLancamentos({ status = "todos", limite = 260 } = {}) {
     const db = this.client();
 
     let query = db
       .from("lancamentos")
-      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
-      .order("validade", { ascending: true });
+      .select("id, loja_id, ean, nome_produto, marca, gramagem, quantidade_padrao, sabor, categoria, setor, quantidade, is_caixa, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em, lojas(nome, grupo, regiao, imagem, cor_tema)")
+      .order("validade", { ascending: true })
+      .limit(limite);
 
     if (status && status !== "todos") {
       query = query.eq("status", status);
     }
 
-    const { data, error } = await query;
+    let resposta = await query;
 
-    if (error) throw error;
+    if (resposta.error && (this.erroColunaAusente?.(resposta.error, "gramagem") || this.erroColunaAusente?.(resposta.error, "is_caixa"))) {
+      let fallback = db
+        .from("lancamentos")
+        .select("id, loja_id, ean, nome_produto, marca, quantidade_padrao, sabor, categoria, setor, quantidade, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em, lojas(nome, grupo, regiao, imagem, cor_tema)")
+        .order("validade", { ascending: true })
+        .limit(limite);
 
-    return (data || []).map(this.lancamentoDBParaApp);
+      if (status && status !== "todos") fallback = fallback.eq("status", status);
+
+      resposta = await fallback;
+    }
+
+    if (resposta.error) throw resposta.error;
+
+    return (resposta.data || []).map(this.lancamentoDBParaApp);
   },
+
 
   async contarFuncionariosAtivos() {
     const db = this.client();
@@ -1302,13 +1440,39 @@ const valisysDB = {
     return count || 0;
   },
 
-  async listarLancamentos({ lojaId = "", status = "ativo" } = {}) {
+
+  async listarLancamentosDashboard({ lojaId = "", status = "ativo", limiteData = "", limite = 120 } = {}) {
     const db = this.client();
+
+    const camposLeves = `
+      id,
+      loja_id,
+      ean,
+      nome_produto,
+      marca,
+      gramagem,
+      quantidade_padrao,
+      sabor,
+      categoria,
+      setor,
+      quantidade,
+      is_caixa,
+      validade,
+      foto,
+      status,
+      usuario_nome,
+      usuario_cargo,
+      retirado_em,
+      retirado_por,
+      criado_em,
+      lojas(nome, grupo, regiao, imagem, cor_tema)
+    `;
 
     let query = db
       .from("lancamentos")
-      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
-      .order("validade", { ascending: true });
+      .select(camposLeves)
+      .order("validade", { ascending: true })
+      .limit(limite);
 
     if (lojaId && lojaId !== "todas") {
       query = query.eq("loja_id", lojaId);
@@ -1318,11 +1482,87 @@ const valisysDB = {
       query = query.eq("status", status);
     }
 
-    const { data, error } = await query;
+    if (limiteData) {
+      query = query.lte("validade", limiteData);
+    }
 
-    if (error) throw error;
+    let resposta = await query;
 
-    return (data || []).map(this.lancamentoDBParaApp);
+    if (resposta.error && (this.erroColunaAusente?.(resposta.error, "gramagem") || this.erroColunaAusente?.(resposta.error, "is_caixa"))) {
+      let fallback = db
+        .from("lancamentos")
+        .select(`
+          id,
+          loja_id,
+          ean,
+          nome_produto,
+          marca,
+          quantidade_padrao,
+          sabor,
+          categoria,
+          setor,
+          quantidade,
+          validade,
+          foto,
+          status,
+          usuario_nome,
+          usuario_cargo,
+          retirado_em,
+          retirado_por,
+          criado_em,
+          lojas(nome, grupo, regiao, imagem, cor_tema)
+        `)
+        .order("validade", { ascending: true })
+        .limit(limite);
+
+      if (lojaId && lojaId !== "todas") fallback = fallback.eq("loja_id", lojaId);
+      if (status && status !== "todos") fallback = fallback.eq("status", status);
+      if (limiteData) fallback = fallback.lte("validade", limiteData);
+
+      resposta = await fallback;
+    }
+
+    if (resposta.error) throw resposta.error;
+
+    return (resposta.data || []).map(this.lancamentoDBParaApp);
+  },
+
+
+  async listarLancamentos({ lojaId = "", status = "ativo", limite = 120 } = {}) {
+    const db = this.client();
+
+    let query = db
+      .from("lancamentos")
+      .select("id, loja_id, ean, nome_produto, marca, gramagem, quantidade_padrao, sabor, categoria, setor, quantidade, is_caixa, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em, lojas(nome, grupo, regiao, imagem, cor_tema)")
+      .order("validade", { ascending: true })
+      .limit(limite);
+
+    if (lojaId && lojaId !== "todas") {
+      query = query.eq("loja_id", lojaId);
+    }
+
+    if (status && status !== "todos") {
+      query = query.eq("status", status);
+    }
+
+    let resposta = await query;
+
+    if (resposta.error && (this.erroColunaAusente?.(resposta.error, "gramagem") || this.erroColunaAusente?.(resposta.error, "is_caixa"))) {
+      let fallback = db
+        .from("lancamentos")
+        .select("id, loja_id, ean, nome_produto, marca, quantidade_padrao, sabor, categoria, setor, quantidade, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em, lojas(nome, grupo, regiao, imagem, cor_tema)")
+        .order("validade", { ascending: true })
+        .limit(limite);
+
+      if (lojaId && lojaId !== "todas") fallback = fallback.eq("loja_id", lojaId);
+      if (status && status !== "todos") fallback = fallback.eq("status", status);
+
+      resposta = await fallback;
+    }
+
+    if (resposta.error) throw resposta.error;
+
+    return (resposta.data || []).map(this.lancamentoDBParaApp);
   },
 
 
@@ -1433,7 +1673,7 @@ const valisysDB = {
         criado_por: `SAC Online - ${dados.nome || "Visitante"}`,
         lida: false
       })
-      .select("*")
+      .select("id, tipo, titulo, mensagem, criado_por, lida, criado_em")
       .single();
 
     if (error) throw error;
@@ -1446,9 +1686,10 @@ const valisysDB = {
 
     let query = db
       .from("notificacoes")
-      .select("*")
+      .select("id, tipo, titulo, mensagem, criado_por, lida, criado_em")
       .eq("tipo", "sac_online")
-      .order("criado_em", { ascending: false });
+      .order("criado_em", { ascending: false })
+      .limit(120);
 
     if (status === "nova") {
       query = query.eq("lida", false);
@@ -1472,7 +1713,7 @@ const valisysDB = {
       .from("notificacoes")
       .update({ lida: true })
       .eq("id", id)
-      .select("*")
+      .select("id, tipo, titulo, mensagem, criado_por, lida, criado_em")
       .single();
 
     if (error) throw error;
@@ -1541,7 +1782,7 @@ const valisysDB = {
         criado_por: autor === "admin" ? "Admin SAC" : `Cliente SAC - ${dados.nome || "Visitante"}`,
         lida: autor === "admin" ? true : false
       })
-      .select("*")
+      .select("id, tipo, titulo, mensagem, criado_por, lida, criado_em")
       .single();
 
     if (error) throw error;
@@ -1549,29 +1790,32 @@ const valisysDB = {
     return this.chatSacDBParaApp(data);
   },
 
-  async listarMensagensChatSac(sessaoId) {
+  async listarMensagensChatSac(sessaoId, { limite = 50 } = {}) {
     const db = this.client();
 
     const { data, error } = await db
       .from("notificacoes")
-      .select("*")
+      .select("id, tipo, titulo, mensagem, criado_por, lida, criado_em")
       .eq("tipo", "sac_chat")
       .eq("titulo", `SAC Chat - ${sessaoId}`)
-      .order("criado_em", { ascending: true });
+      .order("criado_em", { ascending: false })
+      .limit(limite);
 
     if (error) throw error;
 
-    return (data || []).map(this.chatSacDBParaApp);
+    return (data || []).reverse().map(this.chatSacDBParaApp);
   },
 
-  async listarConversasChatSac() {
+
+  async listarConversasChatSac({ limite = 120 } = {}) {
     const db = this.client();
 
     const { data, error } = await db
       .from("notificacoes")
-      .select("*")
+      .select("id, tipo, titulo, mensagem, criado_por, lida, criado_em")
       .eq("tipo", "sac_chat")
-      .order("criado_em", { ascending: false });
+      .order("criado_em", { ascending: false })
+      .limit(limite);
 
     if (error) throw error;
 
@@ -1611,6 +1855,7 @@ const valisysDB = {
 
     return [...conversas.values()].sort((a, b) => String(b.atualizadoEm).localeCompare(String(a.atualizadoEm)));
   },
+
 
   async marcarChatSacComoLido(sessaoId) {
     const db = this.client();

@@ -19,7 +19,7 @@
 <main class="container">
   <section class="card">
     <h2>Cadastrar produto</h2>
-    <p class="muted">Gerente e admin podem cadastrar produtos. Use EAN, nome, marca, fabricante, sabor e foto. Ao escanear ou digitar um EAN válido, o sistema busca automaticamente.</p>
+    <p class="muted">Gerente e admin podem cadastrar produtos. Use EAN, nome, marca, gramagem, sabor e foto. Ao escanear ou digitar um EAN válido, o sistema busca automaticamente.</p>
 
     <div class="button-row">
       <button type="button" id="btn-camera">📷 Escanear EAN</button>
@@ -42,15 +42,21 @@
       <label for="marca">Marca</label>
       <input type="text" id="marca" placeholder="Ex: Finna">
 
-      <label for="fabricante">Fabricante</label>
-      <input type="text" id="fabricante" placeholder="Ex: M. Dias Branco">
+      <label for="quantidadePadrao">Gramagem</label>
+      <input type="text" id="quantidadePadrao" placeholder="Ex: 200g, 1kg, 500ml, 12x1L">
+      <p class="small muted">Se a API não puxar a gramagem, informe aqui. Se puxar errado, você pode editar antes de salvar.</p>
 
       <label for="sabor">Sabor ou variação</label>
       <input type="text" id="sabor" placeholder="Ex: Tradicional, Chocolate, Integral">
 
-      <label for="fotoArquivo">Foto do produto</label>
-      <input type="file" id="fotoArquivo" accept="image/*" capture="environment">
-      <p class="small muted">Se não escolher foto, o sistema tenta puxar automaticamente pelo EAN ou pelo nome.</p>
+      <label>Foto do produto</label>
+      <div class="foto-opcoes">
+        <button type="button" class="secondary" id="btnFotoCameraProduto">Abrir câmera</button>
+        <button type="button" class="secondary" id="btnFotoArquivoProduto">Escolher arquivo</button>
+      </div>
+      <input type="file" id="fotoCameraProduto" accept="image/*" capture="environment" hidden>
+      <input type="file" id="fotoArquivo" accept="image/*" hidden>
+      <p class="small muted">Use a câmera ou escolha um arquivo. Se não escolher foto, o sistema tenta puxar automaticamente pelo EAN ou pelo nome.</p>
 
       <div id="preview-foto"></div>
 
@@ -65,18 +71,18 @@
 </main>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/dados-config.js"></script>
-<script src="js/dados-service.js"></script>
-<script src="js/catalogo-produtos-base.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/cookies.js"></script>
-<script src="js/loja.js"></script>
-<script src="js/site-dialog.js"></script>
-<script src="js/icons.js"></script>
-<script src="js/produtos-fonte.js"></script>
-<script src="js/produto.js"></script>
-<script src="js/push-notifications-v2.js?v=2"></script>
-<script src="js/pwa-register.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="js/dados-config.js" defer></script>
+<script src="js/dados-service.js" defer></script>
+<script src="js/catalogo-produtos-base.js" defer></script>
+<script src="js/auth.js" defer></script>
+<script src="js/cookies.js" defer></script>
+<script src="js/loja.js" defer></script>
+<script src="js/site-dialog.js" defer></script>
+<script src="js/icons.js" defer></script>
+<script src="js/produtos-fonte.js" defer></script>
+<script src="js/produto.js" defer></script>
+<script src="js/push-notifications-v2.js?v=2" defer></script>
+<script src="js/pwa-register.js" defer></script>
 </body>
 </html>

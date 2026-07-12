@@ -597,8 +597,9 @@ function cardProdutoHTML(produto, mensagem = "") {
           <h3>${esc(produto.nome || "Produto sem nome")}</h3>
           <p class="muted">EAN: ${esc(produto.ean || "Não informado")}</p>
           <p><strong>Marca:</strong> ${esc(produto.marca || "Não informada")}</p>
-          <p><strong>Fabricante:</strong> ${esc(produto.fabricante || "Não informado")}</p>
+          <p><strong>Gramagem:</strong> ${esc(produto.gramagem || produto.quantidadePadrao || "Não informada")}</p>
           ${produto.sabor ? `<p><strong>Sabor:</strong> ${esc(produto.sabor)}</p>` : ""}
+          <p class="muted">Você pode editar os dados nos campos do formulário antes de salvar.</p>
         </div>
         ${
           produto.foto

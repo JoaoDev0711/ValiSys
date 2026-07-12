@@ -57,8 +57,8 @@
 
   function iniciar() {
     criarAreaAviso();
-    carregar();
-    setInterval(carregar, 120000);
+    setTimeout(carregar, 900);
+    setInterval(carregar, 180000);
   }
 
   if (document.readyState === "loading") {

@@ -101,9 +101,15 @@ function renderizarGraficoBarras(container, dados, vazio = "Sem dados para mostr
 
 async function carregarGestao() {
   try {
-    let lancamentos = await valisysDB.listarLancamentos({
+    const limiteGestao = new Date();
+    limiteGestao.setDate(limiteGestao.getDate() + 30);
+    const limiteDataGestao = limiteGestao.toISOString().slice(0, 10);
+
+    let lancamentos = await valisysDB.listarLancamentosDashboard({
       lojaId: lojaAtual.id,
-      status: "ativo"
+      status: "ativo",
+      limiteData: limiteDataGestao,
+      limite: 160
     });
 
     if (usuario.cargo === "encarregado" && usuario.setor) {
@@ -142,7 +148,7 @@ async function carregarGestao() {
     );
 
     if (["gerente", "admin"].includes(usuario.cargo)) {
-      const funcionarios = await valisysDB.listarFuncionarios(lojaAtual.id);
+      const funcionarios = await valisysDB.listarFuncionarios(lojaAtual.id, { limite: 80 });
       document.getElementById("gestao-equipe-qtd").innerText = funcionarios.length;
 
       const areaEquipe = document.getElementById("gestao-equipe-lista");

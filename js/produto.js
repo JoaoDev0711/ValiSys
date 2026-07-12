@@ -13,7 +13,7 @@ const lista = document.getElementById("lista-produtos");
 const eanInput = document.getElementById("ean");
 const nomeInput = document.getElementById("nome");
 const marcaInput = document.getElementById("marca");
-const fabricanteInput = document.getElementById("fabricante");
+const gramagemInput = document.getElementById("quantidadePadrao");
 const saborInput = document.getElementById("sabor");
 const categoriaInput = document.getElementById("categoria");
 
@@ -38,6 +38,9 @@ const resultadoCatalogoProduto = document.getElementById("resultado-catalogo-pro
 let catalogoProdutoCache = [];
 
 const fotoArquivo = document.getElementById("fotoArquivo");
+const fotoCameraProduto = document.getElementById("fotoCameraProduto");
+const btnFotoCameraProduto = document.getElementById("btnFotoCameraProduto");
+const btnFotoArquivoProduto = document.getElementById("btnFotoArquivoProduto");
 const previewFoto = document.getElementById("preview-foto");
 
 const btnCamera = document.getElementById("btn-camera");
@@ -45,6 +48,7 @@ const btnPararCamera = document.getElementById("btn-parar-camera");
 
 let fotoBase64 = "";
 let produtoAtualCadastro = null;
+const LIMITE_PRODUTOS_CADASTRO = 60;
 
 let leitorCamera = null;
 let ultimoCodigoLido = "";
@@ -55,6 +59,7 @@ let ultimoEANBuscadoAutomatico = "";
 let timerBuscaNomeAutomatica = null;
 let ultimoNomeBuscadoAutomatico = "";
 let popupCadastroAberto = false;
+let timerListaProdutosCadastro = null;
 
 const scannerStatus = document.getElementById("scanner-status");
 
@@ -319,27 +324,42 @@ async function pararCamera() {
 }
 
 
+
+async function carregarFotoProdutoArquivo(input) {
+  const arquivo = input?.files?.[0];
+
+  if (!arquivo) {
+    fotoBase64 = "";
+    previewFoto.innerHTML = "";
+    return;
+  }
+
+  try {
+    fotoBase64 = await compactarImagem(arquivo, 700, 0.72);
+
+    previewFoto.innerHTML = `
+      <img class="produto-img" src="${fotoBase64}" alt="Preview da foto">
+    `;
+  } catch (erro) {
+    alert("Não foi possível carregar a foto.");
+    console.error(erro);
+  }
+}
+
+if (btnFotoCameraProduto && fotoCameraProduto) {
+  btnFotoCameraProduto.addEventListener("click", () => fotoCameraProduto.click());
+}
+
+if (btnFotoArquivoProduto && fotoArquivo) {
+  btnFotoArquivoProduto.addEventListener("click", () => fotoArquivo.click());
+}
+
+if (fotoCameraProduto) {
+  fotoCameraProduto.addEventListener("change", () => carregarFotoProdutoArquivo(fotoCameraProduto));
+}
+
 if (fotoArquivo) {
-  fotoArquivo.addEventListener("change", async function() {
-    const arquivo = fotoArquivo.files[0];
-
-    if (!arquivo) {
-      fotoBase64 = "";
-      previewFoto.innerHTML = "";
-      return;
-    }
-
-    try {
-      fotoBase64 = await compactarImagem(arquivo, 700, 0.72);
-
-      previewFoto.innerHTML = `
-        <img class="produto-img" src="${fotoBase64}" alt="Preview da foto">
-      `;
-    } catch (erro) {
-      alert("Não foi possível carregar a foto.");
-      console.error(erro);
-    }
-  });
+  fotoArquivo.addEventListener("change", () => carregarFotoProdutoArquivo(fotoArquivo));
 }
 
 function compactarImagem(arquivo, larguraMaxima, qualidade) {
@@ -415,14 +435,19 @@ function garantirPopupCadastroBasico() {
         <label for="popupProdutoMarca">Marca</label>
         <input type="text" id="popupProdutoMarca" placeholder="Ex: M. Dias Branco">
 
-        <label for="popupProdutoFabricante">Fabricante</label>
-        <input type="text" id="popupProdutoFabricante" placeholder="Ex: M. Dias Branco">
+        <label for="popupProdutoGramagem">Gramagem</label>
+        <input type="text" id="popupProdutoGramagem" placeholder="Ex: 200g, 1kg, 500ml, 12x1L">
 
         <label for="popupProdutoSabor">Sabor ou variação</label>
         <input type="text" id="popupProdutoSabor" placeholder="Ex: Tradicional, Chocolate, Integral">
 
-        <label for="popupProdutoFoto">Foto</label>
-        <input type="file" id="popupProdutoFoto" accept="image/*">
+        <label>Foto</label>
+        <div class="foto-opcoes">
+          <button type="button" class="secondary" id="popupFotoCameraBtn">Abrir câmera</button>
+          <button type="button" class="secondary" id="popupFotoArquivoBtn">Escolher arquivo</button>
+        </div>
+        <input type="file" id="popupProdutoFotoCamera" accept="image/*" capture="environment" hidden>
+        <input type="file" id="popupProdutoFoto" accept="image/*" hidden>
 
         <button type="submit">Salvar produto</button>
       </form>
@@ -437,6 +462,8 @@ function garantirPopupCadastroBasico() {
   });
 
   modal.querySelector("#form-popup-produto-basico").addEventListener("submit", salvarPopupCadastroBasico);
+  modal.querySelector("#popupFotoCameraBtn")?.addEventListener("click", () => modal.querySelector("#popupProdutoFotoCamera")?.click());
+  modal.querySelector("#popupFotoArquivoBtn")?.addEventListener("click", () => modal.querySelector("#popupProdutoFoto")?.click());
 
   return modal;
 }
@@ -480,7 +507,7 @@ async function salvarPopupCadastroBasico(event) {
   const ean = normalizarCodigo(modal.querySelector("#popupProdutoEAN").value);
   const nome = modal.querySelector("#popupProdutoNome").value.trim();
   const marca = modal.querySelector("#popupProdutoMarca").value.trim();
-  const fabricante = modal.querySelector("#popupProdutoFabricante").value.trim();
+  const gramagem = modal.querySelector("#popupProdutoGramagem").value.trim();
   const sabor = modal.querySelector("#popupProdutoSabor").value.trim();
   const fotoArquivoModal = modal.querySelector("#popupProdutoFoto").files?.[0] || null;
 
@@ -501,10 +528,11 @@ async function salvarPopupCadastroBasico(event) {
       ean,
       nome,
       marca,
-      fabricante,
+      fabricante: "",
+      gramagem,
       sabor,
       categoria: "",
-      quantidadePadrao: "",
+      quantidadePadrao: gramagem,
       porcao: "",
       embalagem: "",
       origem: "",
@@ -743,7 +771,7 @@ function preencherCamposProduto(produto) {
   if (eanInput) eanInput.value = produto.ean || "";
   if (nomeInput) nomeInput.value = produto.nome || "";
   if (marcaInput) marcaInput.value = produto.marca || "";
-  if (fabricanteInput) fabricanteInput.value = produto.fabricante || "";
+  if (gramagemInput) gramagemInput.value = produto.gramagem || produto.quantidadePadrao || "";
   if (saborInput) saborInput.value = produto.sabor || "";
 }
 
@@ -751,7 +779,7 @@ function lerCamposExtrasProduto() {
   return {
     sabor: "",
     categoria: "",
-    quantidadePadrao: "",
+    quantidadePadrao: gramagemInput?.value.trim() || "",
     porcao: "",
     embalagem: "",
     origem: "",
@@ -878,7 +906,7 @@ function cardProdutoCadastroHTML(produto) {
           <h3>${esc(produto.nome || "Produto sem nome")}</h3>
           <p class="muted">EAN: ${esc(produto.ean || "Não informado")}</p>
           <p><strong>Marca:</strong> ${esc(produto.marca || "Não informada")}</p>
-          <p><strong>Fabricante:</strong> ${esc(produto.fabricante || "Não informado")}</p>
+          <p><strong>Gramagem:</strong> ${esc(produto.gramagem || produto.quantidadePadrao || "Não informada")}</p>
           ${produto.sabor ? `<p><strong>Sabor:</strong> ${esc(produto.sabor)}</p>` : ""}
         </div>
         ${produto.foto ? `<img class="produto-img produto-img-mini" src="${produto.foto}" alt="${esc(produto.nome)}">` : ""}
@@ -918,14 +946,22 @@ async function carregarProdutos() {
   lista.innerHTML = `<div class="card"><p class="muted">Carregando produtos...</p></div>`;
 
   try {
-    const produtos = await valisysDB.listarProdutos();
+    const termoLista = String(buscaCatalogoProdutoInput?.value || nomeInput?.value || "").trim();
+    const produtos = await valisysDB.listarProdutos({
+      termo: termoLista,
+      limite: LIMITE_PRODUTOS_CADASTRO
+    });
 
     if (produtos.length === 0) {
       lista.innerHTML = `<div class="card"><p>Nenhum produto cadastrado.</p></div>`;
       return;
     }
 
-    lista.innerHTML = produtos.map(produto => cardProdutoCadastroHTML(produto)).join("");
+    const avisoLimite = produtos.length >= LIMITE_PRODUTOS_CADASTRO
+      ? `<div class="card"><p class="muted">Mostrando até ${LIMITE_PRODUTOS_CADASTRO} produtos. Use a busca para encontrar outros.</p></div>`
+      : "";
+
+    lista.innerHTML = avisoLimite + produtos.map(produto => cardProdutoCadastroHTML(produto)).join("");
   } catch (erro) {
     console.error(erro);
     lista.innerHTML = `
@@ -951,7 +987,8 @@ form.addEventListener("submit", async function(event) {
     ean,
     nome: nomeInput.value.trim(),
     marca: marcaInput.value.trim(),
-    fabricante: fabricanteInput.value.trim(),
+    fabricante: "",
+    gramagem: gramagemInput?.value.trim() || "",
     ...lerCamposExtrasProduto(),
     sabor: saborInput?.value.trim() || "",
     categoria: "",
@@ -1083,4 +1120,19 @@ btnCamera.addEventListener("click", async () => {
 
 btnPararCamera.addEventListener("click", pararCamera);
 
-carregarProdutos();
+if (lista) {
+  lista.innerHTML = `
+    <div class="card">
+      <p><strong>Modo leve ativado.</strong></p>
+      <p class="muted">Digite uma busca ou leia um EAN para carregar produtos. Assim a tela não puxa o catálogo inteiro ao abrir.</p>
+    </div>
+  `;
+}
+
+
+if (buscaCatalogoProdutoInput) {
+  buscaCatalogoProdutoInput.addEventListener("input", () => {
+    clearTimeout(timerListaProdutosCadastro);
+    timerListaProdutosCadastro = setTimeout(carregarProdutos, 550);
+  });
+}

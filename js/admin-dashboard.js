@@ -601,7 +601,7 @@ async function renderizarLojasAdmin() {
     lojasAdminCache = await valisysDB.listarTodasLojas();
 
     try {
-      lancamentosAdminCache = await valisysDB.listarTodosLancamentos({ status: "todos" });
+      lancamentosAdminCache = await valisysDB.listarTodosLancamentos({ status: "todos", limite: 260 });
     } catch (erroLancamentos) {
       console.warn("Não foi possível carregar lançamentos gerais.", erroLancamentos);
       lancamentosAdminCache = [];
@@ -981,7 +981,7 @@ async function renderizarSacAdmin() {
   `;
 
   try {
-    const conversas = await valisysDB.listarConversasChatSac();
+    const conversas = await valisysDB.listarConversasChatSac({ limite: 120 });
 
     if (conversas.length === 0) {
       listaSacAdmin.innerHTML = `

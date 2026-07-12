@@ -184,7 +184,7 @@ async function renderizarFuncionarios() {
     await carregarSetoresFuncionario();
     await carregarMarcasFuncionario();
 
-    funcionariosCache = await valisysDB.listarFuncionarios(lojaAtual.id);
+    funcionariosCache = await valisysDB.listarFuncionarios(lojaAtual.id, { limite: 120 });
 
     if (funcionariosCache.length === 0) {
       listaFuncionarios.innerHTML = `

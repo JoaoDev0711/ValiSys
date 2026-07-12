@@ -11,6 +11,15 @@ const form = document.getElementById("form-lancamento");
 const eanInput = document.getElementById("ean");
 const nomeInput = document.getElementById("nomeProduto");
 const gramagemProdutoInput = document.getElementById("gramagemProduto");
+const marcaProdutoInput = document.getElementById("marcaProduto");
+const saborProdutoInput = document.getElementById("saborProduto");
+const dadosProdutoEditaveis = document.getElementById("dados-produto-editaveis");
+const areaGramagemProduto = document.getElementById("areaGramagemProduto");
+const fotoCameraLancamento = document.getElementById("fotoCameraLancamento");
+const fotoArquivoLancamento = document.getElementById("fotoArquivoLancamento");
+const btnFotoCameraLancamento = document.getElementById("btnFotoCameraLancamento");
+const btnFotoArquivoLancamento = document.getElementById("btnFotoArquivoLancamento");
+const previewFotoLancamento = document.getElementById("preview-foto-lancamento");
 const produtoPreview = document.getElementById("produto-preview");
 const setorSelect = document.getElementById("setor");
 const buscaCatalogoLancamentoInput = document.getElementById("busca-catalogo-lancamento");
@@ -27,14 +36,109 @@ const btnPararCamera = document.getElementById("btn-parar-camera");
 let produtoAtual = null;
 
 
-function atualizarGramagemDoProdutoAtual() {
-  if (!gramagemProdutoInput) return;
+async function compactarImagemLancamento(arquivo, larguraMaxima = 700, qualidade = 0.72) {
+  return new Promise((resolve, reject) => {
+    const leitor = new FileReader();
+
+    leitor.onload = event => {
+      const img = new Image();
+
+      img.onload = () => {
+        const escala = Math.min(1, larguraMaxima / img.width);
+        const largura = Math.round(img.width * escala);
+        const altura = Math.round(img.height * escala);
+        const canvas = document.createElement("canvas");
+        canvas.width = largura;
+        canvas.height = altura;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, largura, altura);
+        resolve(canvas.toDataURL("image/jpeg", qualidade));
+      };
+
+      img.onerror = reject;
+      img.src = event.target.result;
+    };
+
+    leitor.onerror = reject;
+    leitor.readAsDataURL(arquivo);
+  });
+}
+
+async function carregarFotoLancamento(input) {
+  const arquivo = input?.files?.[0];
+
+  if (!arquivo) return;
+
+  try {
+    const foto = await compactarImagemLancamento(arquivo);
+    if (!produtoAtual) produtoAtual = {};
+    produtoAtual.foto = foto;
+
+    if (previewFotoLancamento) {
+      previewFotoLancamento.innerHTML = `<img class="produto-img" src="${foto}" alt="Foto do produto">`;
+    }
+  } catch (erro) {
+    alert("Não foi possível carregar a foto.");
+    console.error(erro);
+  }
+}
+
+if (btnFotoCameraLancamento && fotoCameraLancamento) {
+  btnFotoCameraLancamento.addEventListener("click", () => fotoCameraLancamento.click());
+}
+
+if (btnFotoArquivoLancamento && fotoArquivoLancamento) {
+  btnFotoArquivoLancamento.addEventListener("click", () => fotoArquivoLancamento.click());
+}
+
+if (fotoCameraLancamento) {
+  fotoCameraLancamento.addEventListener("change", () => carregarFotoLancamento(fotoCameraLancamento));
+}
+
+if (fotoArquivoLancamento) {
+  fotoArquivoLancamento.addEventListener("change", () => carregarFotoLancamento(fotoArquivoLancamento));
+}
+
+function atualizarCamposEditaveisProduto(forcarGramagem = false) {
+  if (!dadosProdutoEditaveis) return;
+
+  dadosProdutoEditaveis.style.display = "block";
+
+  if (marcaProdutoInput) marcaProdutoInput.value = produtoAtual?.marca || "";
+  if (saborProdutoInput) saborProdutoInput.value = produtoAtual?.sabor || "";
 
   const gramagem = produtoAtual?.gramagem || produtoAtual?.quantidadePadrao || "";
 
-  if (gramagem && !gramagemProdutoInput.value.trim()) {
+  if (gramagemProdutoInput && !gramagemProdutoInput.value.trim()) {
     gramagemProdutoInput.value = gramagem;
   }
+
+  const mostrarGramagem = forcarGramagem || !gramagem;
+
+  if (areaGramagemProduto) {
+    areaGramagemProduto.style.display = mostrarGramagem ? "block" : "none";
+  }
+
+  if (previewFotoLancamento && produtoAtual?.foto) {
+    previewFotoLancamento.innerHTML = `<img class="produto-img" src="${produtoAtual.foto}" alt="Foto do produto">`;
+  }
+}
+
+function aplicarEdicoesProdutoAtual() {
+  if (!produtoAtual) produtoAtual = {};
+
+  produtoAtual.nome = nomeInput.value.trim() || produtoAtual.nome || "";
+  produtoAtual.marca = marcaProdutoInput?.value.trim() || "";
+  produtoAtual.gramagem = gramagemProdutoInput?.value.trim() || produtoAtual.gramagem || produtoAtual.quantidadePadrao || "";
+  produtoAtual.quantidadePadrao = produtoAtual.gramagem || produtoAtual.quantidadePadrao || "";
+  produtoAtual.sabor = saborProdutoInput?.value.trim() || "";
+  produtoAtual.fabricante = "";
+}
+
+
+
+function atualizarGramagemDoProdutoAtual() {
+  atualizarCamposEditaveisProduto(false);
 }
 
 
@@ -434,6 +538,7 @@ function selecionarCatalogoLancamento(index) {
   }
 
   produtoPreview.innerHTML = cardProdutoHTML(produtoAtual, "Produto selecionado da lista interna.");
+  atualizarCamposEditaveisProduto(false);
 }
 
 window.selecionarCatalogoLancamento = selecionarCatalogoLancamento;
@@ -521,14 +626,19 @@ function garantirPopupCadastroBasico() {
         <label for="popupProdutoMarca">Marca</label>
         <input type="text" id="popupProdutoMarca" placeholder="Ex: M. Dias Branco">
 
-        <label for="popupProdutoFabricante">Fabricante</label>
-        <input type="text" id="popupProdutoFabricante" placeholder="Ex: M. Dias Branco">
+        <label for="popupProdutoGramagem">Gramagem</label>
+        <input type="text" id="popupProdutoGramagem" placeholder="Ex: 200g, 1kg, 500ml, 12x1L">
 
         <label for="popupProdutoSabor">Sabor ou variação</label>
         <input type="text" id="popupProdutoSabor" placeholder="Ex: Tradicional, Chocolate, Integral">
 
-        <label for="popupProdutoFoto">Foto</label>
-        <input type="file" id="popupProdutoFoto" accept="image/*">
+        <label>Foto</label>
+        <div class="foto-opcoes">
+          <button type="button" class="secondary" id="popupFotoCameraBtn">Abrir câmera</button>
+          <button type="button" class="secondary" id="popupFotoArquivoBtn">Escolher arquivo</button>
+        </div>
+        <input type="file" id="popupProdutoFotoCamera" accept="image/*" capture="environment" hidden>
+        <input type="file" id="popupProdutoFoto" accept="image/*" hidden>
 
         <button type="submit">Salvar produto</button>
       </form>
@@ -543,6 +653,8 @@ function garantirPopupCadastroBasico() {
   });
 
   modal.querySelector("#form-popup-produto-basico").addEventListener("submit", salvarPopupCadastroBasico);
+  modal.querySelector("#popupFotoCameraBtn")?.addEventListener("click", () => modal.querySelector("#popupProdutoFotoCamera")?.click());
+  modal.querySelector("#popupFotoArquivoBtn")?.addEventListener("click", () => modal.querySelector("#popupProdutoFoto")?.click());
 
   return modal;
 }
@@ -567,7 +679,7 @@ async function abrirPopupCadastroBasico({ ean = "", nome = "" } = {}) {
   modal.querySelector("#popupProdutoEAN").value = eanLimpo;
   modal.querySelector("#popupProdutoNome").value = nomeLimpo;
   modal.querySelector("#popupProdutoMarca").value = produtoAtual?.marca || "";
-  modal.querySelector("#popupProdutoFabricante").value = produtoAtual?.fabricante || "";
+  modal.querySelector("#popupProdutoGramagem").value = produtoAtual?.gramagem || produtoAtual?.quantidadePadrao || "";
   modal.querySelector("#popupProdutoSabor").value = produtoAtual?.sabor || "";
   modal.querySelector("#popupProdutoFoto").value = "";
 
@@ -586,9 +698,9 @@ async function salvarPopupCadastroBasico(event) {
   const ean = normalizarCodigo(modal.querySelector("#popupProdutoEAN").value);
   const nome = modal.querySelector("#popupProdutoNome").value.trim();
   const marca = modal.querySelector("#popupProdutoMarca").value.trim();
-  const fabricante = modal.querySelector("#popupProdutoFabricante").value.trim();
+  const gramagem = modal.querySelector("#popupProdutoGramagem").value.trim();
   const sabor = modal.querySelector("#popupProdutoSabor").value.trim();
-  const fotoArquivo = modal.querySelector("#popupProdutoFoto").files?.[0] || null;
+  const fotoArquivo = modal.querySelector("#popupProdutoFotoCamera").files?.[0] || modal.querySelector("#popupProdutoFoto").files?.[0] || null;
 
   if (!ean || !validarEAN(ean)) {
     alert("Informe um EAN válido para salvar o produto.");
@@ -607,10 +719,11 @@ async function salvarPopupCadastroBasico(event) {
       ean,
       nome,
       marca,
-      fabricante,
+      fabricante: "",
+      gramagem,
       sabor,
       categoria: "",
-      quantidadePadrao: "",
+      quantidadePadrao: gramagem,
       porcao: "",
       embalagem: "",
       origem: "",
@@ -760,6 +873,7 @@ async function buscarProdutoCompleto(ean) {
     produtoAtual = produto;
     nomeInput.value = produto.nome || "";
     produtoPreview.innerHTML = cardProdutoHTML(produto, "Produto encontrado no cadastro.");
+    atualizarCamposEditaveisProduto(false);
     return produto;
   }
 
@@ -770,6 +884,7 @@ async function buscarProdutoCompleto(ean) {
       produtoAtual = produtoCatalogoParaAtual(itemCatalogo);
       nomeInput.value = produtoAtual.nome || "";
       produtoPreview.innerHTML = cardProdutoHTML(produtoAtual, "Produto encontrado na lista interna.");
+      atualizarCamposEditaveisProduto(false);
       return produtoAtual;
     }
   } catch (erroCatalogo) {
@@ -817,9 +932,11 @@ async function buscarProdutoCompleto(ean) {
     const produtoSalvo = await valisysDB.salvarProduto(produto);
     produtoAtual = produtoSalvo || produto;
     produtoPreview.innerHTML = cardProdutoHTML(produtoAtual, "Produto encontrado e cadastrado.");
+    atualizarCamposEditaveisProduto(false);
   } catch (erroSalvarProduto) {
     console.warn("Produto puxado da base de produtos, mas não salvo em produtos. O lançamento ainda pode ser salvo.", erroSalvarProduto);
     produtoPreview.innerHTML = cardProdutoHTML(produto, "Produto encontrado. O lançamento já pode ser feito.");
+    atualizarCamposEditaveisProduto(false);
   }
 
   return produtoAtual;
@@ -954,9 +1071,11 @@ form.addEventListener("submit", async function(event) {
     produtoAtual = {
       ean,
       nome: nomeProduto,
-      marca: "",
+      marca: marcaProdutoInput?.value.trim() || "",
       fabricante: "",
-      sabor: "",
+      gramagem: gramagemProdutoInput?.value.trim() || "",
+      quantidadePadrao: gramagemProdutoInput?.value.trim() || "",
+      sabor: saborProdutoInput?.value.trim() || "",
       categoria: "",
       quantidadePadrao: "",
       porcao: "",
@@ -978,6 +1097,8 @@ form.addEventListener("submit", async function(event) {
     produtoAtual.nome = produtoAtual.nome || nomeProduto;
   }
 
+  aplicarEdicoesProdutoAtual();
+
   try {
     const produtoSalvo = await valisysDB.salvarProduto({
       ...produtoAtual,
@@ -995,10 +1116,10 @@ form.addEventListener("submit", async function(event) {
     lojaNome: lojaAtual.nome,
     ean,
     nomeProduto,
-    marca: produtoAtual?.marca || "",
+    marca: produtoAtual?.marca || marcaProdutoInput?.value.trim() || "",
     gramagem: gramagemProdutoInput?.value.trim() || produtoAtual?.gramagem || produtoAtual?.quantidadePadrao || "",
     fabricante: "",
-    sabor: produtoAtual?.sabor || "",
+    sabor: produtoAtual?.sabor || saborProdutoInput?.value.trim() || "",
     categoria: produtoAtual?.categoria || "",
     quantidadePadrao: produtoAtual?.quantidadePadrao || "",
     porcao: produtoAtual?.porcao || "",
@@ -1042,6 +1163,10 @@ form.addEventListener("submit", async function(event) {
     alert("Lançamento salvo!");
     form.reset();
     if (gramagemProdutoInput) gramagemProdutoInput.value = "";
+    if (marcaProdutoInput) marcaProdutoInput.value = "";
+    if (saborProdutoInput) saborProdutoInput.value = "";
+    if (dadosProdutoEditaveis) dadosProdutoEditaveis.style.display = "none";
+    if (previewFotoLancamento) previewFotoLancamento.innerHTML = "";
     produtoAtual = null;
     produtoPreview.innerHTML = "";
   } catch (erro) {

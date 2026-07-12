@@ -18,6 +18,7 @@ if (ehListaGeral && !podeVerListaGeral(usuario.cargo)) {
 
 let lojasCache = [];
 let setoresListaCache = [];
+const LIMITE_LISTA_LANCAMENTOS = 120;
 
 
 async function carregarSetoresFiltroLista(lojaId = "") {
@@ -212,7 +213,8 @@ async function obterLancamentosFiltrados() {
 
   let lancamentos = await valisysDB.listarLancamentos({
     lojaId: filtroLoja,
-    status: filtroStatus
+    status: filtroStatus,
+    limite: LIMITE_LISTA_LANCAMENTOS
   });
 
   if (!ehListaGeral) {
@@ -292,10 +294,15 @@ async function renderizarLista() {
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
 
+    const limiteAvisoLista = lancamentos.length >= LIMITE_LISTA_LANCAMENTOS
+      ? `<p class="muted">Mostrando até ${LIMITE_LISTA_LANCAMENTOS} registros para evitar lentidão. Use busca/filtros para afinar.</p>`
+      : "";
+
     lista.innerHTML = `
       <div class="card lista-resumo">
-        <strong>${lancamentos.length} lançamento(s) encontrado(s)</strong>
-        <p class="muted">Esses dados são compartilhados entre os aparelhos.</p>
+        <strong>${lancamentos.length} lançamento(s) carregado(s)</strong>
+        <p class="muted">Carregamento otimizado para não travar o Supabase.</p>
+        ${limiteAvisoLista}
       </div>
 
       ${lancamentos.map(item => {

@@ -61,21 +61,71 @@ if (usuario) {
     }
   });
 
-  carregarResumoInicial();
+  prepararLembretesSobDemanda();
 }
+
+
+function prepararLembretesSobDemanda() {
+  const bloco = document.querySelector(".lembretes-collapse");
+  const lembretesArea = document.getElementById("lembretes-vencimento");
+  const textoLembrete = document.getElementById("texto-lembrete");
+
+  ["qtd-vencidos", "qtd-hoje", "qtd-7dias", "qtd-30dias"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerText = "—";
+  });
+
+  if (textoLembrete) {
+    textoLembrete.innerText = "Abra esta área somente quando precisar carregar os vencimentos.";
+  }
+
+  if (lembretesArea) {
+    lembretesArea.innerHTML = `
+      <div class="empty-state">
+        <span>⚡</span>
+        <p>Lembretes em modo leve.</p>
+        <p class="muted">Para acelerar o dashboard, os vencimentos só são buscados quando você abre esta área.</p>
+      </div>
+    `;
+  }
+
+  if (!bloco) return;
+
+  bloco.open = false;
+  bloco.dataset.carregado = "false";
+
+  bloco.addEventListener("toggle", () => {
+    if (bloco.open && bloco.dataset.carregado !== "true") {
+      bloco.dataset.carregado = "true";
+      carregarResumoInicial();
+    }
+  });
+}
+
 
 async function carregarResumoInicial() {
   const lembretesArea = document.getElementById("lembretes-vencimento");
   const textoLembrete = document.getElementById("texto-lembrete");
 
-  lembretesArea.innerHTML = `<div class="card"><p class="muted">Carregando vencimentos do sistema...</p></div>`;
+  if (!lembretesArea) return;
+
+  lembretesArea.innerHTML = `<div class="card"><p class="muted">Carregando vencimentos próximos...</p></div>`;
 
   try {
     const lojaAtual = getLojaAtual();
 
-    let lancamentos = await valisysDB.listarLancamentos({
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    const limite = new Date(hoje);
+    limite.setDate(limite.getDate() + 30);
+    const limiteISO = limite.toISOString().slice(0, 10);
+
+    let lancamentos = await valisysDB.listarLancamentosDashboard({
       lojaId: lojaAtual.id,
-      status: "ativo"
+      status: "ativo",
+      limiteData: limiteISO,
+      limite: 120
     });
 
     if (!podeVerListaGeral(usuario.cargo)) {
@@ -83,18 +133,15 @@ async function carregarResumoInicial() {
         String(item.usuarioNome || "").toLowerCase() === String(usuario.nome || "").toLowerCase() &&
         item.usuarioCargo === usuario.cargo
       );
-      textoLembrete.innerText = "Mostrando somente os produtos lançados por você nesta loja.";
+      if (textoLembrete) textoLembrete.innerText = "Mostrando somente vencimentos próximos lançados por você.";
     } else if (usuario.cargo === "encarregado" && usuario.setor) {
       lancamentos = lancamentos.filter(item =>
         String(item.setor || "").toLowerCase() === String(usuario.setor || "").toLowerCase()
       );
-      textoLembrete.innerText = `Mostrando os produtos do setor ${usuario.setor}.`;
+      if (textoLembrete) textoLembrete.innerText = `Mostrando vencimentos próximos do setor ${usuario.setor}.`;
     } else {
-      textoLembrete.innerText = "Mostrando os produtos lançados pela equipe desta loja.";
+      if (textoLembrete) textoLembrete.innerText = "Mostrando vencimentos próximos da equipe.";
     }
-
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
 
     const lancamentosComDias = lancamentos.map(item => {
       const validade = parseDataLocal(item.validade);
@@ -154,21 +201,33 @@ async function carregarResumoInicial() {
       lembretesArea.innerHTML = `
         <div class="empty-state">
           <span>✅</span>
-          <p>Nenhum vencimento urgente encontrado nesta loja.</p>
-          <p class="muted">Total de lançamentos ativos nesta loja: ${lancamentos.length}</p>
-          <a class="mini-link" href="meus-lancamentos.html">Ver meus lançamentos</a>
+          <p>Nenhum vencimento próximo encontrado nesta loja.</p>
+          <p class="muted">O dashboard carrega somente itens vencidos ou até 30 dias para ficar rápido.</p>
+          <a class="mini-link" href="lista-geral.html">Ver lista completa</a>
         </div>
       `;
       return;
     }
 
-    lembretesArea.innerHTML = gruposComItens.map(grupo => renderizarGrupoLembrete(grupo)).join("");
+    const avisoLimite = lancamentosComDias.length >= 320
+      ? `<p class="muted mais-itens">Mostrando os primeiros 120 itens próximos. Use a Lista completa para buscar mais.</p>`
+      : "";
+
+    lembretesArea.innerHTML = avisoLimite + gruposComItens.map(grupo => renderizarGrupoLembrete(grupo)).join("");
   } catch (erro) {
     console.error(erro);
+    document.getElementById("qtd-vencidos").innerText = "!";
+    document.getElementById("qtd-hoje").innerText = "!";
+    document.getElementById("qtd-7dias").innerText = "!";
+    document.getElementById("qtd-30dias").innerText = "!";
+
+    const mensagem = String(erro.message || "");
+
     lembretesArea.innerHTML = `
       <div class="card">
-        <p class="danger">Erro ao carregar resumo do sistema.</p>
-        <p class="muted">${esc(erro.message)}</p>
+        <p class="danger">Não consegui carregar os lembretes agora.</p>
+        <p class="muted">${esc(mensagem.includes("timeout") ? "O banco demorou demais para responder. Rode o SQL principal para criar os índices e tente novamente." : mensagem)}</p>
+        <a class="mini-link" href="lista-geral.html">Abrir lista completa</a>
       </div>
     `;
   }
