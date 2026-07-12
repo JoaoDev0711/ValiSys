@@ -18,7 +18,7 @@ if (ehListaGeral && !podeVerListaGeral(usuario.cargo)) {
 
 let lojasCache = [];
 let setoresListaCache = [];
-const LIMITE_LISTA_LANCAMENTOS = 40;
+const LIMITE_LISTA_LANCAMENTOS = 30;
 let listaJaCarregada = false;
 let timerBuscaLista = null;
 let carregamentoAtualLista = 0;
@@ -491,7 +491,7 @@ function renderizarLancamentos(lancamentos, { origem = "", avisoLimite = false }
     hoje.setHours(0, 0, 0, 0);
 
     const limiteAvisoLista = avisoLimite
-      ? `<p class="muted">Mostrando até ${LIMITE_LISTA_LANCAMENTOS} registros por carregamento para manter rápido. Use filtros para afinar.</p>`
+      ? `<p class="muted">Mostrando até ${LIMITE_LISTA_LANCAMENTOS} registros por carregamento para manter rápido.</p>`
       : "";
 
     lista.innerHTML = `

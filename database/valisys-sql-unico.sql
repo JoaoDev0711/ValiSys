@@ -88,3 +88,16 @@ on public.lancamentos(loja_id, setor, status, validade);
 
 analyze public.lancamentos;
 notify pgrst, 'reload schema';
+
+-- Lista sem timeout: índices auxiliares para filtros diretos sem ordenação pesada.
+create index if not exists lancamentos_loja_idx
+on public.lancamentos(loja_id);
+
+create index if not exists lancamentos_status_idx
+on public.lancamentos(status);
+
+create index if not exists lancamentos_loja_status_idx
+on public.lancamentos(loja_id, status);
+
+analyze public.lancamentos;
+notify pgrst, 'reload schema';

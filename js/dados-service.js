@@ -1443,7 +1443,7 @@ const valisysDB = {
   },
 
 
-  async listarLancamentosDashboard({ lojaId = "", status = "ativo", limiteData = "", limite = 120 } = {}) {
+  async listarLancamentosDashboard({ lojaId = "", status = "ativo", limiteData = "", limite = 80 } = {}) {
     const db = this.client();
 
     const camposLeves = `
@@ -1466,108 +1466,93 @@ const valisysDB = {
       usuario_cargo,
       retirado_em,
       retirado_por,
-      criado_em,
-      lojas(nome, grupo, regiao, imagem, cor_tema)
+      criado_em
     `;
 
-    let query = db
-      .from("lancamentos")
-      .select(camposLeves)
-      .order("validade", { ascending: true })
-      .limit(limite);
+    const camposFallback = `
+      id,
+      loja_id,
+      ean,
+      nome_produto,
+      marca,
+      quantidade_padrao,
+      sabor,
+      categoria,
+      setor,
+      quantidade,
+      validade,
+      foto,
+      status,
+      usuario_nome,
+      usuario_cargo,
+      retirado_em,
+      retirado_por,
+      criado_em
+    `;
 
-    if (lojaId && lojaId !== "todas") {
-      query = query.eq("loja_id", lojaId);
-    }
-
-    if (status && status !== "todos") {
-      query = query.eq("status", status);
-    }
-
-    if (limiteData) {
-      query = query.lte("validade", limiteData);
-    }
-
-    let resposta = await query;
-
-    if (resposta.error && (this.erroColunaAusente?.(resposta.error, "gramagem") || this.erroColunaAusente?.(resposta.error, "is_caixa"))) {
-      let fallback = db
+    const montarQuery = (campos) => {
+      let query = db
         .from("lancamentos")
-        .select(`
-          id,
-          loja_id,
-          ean,
-          nome_produto,
-          marca,
-          quantidade_padrao,
-          sabor,
-          categoria,
-          setor,
-          quantidade,
-          validade,
-          foto,
-          status,
-          usuario_nome,
-          usuario_cargo,
-          retirado_em,
-          retirado_por,
-          criado_em,
-          lojas(nome, grupo, regiao, imagem, cor_tema)
-        `)
-        .order("validade", { ascending: true })
+        .select(campos)
         .limit(limite);
 
-      if (lojaId && lojaId !== "todas") fallback = fallback.eq("loja_id", lojaId);
-      if (status && status !== "todos") fallback = fallback.eq("status", status);
-      if (limiteData) fallback = fallback.lte("validade", limiteData);
+      if (lojaId && lojaId !== "todas") query = query.eq("loja_id", lojaId);
+      if (status && status !== "todos") query = query.eq("status", status);
+      if (limiteData) query = query.lte("validade", limiteData);
 
-      resposta = await fallback;
+      return query;
+    };
+
+    let resposta = await montarQuery(camposLeves);
+
+    if (resposta.error && (this.erroColunaAusente?.(resposta.error, "gramagem") || this.erroColunaAusente?.(resposta.error, "is_caixa"))) {
+      resposta = await montarQuery(camposFallback);
     }
 
     if (resposta.error) throw resposta.error;
 
-    return (resposta.data || []).map(this.lancamentoDBParaApp);
+    return (resposta.data || [])
+      .map(this.lancamentoDBParaApp)
+      .sort((a, b) => String(a.validade || "").localeCompare(String(b.validade || "")));
   },
 
 
   async listarLancamentos({ lojaId = "", status = "ativo", limite = 40 } = {}) {
     const db = this.client();
 
-    const camposComLoja = "id, loja_id, ean, nome_produto, marca, gramagem, quantidade_padrao, sabor, categoria, setor, quantidade, is_caixa, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em, lojas(nome, grupo, regiao, imagem, cor_tema)";
-    const camposSemNovos = "id, loja_id, ean, nome_produto, marca, quantidade_padrao, sabor, categoria, setor, quantidade, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em, lojas(nome, grupo, regiao, imagem, cor_tema)";
-    const camposSemRelacao = "id, loja_id, ean, nome_produto, marca, gramagem, quantidade_padrao, sabor, categoria, setor, quantidade, is_caixa, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em";
-    const camposBasicos = "id, loja_id, ean, nome_produto, marca, quantidade_padrao, sabor, categoria, setor, quantidade, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em";
+    const camposBasicos = "id, loja_id, ean, nome_produto, marca, gramagem, quantidade_padrao, sabor, categoria, setor, quantidade, is_caixa, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em";
+    const camposSemNovos = "id, loja_id, ean, nome_produto, marca, quantidade_padrao, sabor, categoria, setor, quantidade, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em";
+    const camposMinimos = "id, loja_id, ean, nome_produto, marca, quantidade_padrao, setor, quantidade, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em";
 
-    const montarQuery = (campos) => {
-      let query = db
-        .from("lancamentos")
-        .select(campos)
-        .order("validade", { ascending: true })
-        .limit(limite);
-
+    const aplicarFiltros = (query) => {
       if (lojaId && lojaId !== "todas") query = query.eq("loja_id", lojaId);
       if (status && status !== "todos") query = query.eq("status", status);
-
-      return query;
+      return query.limit(limite);
     };
 
-    let resposta = await montarQuery(camposComLoja);
+    // Sem .order() e sem relacionamento com lojas.
+    // O banco estava estourando timeout ao ordenar tabela grande.
+    let resposta = await aplicarFiltros(
+      db.from("lancamentos").select(camposBasicos)
+    );
 
     if (resposta.error && (this.erroColunaAusente?.(resposta.error, "gramagem") || this.erroColunaAusente?.(resposta.error, "is_caixa"))) {
-      resposta = await montarQuery(camposSemNovos);
+      resposta = await aplicarFiltros(
+        db.from("lancamentos").select(camposSemNovos)
+      );
     }
 
-    if (resposta.error && (String(resposta.error.message || "").toLowerCase().includes("relationship") || String(resposta.error.message || "").toLowerCase().includes("lojas"))) {
-      resposta = await montarQuery(camposSemRelacao);
-    }
-
-    if (resposta.error && (this.erroColunaAusente?.(resposta.error, "gramagem") || this.erroColunaAusente?.(resposta.error, "is_caixa"))) {
-      resposta = await montarQuery(camposBasicos);
+    if (resposta.error) {
+      resposta = await aplicarFiltros(
+        db.from("lancamentos").select(camposMinimos)
+      );
     }
 
     if (resposta.error) throw resposta.error;
 
-    return (resposta.data || []).map(this.lancamentoDBParaApp);
+    const itens = (resposta.data || []).map(this.lancamentoDBParaApp);
+
+    return itens.sort((a, b) => String(a.validade || "").localeCompare(String(b.validade || "")));
   },
 
 
