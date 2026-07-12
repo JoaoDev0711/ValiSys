@@ -666,7 +666,7 @@ const valisysDB = {
       .from("funcionarios")
       .update({ marca_promotoria: marcaPromotoria || "" })
       .eq("id", id)
-      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+      .select("id, loja_id, ean, nome_produto, marca, gramagem, quantidade_padrao, sabor, categoria, setor, quantidade, is_caixa, validade, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em")
       .single();
 
     if (error) {
@@ -1349,7 +1349,7 @@ const valisysDB = {
         usuario_nome: item.usuarioNome || "",
         usuario_cargo: item.usuarioCargo || ""
       })
-      .select("*, lojas(nome, grupo, regiao, imagem, cor_tema)")
+      .select("id, loja_id, ean, nome_produto, marca, gramagem, quantidade_padrao, sabor, categoria, setor, quantidade, is_caixa, validade, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em")
       .single();
 
     if (respostaLancamento.error && (String(respostaLancamento.error.message || "").includes("gramagem") || String(respostaLancamento.error.message || "").includes("is_caixa"))) {
@@ -1517,8 +1517,126 @@ const valisysDB = {
   },
 
 
-  async listarLancamentos({ lojaId = "", status = "ativo", limite = 40 } = {}) {
+  async listarLancamentosPaginado({
+    lojaId = "",
+    status = "ativo",
+    termo = "",
+    cursor = null,
+    limite = 30,
+    usuarioNome = "",
+    usuarioCargo = "",
+    setor = ""
+  } = {}) {
     const db = this.client();
+
+    if (!lojaId || lojaId === "todas") {
+      return { itens: [], cursor: null, temMais: false };
+    }
+
+    const limiteSeguro = Math.max(1, Math.min(Number(limite || 30), 50));
+
+    const payload = {
+      p_loja_id: lojaId,
+      p_status: status || "ativo",
+      p_busca: String(termo || "").trim(),
+      p_cursor_validade: cursor?.validade || null,
+      p_cursor_id: cursor?.id || null,
+      p_limite: limiteSeguro,
+      p_usuario_nome: usuarioNome || null,
+      p_usuario_cargo: usuarioCargo || null,
+      p_setor: setor || null
+    };
+
+    try {
+      const { data, error } = await db.rpc("valisys_listar_lancamentos_paginado", payload);
+
+      if (error) throw error;
+
+      const resposta = Array.isArray(data) ? data[0] : data;
+      const itensDB = Array.isArray(resposta?.itens) ? resposta.itens : [];
+      const itens = itensDB.map(this.lancamentoDBParaApp);
+
+      return {
+        itens,
+        cursor: resposta?.proximo_cursor_validade && resposta?.proximo_cursor_id
+          ? {
+              validade: resposta.proximo_cursor_validade,
+              id: resposta.proximo_cursor_id
+            }
+          : null,
+        temMais: Boolean(resposta?.tem_mais)
+      };
+    } catch (erroRpc) {
+      console.warn("RPC paginada da Lista Geral indisponível. Usando fallback leve.", erroRpc);
+
+      let itens = await this.listarLancamentos({
+        lojaId,
+        status,
+        limite: limiteSeguro
+      });
+
+      if (usuarioNome) {
+        itens = itens.filter(item =>
+          String(item.usuarioNome || "").toLowerCase() === String(usuarioNome || "").toLowerCase() &&
+          (!usuarioCargo || item.usuarioCargo === usuarioCargo)
+        );
+      }
+
+      if (setor) {
+        itens = itens.filter(item =>
+          String(item.setor || "").toLowerCase() === String(setor || "").toLowerCase()
+        );
+      }
+
+      const busca = String(termo || "").trim().toLowerCase();
+
+      if (busca) {
+        itens = itens.filter(item => `
+          ${item.nomeProduto || ""}
+          ${item.ean || ""}
+          ${item.marca || ""}
+          ${item.gramagem || item.quantidadePadrao || ""}
+          ${item.setor || ""}
+          ${item.usuarioNome || ""}
+        `.toLowerCase().includes(busca));
+      }
+
+      return {
+        itens: itens.slice(0, limiteSeguro),
+        cursor: null,
+        temMais: false
+      };
+    }
+  },
+
+
+  async listarLancamentos({ lojaId = "", status = "ativo", limite = 30 } = {}) {
+    const db = this.client();
+    const limiteSeguro = Math.max(1, Math.min(Number(limite || 30), 50));
+
+    // Primeira opção: função SQL leve. Ela evita RLS pesado, relação com lojas,
+    // order by e select grande pela API REST normal.
+    if (lojaId && lojaId !== "todas") {
+      try {
+        const respostaRpc = await db.rpc("valisys_listar_lancamentos_leve", {
+          p_loja_id: lojaId,
+          p_status: status || "ativo",
+          p_limite: limiteSeguro
+        });
+
+        if (!respostaRpc.error && Array.isArray(respostaRpc.data)) {
+          return respostaRpc.data
+            .map(item => this.lancamentoDBParaApp(item))
+            .sort((a, b) => String(a.validade || "").localeCompare(String(b.validade || "")));
+        }
+
+        if (respostaRpc.error) {
+          console.warn("RPC leve da lista indisponível. Usando fallback REST.", respostaRpc.error);
+        }
+      } catch (erroRpc) {
+        console.warn("RPC leve da lista falhou. Usando fallback REST.", erroRpc);
+      }
+    }
 
     const camposBasicos = "id, loja_id, ean, nome_produto, marca, gramagem, quantidade_padrao, sabor, categoria, setor, quantidade, is_caixa, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em";
     const camposSemNovos = "id, loja_id, ean, nome_produto, marca, quantidade_padrao, sabor, categoria, setor, quantidade, validade, foto, status, usuario_nome, usuario_cargo, retirado_em, retirado_por, criado_em";
@@ -1527,11 +1645,9 @@ const valisysDB = {
     const aplicarFiltros = (query) => {
       if (lojaId && lojaId !== "todas") query = query.eq("loja_id", lojaId);
       if (status && status !== "todos") query = query.eq("status", status);
-      return query.limit(limite);
+      return query.limit(limiteSeguro);
     };
 
-    // Sem .order() e sem relacionamento com lojas.
-    // O banco estava estourando timeout ao ordenar tabela grande.
     let resposta = await aplicarFiltros(
       db.from("lancamentos").select(camposBasicos)
     );

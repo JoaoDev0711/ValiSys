@@ -8057,3 +8057,48 @@ body.camera-aberta #reader {
 .aviso-lista-fluida.warning {
   background: #fff8e8;
 }
+
+
+/* Remoção visual alteração setor */
+.setor-editor-lista { display: none !important; }
+
+
+/* ===== Lista Geral profissional: RPC paginada ===== */
+.lista-filtros-profissional {
+  align-items: end;
+}
+
+.lista-resumo {
+  border-left: 5px solid var(--primary);
+}
+
+.lista-loading-fluido {
+  overflow: hidden;
+}
+
+.loading-linha {
+  height: 16px;
+  width: 88%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(47,125,79,.08), rgba(47,125,79,.18), rgba(47,125,79,.08));
+  background-size: 200% 100%;
+  animation: loadingLinha 1.2s linear infinite;
+  margin-bottom: 12px;
+}
+
+.loading-linha.menor {
+  width: 56%;
+}
+
+@keyframes loadingLinha {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+.aviso-lista-fluida {
+  border-left: 5px solid var(--warning);
+}
+
+.aviso-lista-fluida.warning {
+  background: #fff8e8;
+}
