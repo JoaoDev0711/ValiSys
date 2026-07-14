@@ -1,11 +1,11 @@
-/* Configurações seguras do ValiSys
-   Escopo: apenas sistema interno. O site público não recebe tema do usuário. */
+/* ValiSys - Tema definitivo.
+   Não altera site público. Corrige contrastes de lembretes, planos e formulários. */
 
 body.valisys-preferencias-publico-bloqueadas {
   color-scheme: light;
 }
 
-/* Base clara explícita para desfazer preferências antigas */
+/* CLARO explícito */
 body.valisys-tema-claro:not(.public-page) {
   --bg: #f7f8f5;
   --surface: #ffffff;
@@ -13,48 +13,100 @@ body.valisys-tema-claro:not(.public-page) {
   --text: #17211b;
   --muted: #6d766f;
   --line: #e4e8df;
+  --primary: #1f6f46;
+  --primary-strong: #185738;
+  --accent: #eef6ee;
+  --danger: #b9342d;
+  --success: #237a4c;
+  --warning: #b87a14;
+  --shadow: 0 8px 24px rgba(23, 33, 27, .06);
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  color-scheme: light;
 }
 
-/* Tema escuro real e consistente */
+body.valisys-tema-claro:not(.public-page) :is(
+  .topbar,
+  .sidebar,
+  .quick-actions-bar,
+  .card,
+  .welcome-card,
+  .action-card,
+  .login-card,
+  .loja-atual-card,
+  .config-group,
+  .config-option,
+  .config-toggle,
+  .config-preview,
+  .config-safe-note,
+  .finance-status-card,
+  .cobranca-card,
+  .plano-card,
+  .grupo-lembrete,
+  .subgrupo-dia,
+  .subgrupo-itens .lembrete-item,
+  .lembrete-item,
+  .empty-state,
+  .resumo-card,
+  .loja-card,
+  .loja-card-clickable,
+  .admin-current-store
+) {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--line) !important;
+}
+
+body.valisys-tema-claro:not(.public-page) :is(.config-option,.config-toggle,.config-preview,.config-safe-note,.subgrupo-dia,.lembrete-foto,.foto-box-lista,.produto-thumb-placeholder) {
+  background: var(--surface-soft) !important;
+  color: var(--text) !important;
+}
+
+/* ESCURO explícito e AUTO escuro */
 body.valisys-tema-escuro:not(.public-page),
 body.valisys-auto-escuro:not(.public-page) {
   --bg: #07110b;
-  --surface: #101a13;
-  --surface-soft: #162219;
-  --text: #f2f7f3;
-  --muted: #b7c5bb;
-  --line: #314036;
-  --primary: #2f8f58;
-  --primary-strong: #4fb974;
-  --accent: #17271d;
-  --danger: #ff8f86;
-  --success: #78d69a;
-  --warning: #ffd891;
+  --surface: #0f1a13;
+  --surface-soft: #17251b;
+  --text: #f4faf5;
+  --muted: #bdd0c2;
+  --line: #33463a;
+  --primary: #26814d;
+  --primary-strong: #44ad6d;
+  --accent: #182d20;
+  --danger: #ff9c96;
+  --success: #8ce5aa;
+  --warning: #ffd68a;
+  --shadow: 0 8px 24px rgba(0, 0, 0, .28);
   background: var(--bg) !important;
   color: var(--text) !important;
   color-scheme: dark;
 }
 
 body.valisys-tema-escuro:not(.public-page) .topbar,
-body.valisys-auto-escuro:not(.public-page) .topbar,
-body.valisys-tema-escuro:not(.public-page) .sidebar,
-body.valisys-auto-escuro:not(.public-page) .sidebar,
-body.valisys-tema-escuro:not(.public-page) .quick-actions-bar,
-body.valisys-auto-escuro:not(.public-page) .quick-actions-bar {
-  background: rgba(7, 17, 11, .96) !important;
-  border-color: var(--line) !important;
-  color: var(--text) !important;
+body.valisys-auto-escuro:not(.public-page) .topbar {
+  background: #f7f8f5 !important;
+  color: #17211b !important;
+  border-color: #dfe7dd !important;
 }
 
-body.valisys-tema-escuro:not(.public-page) .topbar h1,
-body.valisys-auto-escuro:not(.public-page) .topbar h1,
-body.valisys-tema-escuro:not(.public-page) .sidebar *,
-body.valisys-auto-escuro:not(.public-page) .sidebar * {
-  color: var(--text) !important;
+body.valisys-tema-escuro:not(.public-page) .topbar :is(h1,a,button),
+body.valisys-auto-escuro:not(.public-page) .topbar :is(h1,a,button) {
+  color: #17211b !important;
 }
 
-/* Escurece todos os blocos operacionais que antes ficavam claros */
+body.valisys-tema-escuro:not(.public-page) .icon-btn,
+body.valisys-auto-escuro:not(.public-page) .icon-btn,
+body.valisys-tema-escuro:not(.public-page) .user-icon,
+body.valisys-auto-escuro:not(.public-page) .user-icon {
+  background: #ffffff !important;
+  color: #17211b !important;
+  border-color: #dfe7dd !important;
+}
+
 body.valisys-tema-escuro:not(.public-page) :is(
+  .sidebar,
+  .quick-actions-bar,
   .card,
   .welcome-card,
   .action-card,
@@ -77,9 +129,7 @@ body.valisys-tema-escuro:not(.public-page) :is(
   .lancamento-item,
   .validade-card,
   .validade-item,
-  .lembrete-grupo,
-  .lembrete-item,
-  .lembrete-card,
+  .grupo-lembrete,
   .empty-state,
   .loja-card,
   .loja-card-clickable,
@@ -98,6 +148,8 @@ body.valisys-tema-escuro:not(.public-page) :is(
   .resumo-card
 ),
 body.valisys-auto-escuro:not(.public-page) :is(
+  .sidebar,
+  .quick-actions-bar,
   .card,
   .welcome-card,
   .action-card,
@@ -120,9 +172,7 @@ body.valisys-auto-escuro:not(.public-page) :is(
   .lancamento-item,
   .validade-card,
   .validade-item,
-  .lembrete-grupo,
-  .lembrete-item,
-  .lembrete-card,
+  .grupo-lembrete,
   .empty-state,
   .loja-card,
   .loja-card-clickable,
@@ -145,66 +195,56 @@ body.valisys-auto-escuro:not(.public-page) :is(
   border-color: var(--line) !important;
 }
 
-/* Caixas internas/avisos que ficavam brancas */
-body.valisys-tema-escuro:not(.public-page) :is(
-  .login-code-note,
-  .produto-thumb-placeholder,
-  .foto-box-lista,
-  .grupo-content,
-  .produto-detalhes,
-  .lote-card,
-  .produto-info,
-  .cobranca-meta,
-  .finance-info-grid,
-  .plano-recursos,
-  .resumo-dados-operacao p,
-  .contratacao-info,
-  .contratacao-admin-box
-),
-body.valisys-auto-escuro:not(.public-page) :is(
-  .login-code-note,
-  .produto-thumb-placeholder,
-  .foto-box-lista,
-  .grupo-content,
-  .produto-detalhes,
-  .lote-card,
-  .produto-info,
-  .cobranca-meta,
-  .finance-info-grid,
-  .plano-recursos,
-  .resumo-dados-operacao p,
-  .contratacao-info,
-  .contratacao-admin-box
-) {
+/* Lembretes: corrige exatamente a parte branca da imagem */
+body.valisys-tema-escuro:not(.public-page) .grupo-lembrete,
+body.valisys-auto-escuro:not(.public-page) .grupo-lembrete {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+}
+
+body.valisys-tema-escuro:not(.public-page) .subgrupo-dia,
+body.valisys-auto-escuro:not(.public-page) .subgrupo-dia,
+body.valisys-tema-escuro:not(.public-page) .subgrupo-itens,
+body.valisys-auto-escuro:not(.public-page) .subgrupo-itens {
   background: var(--surface-soft) !important;
   color: var(--text) !important;
   border-color: var(--line) !important;
 }
 
-/* Texto sempre legível no escuro */
-body.valisys-tema-escuro:not(.public-page) :is(h1,h2,h3,h4,p,span,strong,label,li,small,summary,td,th,div),
-body.valisys-auto-escuro:not(.public-page) :is(h1,h2,h3,h4,p,span,strong,label,li,small,summary,td,th,div) {
-  color: inherit;
+body.valisys-tema-escuro:not(.public-page) .subgrupo-dia summary,
+body.valisys-auto-escuro:not(.public-page) .subgrupo-dia summary {
+  background: var(--surface-soft) !important;
+  color: var(--warning) !important;
 }
 
-body.valisys-tema-escuro:not(.public-page) :is(.muted,.small.muted,.finance-label,.plano-recursos li),
-body.valisys-auto-escuro:not(.public-page) :is(.muted,.small.muted,.finance-label,.plano-recursos li) {
+body.valisys-tema-escuro:not(.public-page) .subgrupo-itens .lembrete-item,
+body.valisys-auto-escuro:not(.public-page) .subgrupo-itens .lembrete-item,
+body.valisys-tema-escuro:not(.public-page) .lembrete-item,
+body.valisys-auto-escuro:not(.public-page) .lembrete-item {
+  background: #0a160e !important;
+  color: var(--text) !important;
+  border-color: var(--line) !important;
+}
+
+body.valisys-tema-escuro:not(.public-page) .lembrete-foto,
+body.valisys-auto-escuro:not(.public-page) .lembrete-foto,
+body.valisys-tema-escuro:not(.public-page) .produto-thumb-placeholder,
+body.valisys-auto-escuro:not(.public-page) .produto-thumb-placeholder,
+body.valisys-tema-escuro:not(.public-page) .foto-box-lista,
+body.valisys-auto-escuro:not(.public-page) .foto-box-lista {
+  background: #f7f8f5 !important;
+  color: #17211b !important;
+  border-color: #dfe7dd !important;
+}
+
+body.valisys-tema-escuro:not(.public-page) :is(.lembrete-info h3,.lembrete-info p,.grupo-lembrete h3,.grupo-lembrete p),
+body.valisys-auto-escuro:not(.public-page) :is(.lembrete-info h3,.lembrete-info p,.grupo-lembrete h3,.grupo-lembrete p) {
+  color: var(--text) !important;
+}
+
+body.valisys-tema-escuro:not(.public-page) :is(.muted,.small.muted,.finance-label,.plano-recursos li,.mais-itens),
+body.valisys-auto-escuro:not(.public-page) :is(.muted,.small.muted,.finance-label,.plano-recursos li,.mais-itens) {
   color: var(--muted) !important;
-}
-
-body.valisys-tema-escuro:not(.public-page) :is(.danger,.erro,.error),
-body.valisys-auto-escuro:not(.public-page) :is(.danger,.erro,.error) {
-  color: #ffada7 !important;
-}
-
-body.valisys-tema-escuro:not(.public-page) :is(.success,.ok),
-body.valisys-auto-escuro:not(.public-page) :is(.success,.ok) {
-  color: #91e5ae !important;
-}
-
-body.valisys-tema-escuro:not(.public-page) :is(.warning,.alerta),
-body.valisys-auto-escuro:not(.public-page) :is(.warning,.alerta) {
-  color: #ffe0a3 !important;
 }
 
 /* Inputs */
@@ -217,41 +257,38 @@ body.valisys-auto-escuro:not(.public-page) :is(input,select,textarea) {
 
 body.valisys-tema-escuro:not(.public-page) :is(input,textarea)::placeholder,
 body.valisys-auto-escuro:not(.public-page) :is(input,textarea)::placeholder {
-  color: #819185 !important;
+  color: #92a196 !important;
 }
 
 /* Botões */
-body.valisys-tema-escuro:not(.public-page) button,
-body.valisys-auto-escuro:not(.public-page) button,
-body.valisys-tema-escuro:not(.public-page) .button-link,
-body.valisys-auto-escuro:not(.public-page) .button-link,
-body.valisys-tema-escuro:not(.public-page) .primary-link,
-body.valisys-auto-escuro:not(.public-page) .primary-link {
+body.valisys-tema-escuro:not(.public-page) :is(button,.button-link,.primary-link),
+body.valisys-auto-escuro:not(.public-page) :is(button,.button-link,.primary-link) {
   color: #ffffff !important;
 }
 
-body.valisys-tema-escuro:not(.public-page) :is(button.secondary,.secondary-link,.inline-link,.user-icon,.icon-btn),
-body.valisys-auto-escuro:not(.public-page) :is(button.secondary,.secondary-link,.inline-link,.user-icon,.icon-btn) {
+body.valisys-tema-escuro:not(.public-page) :is(button.secondary,.secondary-link,.inline-link),
+body.valisys-auto-escuro:not(.public-page) :is(button.secondary,.secondary-link,.inline-link) {
   background: var(--surface-soft) !important;
   color: var(--text) !important;
   border-color: var(--line) !important;
 }
 
-/* Barra inferior */
+/* Barra inferior sem cobrir conteúdo */
 body:not(.public-page) main.container {
-  padding-bottom: 118px !important;
+  padding-bottom: 128px !important;
 }
 
 body.valisys-tema-escuro:not(.public-page) .quick-actions-bar,
 body.valisys-auto-escuro:not(.public-page) .quick-actions-bar {
-  background: rgba(7, 17, 11, .94) !important;
-  box-shadow: 0 14px 42px rgba(0, 0, 0, .35) !important;
+  background: rgba(7, 17, 11, .96) !important;
+  border-color: var(--line) !important;
+  box-shadow: 0 14px 42px rgba(0,0,0,.35) !important;
 }
 
-body.valisys-tema-escuro:not(.public-page) .quick-actions-bar a:not(.is-active),
-body.valisys-tema-escuro:not(.public-page) .quick-actions-bar button:not(.is-active),
-body.valisys-auto-escuro:not(.public-page) .quick-actions-bar a:not(.is-active),
-body.valisys-auto-escuro:not(.public-page) .quick-actions-bar button:not(.is-active) {
+body.valisys-tema-escuro:not(.public-page) .quick-actions-bar a,
+body.valisys-tema-escuro:not(.public-page) .quick-actions-bar button,
+body.valisys-auto-escuro:not(.public-page) .quick-actions-bar a,
+body.valisys-auto-escuro:not(.public-page) .quick-actions-bar button {
   background: var(--surface) !important;
   color: var(--text) !important;
   border-color: var(--line) !important;
@@ -260,7 +297,7 @@ body.valisys-auto-escuro:not(.public-page) .quick-actions-bar button:not(.is-act
 body.valisys-tema-escuro:not(.public-page) .quick-actions-bar .is-active,
 body.valisys-auto-escuro:not(.public-page) .quick-actions-bar .is-active {
   background: var(--primary) !important;
-  color: #ffffff !important;
+  color: #fff !important;
   border-color: var(--primary) !important;
 }
 
@@ -320,9 +357,7 @@ body.valisys-reduzir-movimento *::after {
   background: var(--surface, #fff);
 }
 
-.config-group h3 {
-  margin: 0;
-}
+.config-group h3 { margin: 0; }
 
 .config-option {
   display: grid;
@@ -336,14 +371,8 @@ body.valisys-reduzir-movimento *::after {
   cursor: pointer;
 }
 
-.config-option input {
-  margin-top: 3px;
-}
-
-.config-option strong {
-  display: block;
-  margin-bottom: 2px;
-}
+.config-option input { margin-top: 3px; }
+.config-option strong { display: block; margin-bottom: 2px; }
 
 .config-toggle {
   display: flex;
@@ -356,10 +385,7 @@ body.valisys-reduzir-movimento *::after {
   background: var(--surface-soft, #f3f5f0);
 }
 
-.config-toggle input {
-  width: 22px;
-  height: 22px;
-}
+.config-toggle input { width: 22px; height: 22px; }
 
 .config-actions {
   display: flex;
@@ -377,9 +403,7 @@ body.valisys-reduzir-movimento *::after {
   gap: 8px;
 }
 
-.config-volume input {
-  width: 100%;
-}
+.config-volume input { width: 100%; }
 
 .config-preview {
   display: grid;
@@ -403,10 +427,9 @@ body.valisys-reduzir-movimento *::after {
   }
 }
 
-/* Mobile: barra fixa sem esmagar conteúdo */
 @media (max-width: 640px) {
   body:not(.public-page) main.container {
-    padding-bottom: 130px !important;
+    padding-bottom: 140px !important;
   }
 
   .quick-actions-bar {

@@ -1,10 +1,11 @@
 /*
-  ValiSys - Preferências locais seguras
-  Salva no aparelho. Não altera banco de dados.
-  Site público mantém visual próprio.
+  ValiSys - Preferências locais definitivas
+  Corrige versões antigas salvas no aparelho e aplica tema apenas no sistema interno.
 */
 (function () {
   const STORAGE_KEY = "valisysPreferencias";
+  const VERSION_KEY = "valisysPreferenciasVersao";
+  const CURRENT_VERSION = "modo-tema-definitivo-2";
 
   const DEFAULTS = {
     tema: "claro",
@@ -52,7 +53,18 @@
     return pref;
   }
 
+  function migrarPreferenciasQuebradas() {
+    const versao = localStorage.getItem(VERSION_KEY);
+
+    if (versao === CURRENT_VERSION) return;
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULTS));
+    localStorage.setItem(VERSION_KEY, CURRENT_VERSION);
+  }
+
   function lerPreferencias() {
+    migrarPreferenciasQuebradas();
+
     try {
       const salvo = JSON.parse(localStorage.getItem(STORAGE_KEY));
       return normalizar(salvo);
@@ -64,6 +76,7 @@
   function salvarPreferencias(preferencias) {
     const pref = normalizar(preferencias);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(pref));
+    localStorage.setItem(VERSION_KEY, CURRENT_VERSION);
     aplicarPreferencias(pref);
     return pref;
   }
