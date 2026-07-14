@@ -138,7 +138,7 @@ function erroAmigavel(erro) {
   const mensagem = String(erro?.message || "").toLowerCase();
 
   if (mensagem.includes("timeout") || mensagem.includes("canceling statement")) {
-    return "A consulta demorou mais que o normal. Rode o SQL principal atualizado e tente novamente.";
+    return "A consulta demorou mais que o normal. Tente novamente.";
   }
 
   if (mensagem.includes("failed to fetch") || mensagem.includes("network")) {
