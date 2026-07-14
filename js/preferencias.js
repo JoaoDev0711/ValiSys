@@ -1,9 +1,11 @@
 /*
-  ValiSys - Preferências locais do usuário
-  Não usa banco. Salva no localStorage do aparelho.
+  ValiSys - Preferências locais seguras
+  As preferências são locais do aparelho e não alteram banco de dados.
+  Para evitar quebra visual, o site público não recebe tema/estilo do usuário.
 */
 (function () {
   const STORAGE_KEY = "valisysPreferencias";
+
   const DEFAULTS = {
     tema: "claro",
     estilo: "minimalista",
@@ -17,52 +19,104 @@
     densidade: "confortavel"
   };
 
+  function paginaAtual() {
+    return location.pathname.split("/").pop() || "index.html";
+  }
+
+  function ehPaginaPublica() {
+    const pagina = paginaAtual();
+    return ["index.html", "contratacao.html"].includes(pagina) || document.body?.classList.contains("public-page");
+  }
+
   function clamp(num, min, max) {
     const value = Number(num);
     if (Number.isNaN(value)) return min;
     return Math.min(max, Math.max(min, value));
   }
 
+  function normalizar(preferencias = {}) {
+    const pref = { ...DEFAULTS, ...(preferencias || {}) };
+
+    if (!["claro", "escuro", "auto"].includes(pref.tema)) pref.tema = "claro";
+    if (!["minimalista", "compacto", "premium"].includes(pref.estilo)) pref.estilo = "minimalista";
+    if (!["confortavel", "compacta"].includes(pref.densidade)) pref.densidade = "confortavel";
+
+    pref.volume = clamp(pref.volume, 0, 1);
+    pref.sons = Boolean(pref.sons);
+    pref.somEntrada = Boolean(pref.somEntrada);
+    pref.somClique = Boolean(pref.somClique);
+    pref.somSucesso = Boolean(pref.somSucesso);
+    pref.reduzirMovimento = Boolean(pref.reduzirMovimento);
+    pref.fonteMaior = Boolean(pref.fonteMaior);
+
+    return pref;
+  }
+
   function lerPreferencias() {
     try {
       const salvo = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      return { ...DEFAULTS, ...(salvo || {}) };
+      return normalizar(salvo);
     } catch {
-      return { ...DEFAULTS };
+      return normalizar(DEFAULTS);
     }
   }
 
   function salvarPreferencias(preferencias) {
-    const normalizado = {
-      ...DEFAULTS,
-      ...(preferencias || {})
-    };
+    const pref = normalizar(preferencias);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(pref));
+    aplicarPreferencias(pref);
+    return pref;
+  }
 
-    normalizado.volume = clamp(normalizado.volume, 0, 1);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizado));
-    aplicarPreferencias(normalizado);
-
-    return normalizado;
+  function limparClasses(body) {
+    body.classList.remove(
+      "valisys-tema-claro",
+      "valisys-tema-escuro",
+      "valisys-tema-auto",
+      "valisys-estilo-minimalista",
+      "valisys-estilo-compacto",
+      "valisys-estilo-premium",
+      "valisys-densidade-confortavel",
+      "valisys-densidade-compacta",
+      "valisys-fonte-maior",
+      "valisys-reduzir-movimento",
+      "tema-escuro",
+      "tema-auto",
+      "estilo-compacto",
+      "estilo-premium",
+      "fonte-maior",
+      "reduzir-movimento"
+    );
   }
 
   function aplicarPreferencias(preferencias = lerPreferencias()) {
+    const pref = normalizar(preferencias);
     const root = document.documentElement;
     const body = document.body;
 
-    root.dataset.tema = preferencias.tema || "claro";
-    root.dataset.estilo = preferencias.estilo || "minimalista";
-    root.dataset.densidade = preferencias.densidade || "confortavel";
-    root.dataset.fonteMaior = preferencias.fonteMaior ? "sim" : "nao";
-    root.dataset.reduzirMovimento = preferencias.reduzirMovimento ? "sim" : "nao";
+    root.dataset.valisysPreferencias = "ativas";
+    root.dataset.tema = pref.tema;
+    root.dataset.estilo = pref.estilo;
+    root.dataset.densidade = pref.densidade;
+    root.dataset.fonteMaior = pref.fonteMaior ? "sim" : "nao";
+    root.dataset.reduzirMovimento = pref.reduzirMovimento ? "sim" : "nao";
 
-    if (body) {
-      body.classList.toggle("tema-escuro", preferencias.tema === "escuro");
-      body.classList.toggle("tema-auto", preferencias.tema === "auto");
-      body.classList.toggle("estilo-compacto", preferencias.estilo === "compacto");
-      body.classList.toggle("estilo-premium", preferencias.estilo === "premium");
-      body.classList.toggle("fonte-maior", Boolean(preferencias.fonteMaior));
-      body.classList.toggle("reduzir-movimento", Boolean(preferencias.reduzirMovimento));
+    if (!body) return;
+
+    limparClasses(body);
+
+    // Site público fica sempre com identidade visual própria.
+    if (ehPaginaPublica()) {
+      body.classList.add("valisys-preferencias-publico-bloqueadas");
+      return;
     }
+
+    body.classList.add(`valisys-tema-${pref.tema}`);
+    body.classList.add(`valisys-estilo-${pref.estilo}`);
+    body.classList.add(`valisys-densidade-${pref.densidade}`);
+
+    if (pref.fonteMaior) body.classList.add("valisys-fonte-maior");
+    if (pref.reduzirMovimento) body.classList.add("valisys-reduzir-movimento");
   }
 
   let audioContext = null;
@@ -75,17 +129,17 @@
   }
 
   function tocarSom(tipo = "sucesso") {
-    const preferencias = lerPreferencias();
+    const pref = lerPreferencias();
 
-    if (!preferencias.sons) return;
-    if (tipo === "entrada" && !preferencias.somEntrada) return;
-    if (tipo === "clique" && !preferencias.somClique) return;
-    if (tipo === "sucesso" && !preferencias.somSucesso) return;
+    if (!pref.sons) return;
+    if (tipo === "entrada" && !pref.somEntrada) return;
+    if (tipo === "clique" && !pref.somClique) return;
+    if (tipo === "sucesso" && !pref.somSucesso) return;
 
     const ctx = getAudioContext();
     if (!ctx) return;
 
-    const volume = clamp(preferencias.volume, 0, 1);
+    const volume = clamp(pref.volume, 0, 1);
     const ganho = ctx.createGain();
     const oscilador = ctx.createOscillator();
 
@@ -113,8 +167,11 @@
   }
 
   function tocarAoEntrar() {
+    if (ehPaginaPublica()) return;
+
     const paginasLogin = ["dashboard.html", "admin-dashboard.html"];
-    const pagina = location.pathname.split("/").pop() || "index.html";
+    const pagina = paginaAtual();
+
     if (!paginasLogin.includes(pagina)) return;
 
     const chave = `valisysSomEntrada:${pagina}:${new Date().toDateString()}`;
@@ -126,8 +183,11 @@
 
   function ativarSomClique() {
     document.addEventListener("click", (event) => {
+      if (ehPaginaPublica()) return;
+
       const alvo = event.target.closest("button, a, .action-card, .loja-card-clickable");
       if (!alvo) return;
+
       tocarSom("clique");
     }, { capture: true });
   }
@@ -139,8 +199,6 @@
     aplicar: aplicarPreferencias,
     tocarSom
   };
-
-  aplicarPreferencias();
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {

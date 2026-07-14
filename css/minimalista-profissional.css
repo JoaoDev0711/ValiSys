@@ -688,3 +688,20 @@ label {
   font-weight: 800;
   white-space: nowrap;
 }
+
+
+.public-plan-flow-note {
+  max-width: 760px;
+  margin: 0 auto 18px;
+  padding: 16px;
+  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.public-plan-flow-note strong {
+  display: block;
+  margin-bottom: 4px;
+}

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dados da loja - ValiSys</title>
+  <meta name="description" content="Cadastre os dados da loja ou grupo antes de escolher o plano ValiSys.">
+  <link rel="icon" href="assets/logo/valisys-mark-oficial.png" type="image/png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#153B2A">
+  <link rel="stylesheet" href="css/styles.css?v=fix-configuracoes-seguras-1">
+  <link rel="stylesheet" href="css/minimalista-profissional.css?v=fix-configuracoes-seguras-1">
+  <link rel="stylesheet" href="css/configuracoes.css?v=fix-configuracoes-seguras-1">
+  <link rel="stylesheet" href="css/contratacao.css?v=fix-configuracoes-seguras-1">
+</head>
+<body class="public-page">
+
+<header class="public-header redesign-header">
+  <a href="index.html" class="brand valisys-brand redesign-brand public-logo-link" aria-label="ValiSys">
+    <img src="assets/logo/valisys-logo-oficial.png" alt="ValiSys" class="public-logo-img">
+  </a>
+
+  <nav class="public-nav redesign-nav">
+    <a href="index.html#planos">Planos</a>
+    <a href="index.html#recursos">Recursos</a>
+    <a href="escolher-loja.html">Entrar</a>
+  </nav>
+
+  <a href="admin-login.html" class="login-link redesign-login">Administração</a>
+</header>
+
+<main class="container contratacao-container">
+  <section class="welcome-card contratacao-hero">
+    <p class="muted">Antes do plano</p>
+    <h1>Configure a loja ou grupo</h1>
+    <p>O plano será vinculado aos dados informados nesta etapa. Depois disso, a administração escolhe o plano e acompanha a assinatura.</p>
+  </section>
+
+  <section class="contratacao-grid">
+    <form id="contratacao-form" class="card contratacao-form">
+      <h2>Dados comerciais</h2>
+      <p class="muted">Informe os dados da operação que será implantada no ValiSys.</p>
+
+      <label for="tipoOperacao">Tipo de operação</label>
+      <select id="tipoOperacao" required>
+        <option value="loja">Loja única</option>
+        <option value="grupo">Grupo ou rede</option>
+      </select>
+
+      <label for="nomeLojaContratacao">Nome da loja principal</label>
+      <input type="text" id="nomeLojaContratacao" placeholder="Ex: Mercado São João" required>
+
+      <label for="grupoContratacao">Grupo/Rede</label>
+      <input type="text" id="grupoContratacao" placeholder="Ex: Rede São João, Bahamas, Frangolândia">
+
+      <label for="regiaoContratacao">Região</label>
+      <input type="text" id="regiaoContratacao" placeholder="Ex: Fortaleza, Eusébio, Caucaia">
+
+      <label for="responsavelContratacao">Responsável</label>
+      <input type="text" id="responsavelContratacao" placeholder="Nome do responsável pela implantação" required>
+
+      <label for="emailContratacao">E-mail</label>
+      <input type="email" id="emailContratacao" placeholder="contato@loja.com.br">
+
+      <label for="telefoneContratacao">Telefone/WhatsApp</label>
+      <input type="tel" id="telefoneContratacao" placeholder="(00) 00000-0000">
+
+      <label for="qtdLojasContratacao">Quantidade de lojas</label>
+      <input type="number" id="qtdLojasContratacao" min="1" value="1">
+
+      <label for="observacoesContratacao">Observações</label>
+      <textarea id="observacoesContratacao" rows="3" placeholder="Setores, quantidade de usuários, necessidades da operação ou dados complementares."></textarea>
+
+      <div class="contratacao-actions">
+        <button type="submit">Continuar para planos</button>
+        <a href="index.html#planos" class="inline-link">Voltar aos planos</a>
+      </div>
+
+      <p class="small muted" id="contratacao-status">Os dados serão salvos como pré-cadastro neste aparelho.</p>
+    </form>
+
+    <aside class="card contratacao-resumo">
+      <p class="muted">Resumo</p>
+      <h2 id="resumoNomeLoja">Loja não informada</h2>
+
+      <div class="resumo-dados-operacao">
+        <p><strong>Tipo:</strong> <span id="resumoTipo">Loja única</span></p>
+        <p><strong>Grupo/Rede:</strong> <span id="resumoGrupo">Não informado</span></p>
+        <p><strong>Região:</strong> <span id="resumoRegiao">Não informada</span></p>
+        <p><strong>Responsável:</strong> <span id="resumoResponsavel">Não informado</span></p>
+        <p><strong>Lojas:</strong> <span id="resumoQtdLojas">1</span></p>
+      </div>
+
+      <div class="contratacao-info">
+        <strong>Fluxo de implantação</strong>
+        <ol>
+          <li>Dados da loja ou grupo.</li>
+          <li>Escolha do plano pela administração.</li>
+          <li>Geração da assinatura e cobranças.</li>
+          <li>Configuração dos usuários e setores.</li>
+        </ol>
+      </div>
+
+      <div class="contratacao-admin-box" id="contratacao-admin-box">
+        <strong>Administração conectada</strong>
+        <p>Quando o acesso administrativo estiver ativo, este pré-cadastro pode criar a loja e seguir direto para os planos.</p>
+      </div>
+    </aside>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="js/preferencias.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/dados-config.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/dados-service.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/auth.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/cookies.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/loja.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/site-dialog.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/icons.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/contratacao.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/pwa-register.js?v=fix-configuracoes-seguras-1" defer></script>
+</body>
+</html>

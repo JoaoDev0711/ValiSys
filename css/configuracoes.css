@@ -1,120 +1,145 @@
-/* Configurações e temas do usuário */
-:root[data-tema="escuro"] {
-  --bg: #101510;
-  --surface: #151d17;
-  --surface-soft: #1d271f;
-  --text: #edf5ee;
-  --muted: #a8b3aa;
-  --line: #2c392f;
-  --primary: #67c587;
-  --primary-strong: #8be5a6;
-  --accent: #1f3023;
-  --shadow: 0 10px 30px rgba(0, 0, 0, .28);
+/* Configurações seguras do ValiSys
+   Escopo limitado ao sistema interno. O site público mantém identidade própria. */
+
+body.valisys-preferencias-publico-bloqueadas {
+  color-scheme: light;
 }
 
-:root[data-tema="escuro"] body,
-body.tema-escuro {
-  background: var(--bg) !important;
-  color: var(--text) !important;
-}
-
-:root[data-tema="escuro"] .topbar,
-:root[data-tema="escuro"] .public-header,
-:root[data-tema="escuro"] .quick-actions-bar,
-:root[data-tema="escuro"] .sidebar {
-  background: rgba(16, 21, 16, .96) !important;
-  border-color: var(--line) !important;
-}
-
-:root[data-tema="escuro"] .card,
-:root[data-tema="escuro"] .welcome-card,
-:root[data-tema="escuro"] .action-card,
-:root[data-tema="escuro"] .login-card,
-:root[data-tema="escuro"] .loja-atual-card,
-:root[data-tema="escuro"] .public-plan-card,
-:root[data-tema="escuro"] .feature-grid-redesign article,
-:root[data-tema="escuro"] .update-item,
-:root[data-tema="escuro"] .tutorial-item,
-:root[data-tema="escuro"] .config-group,
-:root[data-tema="escuro"] .config-option,
-:root[data-tema="escuro"] .config-toggle,
-:root[data-tema="escuro"] .config-preview {
-  background: var(--surface) !important;
-  color: var(--text) !important;
-  border-color: var(--line) !important;
-}
-
-:root[data-tema="escuro"] input,
-:root[data-tema="escuro"] select,
-:root[data-tema="escuro"] textarea {
+/* Tema escuro seguro */
+body.valisys-tema-escuro {
   background: #101510 !important;
-  color: var(--text) !important;
-  border-color: var(--line) !important;
+  color: #eef5ef !important;
 }
 
-:root[data-tema="escuro"] .muted,
-:root[data-tema="escuro"] .small.muted {
-  color: var(--muted) !important;
+body.valisys-tema-escuro .topbar,
+body.valisys-tema-escuro .sidebar,
+body.valisys-tema-escuro .quick-actions-bar {
+  background: rgba(16, 21, 16, .96) !important;
+  border-color: #2c392f !important;
+  color: #eef5ef !important;
 }
 
+body.valisys-tema-escuro .card,
+body.valisys-tema-escuro .welcome-card,
+body.valisys-tema-escuro .action-card,
+body.valisys-tema-escuro .login-card,
+body.valisys-tema-escuro .loja-atual-card,
+body.valisys-tema-escuro .update-item,
+body.valisys-tema-escuro .tutorial-item,
+body.valisys-tema-escuro .config-group,
+body.valisys-tema-escuro .config-option,
+body.valisys-tema-escuro .config-toggle,
+body.valisys-tema-escuro .config-preview,
+body.valisys-tema-escuro .finance-status-card,
+body.valisys-tema-escuro .cobranca-card,
+body.valisys-tema-escuro .plano-card {
+  background: #151d17 !important;
+  color: #eef5ef !important;
+  border-color: #2c392f !important;
+}
+
+body.valisys-tema-escuro input,
+body.valisys-tema-escuro select,
+body.valisys-tema-escuro textarea {
+  background: #101510 !important;
+  color: #eef5ef !important;
+  border-color: #2c392f !important;
+}
+
+body.valisys-tema-escuro .muted,
+body.valisys-tema-escuro .small.muted {
+  color: #a8b3aa !important;
+}
+
+body.valisys-tema-escuro button.secondary,
+body.valisys-tema-escuro .secondary-link,
+body.valisys-tema-escuro .inline-link {
+  background: #1d271f !important;
+  color: #eef5ef !important;
+  border-color: #2c392f !important;
+}
+
+body.valisys-tema-escuro .quick-actions-bar a:not(.is-active),
+body.valisys-tema-escuro .quick-actions-bar button:not(.is-active) {
+  background: #1d271f !important;
+  color: #eef5ef !important;
+  border-color: #2c392f !important;
+}
+
+/* Tema automático: só escurece o sistema interno quando o aparelho está em dark mode */
 @media (prefers-color-scheme: dark) {
-  :root[data-tema="auto"] {
-    --bg: #101510;
-    --surface: #151d17;
-    --surface-soft: #1d271f;
-    --text: #edf5ee;
-    --muted: #a8b3aa;
-    --line: #2c392f;
-    --primary: #67c587;
-    --primary-strong: #8be5a6;
-    --accent: #1f3023;
-    --shadow: 0 10px 30px rgba(0, 0, 0, .28);
+  body.valisys-tema-auto:not(.public-page) {
+    background: #101510 !important;
+    color: #eef5ef !important;
   }
 
-  :root[data-tema="auto"] body {
-    background: var(--bg) !important;
-    color: var(--text) !important;
+  body.valisys-tema-auto:not(.public-page) .card,
+  body.valisys-tema-auto:not(.public-page) .welcome-card,
+  body.valisys-tema-auto:not(.public-page) .action-card,
+  body.valisys-tema-auto:not(.public-page) .login-card,
+  body.valisys-tema-auto:not(.public-page) .config-group,
+  body.valisys-tema-auto:not(.public-page) .config-option,
+  body.valisys-tema-auto:not(.public-page) .config-toggle,
+  body.valisys-tema-auto:not(.public-page) .config-preview {
+    background: #151d17 !important;
+    color: #eef5ef !important;
+    border-color: #2c392f !important;
+  }
+
+  body.valisys-tema-auto:not(.public-page) input,
+  body.valisys-tema-auto:not(.public-page) select,
+  body.valisys-tema-auto:not(.public-page) textarea {
+    background: #101510 !important;
+    color: #eef5ef !important;
+    border-color: #2c392f !important;
   }
 }
 
-:root[data-estilo="compacto"] {
-  --radius: 12px;
-}
-
-:root[data-estilo="compacto"] .card,
-:root[data-estilo="compacto"] .welcome-card,
-:root[data-estilo="compacto"] .action-card {
+/* Estilos seguros */
+body.valisys-estilo-compacto .card,
+body.valisys-estilo-compacto .welcome-card,
+body.valisys-estilo-compacto .action-card,
+body.valisys-densidade-compacta .card,
+body.valisys-densidade-compacta .welcome-card,
+body.valisys-densidade-compacta .action-card {
   padding: 14px !important;
-  border-radius: 14px !important;
 }
 
-:root[data-estilo="premium"] {
-  --bg: #f5f2eb;
-  --surface: #fffdf7;
-  --surface-soft: #f0eadf;
-  --primary: #1b5f3b;
-  --primary-strong: #123f29;
-  --accent: #e8dcc7;
-  --line: #e4dacb;
+body.valisys-estilo-compacto .grid-actions {
+  gap: 10px !important;
 }
 
-:root[data-fonte-maior="sim"] body {
+body.valisys-estilo-premium .card,
+body.valisys-estilo-premium .welcome-card,
+body.valisys-estilo-premium .action-card,
+body.valisys-estilo-premium .login-card {
+  border-color: #d8c8a9 !important;
+}
+
+body.valisys-estilo-premium .topbar {
+  border-bottom-color: #d8c8a9 !important;
+}
+
+body.valisys-fonte-maior {
   font-size: 17px;
 }
 
-:root[data-densidade="compacta"] .card,
-:root[data-densidade="compacta"] .action-card,
-:root[data-densidade="compacta"] .welcome-card {
-  padding: 14px !important;
+body.valisys-fonte-maior input,
+body.valisys-fonte-maior select,
+body.valisys-fonte-maior textarea,
+body.valisys-fonte-maior button {
+  font-size: 16px;
 }
 
-:root[data-reduzir-movimento="sim"] *,
-body.reduzir-movimento * {
+body.valisys-reduzir-movimento *,
+body.valisys-reduzir-movimento *::before,
+body.valisys-reduzir-movimento *::after {
   animation: none !important;
   transition: none !important;
   scroll-behavior: auto !important;
 }
 
+/* Tela de configurações */
 .config-section,
 .config-options {
   display: grid;
@@ -125,9 +150,9 @@ body.reduzir-movimento * {
   display: grid;
   gap: 10px;
   padding: 16px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line, #e4e8df);
   border-radius: 18px;
-  background: var(--surface);
+  background: var(--surface, #fff);
 }
 
 .config-group h3 {
@@ -140,9 +165,9 @@ body.reduzir-movimento * {
   gap: 10px;
   align-items: flex-start;
   padding: 12px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line, #e4e8df);
   border-radius: 14px;
-  background: var(--surface-soft);
+  background: var(--surface-soft, #f3f5f0);
   cursor: pointer;
 }
 
@@ -161,9 +186,9 @@ body.reduzir-movimento * {
   justify-content: space-between;
   gap: 16px;
   padding: 12px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line, #e4e8df);
   border-radius: 14px;
-  background: var(--surface-soft);
+  background: var(--surface-soft, #f3f5f0);
 }
 
 .config-toggle input {
@@ -196,8 +221,15 @@ body.reduzir-movimento * {
   gap: 10px;
   padding: 16px;
   border-radius: 18px;
-  border: 1px dashed var(--line);
-  background: var(--surface-soft);
+  border: 1px dashed var(--line, #e4e8df);
+  background: var(--surface-soft, #f3f5f0);
+}
+
+.config-safe-note {
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line, #e4e8df);
+  background: var(--surface-soft, #f3f5f0);
 }
 
 @media (min-width: 760px) {

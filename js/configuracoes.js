@@ -61,6 +61,7 @@ function atualizarVolume() {
 
 function atualizarDependenciasSom() {
   const ativo = sonsInput.checked;
+
   [somEntradaInput, somCliqueInput, somSucessoInput, volumeInput, testeSomBtn].forEach(item => {
     item.disabled = !ativo;
   });
@@ -71,7 +72,7 @@ function salvar(auto = false) {
   valisysPreferencias.salvar(pref);
 
   statusConfig.innerText = auto
-    ? "Preferências aplicadas neste aparelho."
+    ? "Preferências aplicadas com segurança neste aparelho."
     : "Configurações salvas.";
 
   if (!auto) {
@@ -106,14 +107,18 @@ testeSomBtn.addEventListener("click", () => {
 
 resetBtn.addEventListener("click", async () => {
   const confirmar = await confirmarAcao(
-    "Restaurar as preferências locais deste aparelho?",
+    "Restaurar aparência, sons e acessibilidade para o padrão deste aparelho?",
     "Restaurar configurações"
   );
 
   if (!confirmar) return;
 
   localStorage.removeItem("valisysPreferencias");
-  valisysPreferencias.aplicar();
+
+  if (window.valisysPreferencias) {
+    valisysPreferencias.salvar(valisysPreferencias.defaults);
+  }
+
   preencherFormulario();
   atualizarDependenciasSom();
   statusConfig.innerText = "Padrão restaurado.";

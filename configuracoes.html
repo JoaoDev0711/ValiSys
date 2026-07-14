@@ -6,9 +6,9 @@
   <title>Configurações - ValiSys</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#153B2A">
-  <link rel="stylesheet" href="css/styles.css?v=admin-listas-permissoes-1">
-  <link rel="stylesheet" href="css/minimalista-profissional.css?v=admin-listas-permissoes-1">
-  <link rel="stylesheet" href="css/configuracoes.css?v=admin-listas-permissoes-1">
+  <link rel="stylesheet" href="css/styles.css?v=fix-configuracoes-seguras-1">
+  <link rel="stylesheet" href="css/minimalista-profissional.css?v=fix-configuracoes-seguras-1">
+  <link rel="stylesheet" href="css/configuracoes.css?v=fix-configuracoes-seguras-1">
 </head>
 <body>
 
@@ -22,7 +22,8 @@
   <section class="welcome-card">
     <p class="muted">Preferências locais</p>
     <h2>Configurações do sistema</h2>
-    <p>Ajustes de aparência, som e acessibilidade aplicados apenas neste aparelho.</p>
+    <p>Ajustes locais de aparência, som e acessibilidade. As mudanças afetam apenas o sistema interno neste aparelho.</p>
+    <div class="config-safe-note"><strong>Área segura</strong><p class="muted">As preferências não alteram o site público nem modificam dados do Supabase.</p></div>
   </section>
 
   <form id="config-form" class="config-section">
@@ -58,8 +59,8 @@
     </section>
 
     <section class="config-group">
-      <h3>Estilo visual</h3>
-      <p class="muted">Variações de apresentação sem alteração das funções.</p>
+      <h3>Apresentação</h3>
+      <p class="muted">Ajustes leves de espaçamento e acabamento visual.</p>
 
       <div class="config-options duas-colunas">
         <label class="config-option">
@@ -81,8 +82,8 @@
         <label class="config-option">
           <input type="radio" name="estilo" value="premium">
           <span>
-            <strong>Premium</strong>
-            <small class="muted">Aparência mais institucional.</small>
+            <strong>Institucional</strong>
+            <small class="muted">Acabamento mais formal, sem alterar layout.</small>
           </span>
         </label>
       </div>
@@ -194,17 +195,17 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="js/preferencias.js?v=admin-listas-permissoes-1" defer></script>
-<script src="js/dados-config.js?v=admin-listas-permissoes-1" defer></script>
-<script src="js/dados-service.js?v=admin-listas-permissoes-1" defer></script>
-<script src="js/auth.js?v=admin-listas-permissoes-1" defer></script>
-<script src="js/cookies.js?v=admin-listas-permissoes-1" defer></script>
-<script src="js/loja.js?v=admin-listas-permissoes-1" defer></script>
-<script src="js/site-dialog.js?v=admin-listas-permissoes-1" defer></script>
-<script src="js/icons.js?v=admin-listas-permissoes-1" defer></script>
-<script src="js/navbar.js?v=admin-listas-permissoes-1" defer></script>
-<script src="js/configuracoes.js?v=admin-listas-permissoes-1" defer></script>
-<script src="js/global-actions.js?v=admin-listas-permissoes-1" defer></script>
-<script src="js/pwa-register.js?v=admin-listas-permissoes-1" defer></script>
+<script src="js/preferencias.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/dados-config.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/dados-service.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/auth.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/cookies.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/loja.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/site-dialog.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/icons.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/navbar.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/configuracoes.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/global-actions.js?v=fix-configuracoes-seguras-1" defer></script>
+<script src="js/pwa-register.js?v=fix-configuracoes-seguras-1" defer></script>
 </body>
 </html>
