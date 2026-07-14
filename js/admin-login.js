@@ -1,25 +1,25 @@
-const formAdministrador = document.getElementById("admin-login-form");
-const senhaAdministradorInput = document.getElementById("senhaAdmin");
+const formAdmin = document.getElementById("admin-login-form");
+const senhaAdminInput = document.getElementById("senhaAdmin");
 
-const senhaAdministrador = "admin123";
+const senhaAdmin = "admin123";
 
-formAdministrador.addEventListener("submit", event => {
+formAdmin.addEventListener("submit", event => {
   event.preventDefault();
 
-  const senha = senhaAdministradorInput.value.trim();
+  const senha = senhaAdminInput.value.trim();
 
-  if (senha !== senhaAdministrador) {
-    alert("Senha administrativa incorreta.");
-    senhaAdministradorInput.focus();
+  if (senha !== senhaAdmin) {
+    alert("Senha do admin incorreta.");
+    senhaAdminInput.focus();
     return;
   }
 
-  // Administrador é separado da operação da loja.
-  // No acesso administrativo, não mantém loja selecionada nem usuário de loja.
+  // Admin é separado da operação da loja.
+  // Ao entrar como admin, não mantém loja selecionada nem usuário de loja.
   limparLojaAtual();
   salvarJSONLocal("usuarioLogado", {
     id: "admin-geral",
-    nome: "Administrador",
+    nome: "Admin",
     cargo: "admin",
     funcionarioId: "",
     lojaIdPadrao: "",

@@ -3,20 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Acesso da loja - ValiSys</title>
+  <title>Login - Vencimentos</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#153B2A">
-  <link rel="stylesheet" href="css/styles.css?v=minimalista-profissional-1">
-  <link rel="stylesheet" href="css/minimalista-profissional.css?v=minimalista-profissional-1">
+  <link rel="stylesheet" href="css/styles.css?v=planos-site-publico-1">
 </head>
 <body>
 
 <main class="login-page">
   <section class="login-card">
     <a href="escolher-loja.html" class="voltar-site" id="voltar-login">← Escolher loja</a>
-    <div class="login-logo"></div>
-    <h1>Acesso da loja</h1>
-    <p id="texto-login">Entre com seu perfil operacional da loja selecionada.</p>
+    <div class="login-logo">📦</div>
+    <h1>Login da loja</h1>
+    <p id="texto-login">Entre com um usuário da loja selecionada.</p>
 
     <div id="loja-login-card" class="mini-info-card"></div>
 
@@ -36,14 +35,10 @@
 
       <div id="senha-area" style="display:none;">
         <label for="senha" id="senha-label">Código de acesso</label>
-        <div class="acesso-codigo-wrapper">
-          <input type="password" id="senha" placeholder="Digite o código" autocomplete="current-password">
-          <button type="button" class="secondary" id="toggle-codigo-acesso">Mostrar</button>
-        </div>
-        <div class="login-code-note" id="codigo-acesso-info">
-          <strong>Código de acesso</strong>
-          <span id="senha-ajuda">Informe o código cadastrado para este perfil.</span>
-        </div>
+        <input type="password" id="senha" placeholder="Digite o código">
+        <p class="small muted" id="senha-ajuda">
+          Somente encarregado usa código cadastrado na loja.
+        </p>
       </div>
 
       <div id="marca-promotor-area" style="display:none;">
@@ -67,19 +62,19 @@
     </div>
 
     <p class="small muted">
-      Administração separada: <a href="admin-login.html">acesso administrativo</a>.
+      Administração separada: <a href="admin-login.html">entrar como admin</a>.
     </p>
   </section>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="js/dados-config.js?v=minimalista-profissional-1" defer></script>
-<script src="js/auth.js?v=minimalista-profissional-1" defer></script>
-<script src="js/loja.js?v=minimalista-profissional-1" defer></script>
-<script src="js/site-dialog.js?v=minimalista-profissional-1" defer></script>
-<script src="js/icons.js?v=minimalista-profissional-1" defer></script>
-<script src="js/dados-service.js?v=minimalista-profissional-1" defer></script>
-<script src="js/login.js?v=minimalista-profissional-1" defer></script>
-<script src="js/pwa-register.js?v=minimalista-profissional-1" defer></script>
+<script src="js/dados-config.js?v=planos-site-publico-1" defer></script>
+<script src="js/auth.js?v=planos-site-publico-1" defer></script>
+<script src="js/loja.js?v=planos-site-publico-1" defer></script>
+<script src="js/site-dialog.js?v=planos-site-publico-1" defer></script>
+<script src="js/icons.js?v=planos-site-publico-1" defer></script>
+<script src="js/dados-service.js?v=planos-site-publico-1" defer></script>
+<script src="js/login.js?v=planos-site-publico-1" defer></script>
+<script src="js/pwa-register.js?v=planos-site-publico-1" defer></script>
 </body>
 </html>

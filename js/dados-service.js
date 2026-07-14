@@ -1579,7 +1579,7 @@ const valisysDB = {
   },
 
 
-  async listarLancamentosPainel({ lojaId = "", status = "ativo", limiteData = "", limite = 80 } = {}) {
+  async listarLancamentosDashboard({ lojaId = "", status = "ativo", limiteData = "", limite = 80 } = {}) {
     const db = this.client();
 
     const camposLeves = `
@@ -2039,7 +2039,7 @@ const valisysDB = {
         }),
         setor: "SAC Online",
         validade: null,
-        criado_por: autor === "admin" ? "Administrador SAC" : `Cliente SAC - ${dados.nome || "Visitante"}`,
+        criado_por: autor === "admin" ? "Admin SAC" : `Cliente SAC - ${dados.nome || "Visitante"}`,
         lida: autor === "admin" ? true : false
       })
       .select("id, tipo, titulo, mensagem, criado_por, lida, criado_em")

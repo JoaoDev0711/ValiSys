@@ -3,43 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel administrativo - Vencimentos</title>
+  <title>Dashboard Admin - Vencimentos</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#153B2A">
-  <link rel="stylesheet" href="css/styles.css?v=minimalista-profissional-1">
-  <link rel="stylesheet" href="css/minimalista-profissional.css?v=minimalista-profissional-1">
+  <link rel="stylesheet" href="css/styles.css?v=planos-site-publico-1">
 </head>
 <body>
 
 <header class="topbar">
-  <button id="menu-btn" class="icon-btn" aria-label="Abrir menu">Menu</button>
-  <h1>Administrador</h1>
-  <a href="#" onclick="sair()" class="user-icon" aria-label="Sair">Sair</a>
+  <button id="menu-btn" class="icon-btn" aria-label="Abrir menu">☰</button>
+  <h1>Admin</h1>
+  <a href="#" onclick="sair()" class="user-icon" aria-label="Sair">🚪</a>
 </header>
 
 <nav id="sidebar" class="sidebar">
   <div class="sidebar-user">
-    <div class="avatar"></div>
+    <div class="avatar">⚙️</div>
     <div>
-      <strong id="sidebar-nome">Administrador</strong>
-      <p id="sidebar-cargo">Painel administrativo</p>
+      <strong id="sidebar-nome">Admin</strong>
+      <p id="sidebar-cargo">Dashboard Admin</p>
     </div>
   </div>
 
-  <a href="admin-dashboard.html"> Painel administrativo</a>
-  <a href="#visao-geral-admin"> Visão geral</a>
-  <a href="#graficos-admin"> Gráficos</a>
-  <a href="#loja-admin-atual"> Loja atual</a>
-  <a href="#form-loja-admin"> Cadastrar loja</a>
-  <a href="#filtros-lojas-admin"> Filtros</a>
-  <a href="#lista-lojas-admin"> Lojas</a>
-
-  <a href="tutorial.html">Tutorial</a>
-  <a href="notas-atualizacao.html">Atualizações</a>
-  <a href="#" onclick="trocarLojaComConfirmacao()">Entrar em uma loja</a>
-  <a href="minha-assinatura.html"> Assinatura da loja</a>
-  <a href="planos.html"> Planos</a>
-  <a href="#" onclick="sair()">Sair</a>
+  <a href="admin-dashboard.html">🏠 Dashboard Admin</a>
+  <a href="#visao-geral-admin">📌 Visão geral</a>
+  <a href="#graficos-admin">📊 Gráficos</a>
+  <a href="#loja-admin-atual">🏪 Loja atual</a>
+  <a href="#form-loja-admin">➕ Cadastrar loja</a>
+  <a href="#filtros-lojas-admin">🔎 Filtros</a>
+  <a href="#lista-lojas-admin">📋 Lojas</a>
+  <a href="#" onclick="trocarLojaComConfirmacao()">↪️ Entrar em loja</a>
+  <a href="minha-assinatura.html">💳 Assinatura da loja</a>
+  <a href="planos.html">💼 Planos</a>
+  <a href="#" onclick="sair()">🚪 Sair</a>
 </nav>
 
 <div id="overlay"></div>
@@ -47,14 +43,14 @@
 <main class="container">
   <section class="welcome-card admin-hero">
     <p class="muted">Painel geral</p>
-    <h2>Painel administrativo</h2>
+    <h2>Dashboard Admin</h2>
     <p>Visão administrativa das lojas, operação, vencimentos e gestão geral.</p>
 
   </section>
 
   <section class="resumo-vencimentos admin-resumo" id="visao-geral-admin">
     <div class="resumo-card ok-soft">
-      <span></span>
+      <span>🏪</span>
       <div>
         <strong id="qtd-lojas-admin">0</strong>
         <p>Lojas ativas</p>
@@ -62,7 +58,7 @@
     </div>
 
     <div class="resumo-card warning-soft">
-      <span>⏸</span>
+      <span>⏸️</span>
       <div>
         <strong id="qtd-lojas-inativas-admin">0</strong>
         <p>Lojas desativadas</p>
@@ -70,7 +66,7 @@
     </div>
 
     <div class="resumo-card alert-soft">
-      <span></span>
+      <span>📦</span>
       <div>
         <strong id="qtd-lancamentos-admin">0</strong>
         <p>Lançamentos ativos</p>
@@ -78,7 +74,7 @@
     </div>
 
     <div class="resumo-card danger-soft">
-      <span></span>
+      <span>🚨</span>
       <div>
         <strong id="qtd-vencidos-admin">0</strong>
         <p>Vencidos</p>
@@ -95,7 +91,7 @@
           <h2>Lojas por situação</h2>
           <p class="muted">Percentual de lojas ativas e desativadas.</p>
         </div>
-        <span></span>
+        <span>📈</span>
       </div>
       <div id="grafico-situacao-lojas" class="pie-chart-wrap"></div>
     </article>
@@ -119,7 +115,7 @@
           <h2>Lojas por grupo/rede</h2>
           <p class="muted">Ranking das redes cadastradas.</p>
         </div>
-        <span></span>
+        <span>🏷️</span>
       </div>
       <div id="grafico-grupos-admin" class="bar-chart"></div>
     </article>
@@ -130,7 +126,7 @@
           <h2>Lojas por região</h2>
           <p class="muted">Ranking das regiões cadastradas.</p>
         </div>
-        <span></span>
+        <span>📍</span>
       </div>
       <div id="grafico-regioes-admin" class="bar-chart"></div>
     </article>
@@ -142,7 +138,7 @@
         <h2>Loja em administração</h2>
         <p class="muted">Escolha uma loja ativa e use os atalhos operacionais.</p>
       </div>
-      <span></span>
+      <span>🏪</span>
     </div>
 
     <div id="admin-loja-atual" class="admin-current-store"></div>
@@ -263,18 +259,16 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="js/dados-config.js?v=minimalista-profissional-1" defer></script>
-<script src="js/dados-service.js?v=minimalista-profissional-1" defer></script>
-<script src="js/auth.js?v=minimalista-profissional-1" defer></script>
-<script src="js/cookies.js?v=minimalista-profissional-1" defer></script>
-<script src="js/loja.js?v=minimalista-profissional-1" defer></script>
-<script src="js/site-dialog.js?v=minimalista-profissional-1" defer></script>
-<script src="js/icons.js?v=minimalista-profissional-1" defer></script>
-<script src="js/navbar.js?v=minimalista-profissional-1" defer></script>
-<script src="js/admin-dashboard.js?v=minimalista-profissional-1" defer></script>
-<script src="js/push-notifications-v2.js?v=minimalista-profissional-1" defer></script>
-<script src="js/onboarding.js?v=minimalista-profissional-1" defer></script>
-<script src="js/global-actions.js?v=minimalista-profissional-1" defer></script>
-<script src="js/pwa-register.js?v=minimalista-profissional-1" defer></script>
+<script src="js/dados-config.js?v=planos-site-publico-1" defer></script>
+<script src="js/dados-service.js?v=planos-site-publico-1" defer></script>
+<script src="js/auth.js?v=planos-site-publico-1" defer></script>
+<script src="js/cookies.js?v=planos-site-publico-1" defer></script>
+<script src="js/loja.js?v=planos-site-publico-1" defer></script>
+<script src="js/site-dialog.js?v=planos-site-publico-1" defer></script>
+<script src="js/icons.js?v=planos-site-publico-1" defer></script>
+<script src="js/navbar.js?v=planos-site-publico-1" defer></script>
+<script src="js/admin-dashboard.js?v=planos-site-publico-1" defer></script>
+<script src="js/push-notifications-v2.js?v=planos-site-publico-1" defer></script>
+<script src="js/pwa-register.js?v=planos-site-publico-1" defer></script>
 </body>
 </html>

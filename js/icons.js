@@ -42,15 +42,15 @@
   };
 
   const EMOJI_TO_ICON = {
-    "": "menu", "←": "back", "↪": "user", "": "logout", "": "box",
-    "": "home", "": "list", "": "calendar", "": "calendar", "": "chart",
-    "": "bell", "": "plus", "": "users", "": "admin", "": "store",
-    "": "pin", "": "search", "": "user", "": "cart", "": "alert",
-    "⏳": "clock", "": "check", "": "alert", "": "error", "": "camera",
-    "": "tag", "": "file", "": "database", "": "edit", "": "trash",
-    "ℹ": "info", "": "lock", "": "key", "": "spark", "": "product",
-    "": "product", "": "product", "": "product", "": "product",
-    "": "product", "": "product", "": "product", "": "product"
+    "☰": "menu", "←": "back", "↪️": "user", "🚪": "logout", "📦": "box",
+    "🏠": "home", "📋": "list", "📅": "calendar", "🗓️": "calendar", "📊": "chart",
+    "🔔": "bell", "➕": "plus", "👥": "users", "⚙️": "admin", "🏪": "store",
+    "📌": "pin", "🔎": "search", "👤": "user", "🛒": "cart", "🚨": "alert",
+    "⏳": "clock", "✅": "check", "⚠️": "alert", "❌": "error", "📷": "camera",
+    "🏷️": "tag", "🧾": "file", "📥": "database", "📝": "edit", "🗑️": "trash",
+    "ℹ️": "info", "🔒": "lock", "🔑": "key", "✨": "spark", "🥤": "product",
+    "🧀": "product", "🥩": "product", "🥬": "product", "🥖": "product",
+    "❄️": "product", "🧼": "product", "🧴": "product", "🐾": "product"
   };
 
   const keys = Object.keys(EMOJI_TO_ICON).sort((a, b) => b.length - a.length);

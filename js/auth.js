@@ -48,7 +48,7 @@ function nomeCargo(cargo) {
     promotor: "Promotor",
     encarregado: "Encarregado",
     gerente: "Gerente",
-    admin: "Administrador"
+    admin: "Admin"
   };
 
   return cargos[cargo] || cargo;
@@ -109,8 +109,8 @@ function limparUsuarioLogado() {
   localStorage.removeItem("usuarioLogado");
 }
 
-function bloquearAdministradorEmAreaLoja() {
-  // Administrador pode administrar uma loja quando veio pela Painel administrativo.
+function bloquearAdminEmAreaLoja() {
+  // Admin pode administrar uma loja quando veio pela Dashboard Admin.
   // A seleção pública de loja continua limpando o usuário antes do login operacional.
   return false;
 }
