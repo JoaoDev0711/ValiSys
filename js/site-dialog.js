@@ -42,7 +42,7 @@
 
       tituloEl.innerText = titulo;
       mensagemEl.innerText = String(mensagem || "");
-      iconEl.innerText = tipo === "perigo" ? "!" : tipo === "sucesso" ? "" : "?";
+      iconEl.innerText = tipo === "perigo" ? "!" : tipo === "sucesso" ? "✓" : "?";
       iconEl.className = `site-modal-icon modal-${tipo}`;
 
       btnOk.innerText = textoOk;

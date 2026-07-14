@@ -16,7 +16,7 @@
     if (!PERMITIDOS.includes(usuario.cargo)) {
       form.innerHTML = `
         <div class="empty-state">
-          <span></span>
+          <span>🔒</span>
           <p>Somente gerente, encarregado ou admin pode enviar aviso para a equipe.</p>
         </div>
       `;

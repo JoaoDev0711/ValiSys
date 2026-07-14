@@ -8,43 +8,43 @@ if (!usuario || usuario.cargo !== "admin") {
 
 
 
-const formLojaAdministrador = document.getElementById("form-loja-admin");
-const nomeLojaAdministrador = document.getElementById("nomeLojaAdministrador");
-const responsavelLojaAdministrador = document.getElementById("responsavelLojaAdministrador");
-const grupoLojaAdministrador = document.getElementById("grupoLojaAdministrador");
-const regiaoLojaAdministrador = document.getElementById("regiaoLojaAdministrador");
-const corLojaAdministrador = document.getElementById("corLojaAdministrador");
-const imagemLojaAdministrador = document.getElementById("imagemLojaAdministrador");
-const previewImagemLojaAdministrador = document.getElementById("previewImagemLojaAdministrador");
-const setoresLojaAdministradorLista = document.getElementById("setoresLojaAdministradorLista");
-const setorOutroAdministradorArea = document.getElementById("setorOutroAdministradorArea");
-const novoSetorAdministrador = document.getElementById("novoSetorAdministrador");
-const btnAdicionarSetorAdministrador = document.getElementById("btnAdicionarSetorAdministrador");
-const gerentesPreCadastroAdministrador = document.getElementById("gerentesPreCadastroAdministrador");
-const encarregadosPreCadastroAdministrador = document.getElementById("encarregadosPreCadastroAdministrador");
-const listaLojasAdministrador = document.getElementById("lista-lojas-admin");
-const qtdLojasAdministrador = document.getElementById("qtd-lojas-admin");
-const qtdLojasInativasAdministrador = document.getElementById("qtd-lojas-inativas-admin");
-const qtdLancamentosAdministrador = document.getElementById("qtd-lancamentos-admin");
-const qtdVencidosAdministrador = document.getElementById("qtd-vencidos-admin");
+const formLojaAdmin = document.getElementById("form-loja-admin");
+const nomeLojaAdmin = document.getElementById("nomeLojaAdmin");
+const responsavelLojaAdmin = document.getElementById("responsavelLojaAdmin");
+const grupoLojaAdmin = document.getElementById("grupoLojaAdmin");
+const regiaoLojaAdmin = document.getElementById("regiaoLojaAdmin");
+const corLojaAdmin = document.getElementById("corLojaAdmin");
+const imagemLojaAdmin = document.getElementById("imagemLojaAdmin");
+const previewImagemLojaAdmin = document.getElementById("previewImagemLojaAdmin");
+const setoresLojaAdminLista = document.getElementById("setoresLojaAdminLista");
+const setorOutroAdminArea = document.getElementById("setorOutroAdminArea");
+const novoSetorAdmin = document.getElementById("novoSetorAdmin");
+const btnAdicionarSetorAdmin = document.getElementById("btnAdicionarSetorAdmin");
+const gerentesPreCadastroAdmin = document.getElementById("gerentesPreCadastroAdmin");
+const encarregadosPreCadastroAdmin = document.getElementById("encarregadosPreCadastroAdmin");
+const listaLojasAdmin = document.getElementById("lista-lojas-admin");
+const qtdLojasAdmin = document.getElementById("qtd-lojas-admin");
+const qtdLojasInativasAdmin = document.getElementById("qtd-lojas-inativas-admin");
+const qtdLancamentosAdmin = document.getElementById("qtd-lancamentos-admin");
+const qtdVencidosAdmin = document.getElementById("qtd-vencidos-admin");
 
-const filtroGrupoAdministrador = document.getElementById("filtroGrupoAdministrador");
-const filtroRegiaoAdministrador = document.getElementById("filtroRegiaoAdministrador");
-const filtroStatusAdministrador = document.getElementById("filtroStatusAdministrador");
+const filtroGrupoAdmin = document.getElementById("filtroGrupoAdmin");
+const filtroRegiaoAdmin = document.getElementById("filtroRegiaoAdmin");
+const filtroStatusAdmin = document.getElementById("filtroStatusAdmin");
 
 const graficoSituacaoLojas = document.getElementById("grafico-situacao-lojas");
-const graficoVencimentosAdministrador = document.getElementById("grafico-vencimentos-admin");
-const graficoGruposAdministrador = document.getElementById("grafico-grupos-admin");
-const graficoRegioesAdministrador = document.getElementById("grafico-regioes-admin");
+const graficoVencimentosAdmin = document.getElementById("grafico-vencimentos-admin");
+const graficoGruposAdmin = document.getElementById("grafico-grupos-admin");
+const graficoRegioesAdmin = document.getElementById("grafico-regioes-admin");
 const adminPercentuais = document.getElementById("admin-percentuais");
 const adminLojaAtual = document.getElementById("admin-loja-atual");
-const listaSacAdministrador = document.getElementById("lista-sac-admin");
-const btnAtualizarSacAdministrador = document.getElementById("btnAtualizarSacAdministrador");
-const chatSacAdministradorPainel = document.getElementById("chatSacAdministradorPainel");
+const listaSacAdmin = document.getElementById("lista-sac-admin");
+const btnAtualizarSacAdmin = document.getElementById("btnAtualizarSacAdmin");
+const chatSacAdminPainel = document.getElementById("chatSacAdminPainel");
 
 let imagemLojaBase64 = "";
-let lojasAdministradorCache = [];
-let lancamentosAdministradorCache = [];
+let lojasAdminCache = [];
+let lancamentosAdminCache = [];
 
 
 function lerLinhasTextarea(valor) {
@@ -54,7 +54,7 @@ function lerLinhasTextarea(valor) {
     .filter(Boolean);
 }
 
-function setoresBaseAdministrador() {
+function setoresBaseAdmin() {
   return valisysDB.setoresPadraoLoja
     ? valisysDB.setoresPadraoLoja()
     : ["Geral", "Mercearia", "Bebidas", "Frios e Laticínios", "Açougue", "Hortifruti", "Padaria", "Congelados", "Limpeza", "Higiene e Perfumaria", "Pet", "Outros"];
@@ -72,7 +72,7 @@ function setorIdSeguro(nome) {
 function renderizarSelecaoSetores(container, selecionados = [], customizados = []) {
   if (!container) return;
 
-  const base = setoresBaseAdministrador();
+  const base = setoresBaseAdmin();
   const todos = [...new Set([...base, ...customizados].map(item => String(item || "").trim()).filter(Boolean))];
 
   const selecionadosPadrao = base.filter(item => item !== "Outros");
@@ -108,16 +108,16 @@ function setoresSelecionadosDoContainer(container) {
   return [...new Set(marcados)];
 }
 
-function atualizarAreaOutroSetor(container = setoresLojaAdministradorLista) {
-  if (!container || !setorOutroAdministradorArea) return;
+function atualizarAreaOutroSetor(container = setoresLojaAdminLista) {
+  if (!container || !setorOutroAdminArea) return;
 
   const outrosMarcado = [...container.querySelectorAll("input[type='checkbox']:checked")]
     .some(input => input.value === "Outros");
 
-  setorOutroAdministradorArea.style.display = outrosMarcado ? "block" : "none";
+  setorOutroAdminArea.style.display = outrosMarcado ? "block" : "none";
 }
 
-function adicionarSetorPersonalizadoAdministrador(container = setoresLojaAdministradorLista, input = novoSetorAdministrador) {
+function adicionarSetorPersonalizadoAdmin(container = setoresLojaAdminLista, input = novoSetorAdmin) {
   if (!container || !input) return;
 
   const nome = input.value.trim();
@@ -147,16 +147,16 @@ function adicionarSetorPersonalizadoAdministrador(container = setoresLojaAdminis
   input.value = "";
 }
 
-function setoresFormularioAdministrador() {
-  const setores = setoresSelecionadosDoContainer(setoresLojaAdministradorLista);
+function setoresFormularioAdmin() {
+  const setores = setoresSelecionadosDoContainer(setoresLojaAdminLista);
 
-  return setores.length > 0 ? setores : setoresBaseAdministrador().filter(item => item !== "Outros");
+  return setores.length > 0 ? setores : setoresBaseAdmin().filter(item => item !== "Outros");
 }
 
-function funcionariosPreCadastroAdministrador(setores = []) {
+function funcionariosPreCadastroAdmin(setores = []) {
   const funcionarios = [];
 
-  lerLinhasTextarea(gerentesPreCadastroAdministrador?.value || "").forEach(nome => {
+  lerLinhasTextarea(gerentesPreCadastroAdmin?.value || "").forEach(nome => {
     funcionarios.push({
       nome,
       cargo: "gerente",
@@ -165,7 +165,7 @@ function funcionariosPreCadastroAdministrador(setores = []) {
     });
   });
 
-  String(encarregadosPreCadastroAdministrador?.value || "")
+  String(encarregadosPreCadastroAdmin?.value || "")
     .split(/\n/)
     .map(linha => linha.trim())
     .filter(Boolean)
@@ -188,21 +188,21 @@ function funcionariosPreCadastroAdministrador(setores = []) {
   return funcionarios;
 }
 
-if (setoresLojaAdministradorLista) {
-  renderizarSelecaoSetores(setoresLojaAdministradorLista);
+if (setoresLojaAdminLista) {
+  renderizarSelecaoSetores(setoresLojaAdminLista);
 
-  setoresLojaAdministradorLista.addEventListener("change", () => atualizarAreaOutroSetor(setoresLojaAdministradorLista));
+  setoresLojaAdminLista.addEventListener("change", () => atualizarAreaOutroSetor(setoresLojaAdminLista));
 }
 
-if (btnAdicionarSetorAdministrador) {
-  btnAdicionarSetorAdministrador.addEventListener("click", () => adicionarSetorPersonalizadoAdministrador());
+if (btnAdicionarSetorAdmin) {
+  btnAdicionarSetorAdmin.addEventListener("click", () => adicionarSetorPersonalizadoAdmin());
 }
 
-if (novoSetorAdministrador) {
-  novoSetorAdministrador.addEventListener("keydown", event => {
+if (novoSetorAdmin) {
+  novoSetorAdmin.addEventListener("keydown", event => {
     if (event.key === "Enter") {
       event.preventDefault();
-      adicionarSetorPersonalizadoAdministrador();
+      adicionarSetorPersonalizadoAdmin();
     }
   });
 }
@@ -258,28 +258,28 @@ function montarOptions(select, valores, textoTodos, valorTodos) {
   }
 }
 
-function atualizarFiltrosAdministrador() {
+function atualizarFiltrosAdmin() {
   montarOptions(
-    filtroGrupoAdministrador,
-    lojasAdministradorCache.map(loja => loja.grupo || "Sem grupo"),
+    filtroGrupoAdmin,
+    lojasAdminCache.map(loja => loja.grupo || "Sem grupo"),
     "Todos os grupos",
     "todos"
   );
 
   montarOptions(
-    filtroRegiaoAdministrador,
-    lojasAdministradorCache.map(loja => loja.regiao || "Sem região"),
+    filtroRegiaoAdmin,
+    lojasAdminCache.map(loja => loja.regiao || "Sem região"),
     "Todas as regiões",
     "todas"
   );
 }
 
-function lojasFiltradasAdministrador() {
-  const grupo = filtroGrupoAdministrador.value;
-  const regiao = filtroRegiaoAdministrador.value;
-  const status = filtroStatusAdministrador.value;
+function lojasFiltradasAdmin() {
+  const grupo = filtroGrupoAdmin.value;
+  const regiao = filtroRegiaoAdmin.value;
+  const status = filtroStatusAdmin.value;
 
-  return lojasAdministradorCache.filter(loja => {
+  return lojasAdminCache.filter(loja => {
     const grupoLoja = loja.grupo || "Sem grupo";
     const regiaoLoja = loja.regiao || "Sem região";
     const statusLoja = loja.status || "ativa";
@@ -381,7 +381,7 @@ function renderizarPizza(container, dados, vazio = "Sem dados para mostrar.") {
 }
 
 function calcularResumoVencimentos() {
-  const ativos = lancamentosAdministradorCache.filter(item => item.status === "ativo");
+  const ativos = lancamentosAdminCache.filter(item => item.status === "ativo");
 
   return ativos.reduce((acc, item) => {
     const dias = diasAteValidade(item.validade);
@@ -402,11 +402,11 @@ function calcularResumoVencimentos() {
   });
 }
 
-function renderizarPercentuaisAdministrador() {
-  const totalLojas = lojasAdministradorCache.length;
-  const ativas = lojasAdministradorCache.filter(loja => (loja.status || "ativa") === "ativa").length;
+function renderizarPercentuaisAdmin() {
+  const totalLojas = lojasAdminCache.length;
+  const ativas = lojasAdminCache.filter(loja => (loja.status || "ativa") === "ativa").length;
   const inativas = totalLojas - ativas;
-  const ativosLancamentos = lancamentosAdministradorCache.filter(item => item.status === "ativo");
+  const ativosLancamentos = lancamentosAdminCache.filter(item => item.status === "ativo");
   const resumo = calcularResumoVencimentos();
   const totalVencimentosCriticos = resumo.vencidos + resumo.hoje + resumo.seteDias;
 
@@ -433,9 +433,9 @@ function renderizarPercentuaisAdministrador() {
   `;
 }
 
-function renderizarGraficosAdministrador() {
-  const ativas = lojasAdministradorCache.filter(loja => (loja.status || "ativa") === "ativa").length;
-  const inativas = lojasAdministradorCache.filter(loja => (loja.status || "ativa") !== "ativa").length;
+function renderizarGraficosAdmin() {
+  const ativas = lojasAdminCache.filter(loja => (loja.status || "ativa") === "ativa").length;
+  const inativas = lojasAdminCache.filter(loja => (loja.status || "ativa") !== "ativa").length;
   const resumo = calcularResumoVencimentos();
 
   // Um indicador = um gráfico. Sem duplicar pizza e barra para o mesmo dado.
@@ -444,7 +444,7 @@ function renderizarGraficosAdministrador() {
     "Desativadas": inativas
   });
 
-  renderizarGraficoBarras(graficoVencimentosAdministrador, {
+  renderizarGraficoBarras(graficoVencimentosAdmin, {
     "Vencidos": resumo.vencidos,
     "Vencem hoje": resumo.hoje,
     "Até 7 dias": resumo.seteDias,
@@ -453,19 +453,19 @@ function renderizarGraficosAdministrador() {
   });
 
   renderizarGraficoBarras(
-    graficoGruposAdministrador,
-    contarPorCampo(lojasAdministradorCache, "grupo", "Sem grupo")
+    graficoGruposAdmin,
+    contarPorCampo(lojasAdminCache, "grupo", "Sem grupo")
   );
 
   renderizarGraficoBarras(
-    graficoRegioesAdministrador,
-    contarPorCampo(lojasAdministradorCache, "regiao", "Sem região")
+    graficoRegioesAdmin,
+    contarPorCampo(lojasAdminCache, "regiao", "Sem região")
   );
 
-  renderizarPercentuaisAdministrador();
+  renderizarPercentuaisAdmin();
 }
 
-function renderizarLojaAtualAdministrador() {
+function renderizarLojaAtualAdmin() {
   const lojaAtual = getLojaAtual();
 
   if (!lojaAtual) {
@@ -499,11 +499,11 @@ function renderizarLojaAtualAdministrador() {
   `;
 }
 
-function renderizarListaFiltradaAdministrador() {
-  const lojas = lojasFiltradasAdministrador();
+function renderizarListaFiltradaAdmin() {
+  const lojas = lojasFiltradasAdmin();
 
   if (lojas.length === 0) {
-    listaLojasAdministrador.innerHTML = `
+    listaLojasAdmin.innerHTML = `
       <div class="card">
         <p>Nenhuma loja encontrada com estes filtros.</p>
       </div>
@@ -511,7 +511,7 @@ function renderizarListaFiltradaAdministrador() {
     return;
   }
 
-  listaLojasAdministrador.innerHTML = lojas.map(loja => {
+  listaLojasAdmin.innerHTML = lojas.map(loja => {
     const status = loja.status || "ativa";
     const ativa = status === "ativa";
     const cor = normalizarHexCor(loja.corTema) || "#2f7d4f";
@@ -538,7 +538,7 @@ function renderizarListaFiltradaAdministrador() {
         <div class="loja-actions">
           ${
             ativa
-              ? `<button type="button" onclick="administrarLoja('${loja.id}')">Administradoristrar esta loja</button>`
+              ? `<button type="button" onclick="administrarLoja('${loja.id}')">Administrar esta loja</button>`
               : `<button type="button" class="secondary" disabled>Loja desativada</button>`
           }
 
@@ -548,16 +548,16 @@ function renderizarListaFiltradaAdministrador() {
 
           <label class="btn-file">
             Trocar imagem
-            <input type="file" accept="image/*" onchange="trocarImagemLojaAdministrador('${loja.id}', this)">
+            <input type="file" accept="image/*" onchange="trocarImagemLojaAdmin('${loja.id}', this)">
           </label>
 
           ${
             ativa
-              ? `<button type="button" class="btn-warning" onclick="alterarStatusLojaAdministrador('${loja.id}', 'inativa')">Desativar serviço</button>`
-              : `<button type="button" onclick="alterarStatusLojaAdministrador('${loja.id}', 'ativa')">Ativar serviço</button>`
+              ? `<button type="button" class="btn-warning" onclick="alterarStatusLojaAdmin('${loja.id}', 'inativa')">Desativar serviço</button>`
+              : `<button type="button" onclick="alterarStatusLojaAdmin('${loja.id}', 'ativa')">Ativar serviço</button>`
           }
 
-          <button type="button" class="btn-danger" onclick="excluirLojaAdministrador('${loja.id}')">
+          <button type="button" class="btn-danger" onclick="excluirLojaAdmin('${loja.id}')">
             Excluir loja
           </button>
         </div>
@@ -566,20 +566,20 @@ function renderizarListaFiltradaAdministrador() {
   }).join("");
 }
 
-if (imagemLojaAdministrador) {
-  imagemLojaAdministrador.addEventListener("change", async () => {
-    const arquivo = imagemLojaAdministrador.files[0];
+if (imagemLojaAdmin) {
+  imagemLojaAdmin.addEventListener("change", async () => {
+    const arquivo = imagemLojaAdmin.files[0];
 
     if (!arquivo) {
       imagemLojaBase64 = "";
-      previewImagemLojaAdministrador.innerHTML = "";
+      previewImagemLojaAdmin.innerHTML = "";
       return;
     }
 
     try {
       imagemLojaBase64 = await comprimirImagemLoja(arquivo);
 
-      previewImagemLojaAdministrador.innerHTML = `
+      previewImagemLojaAdmin.innerHTML = `
         <div class="loja-preview-box">
           <img src="${imagemLojaBase64}" alt="Prévia da imagem da loja">
           <span>Imagem selecionada</span>
@@ -587,42 +587,42 @@ if (imagemLojaAdministrador) {
       `;
     } catch (erro) {
       alert(erro.message);
-      imagemLojaAdministrador.value = "";
+      imagemLojaAdmin.value = "";
       imagemLojaBase64 = "";
-      previewImagemLojaAdministrador.innerHTML = "";
+      previewImagemLojaAdmin.innerHTML = "";
     }
   });
 }
 
-async function renderizarLojasAdministrador() {
-  listaLojasAdministrador.innerHTML = `<div class="card"><p class="muted">Carregando dados administrativos...</p></div>`;
+async function renderizarLojasAdmin() {
+  listaLojasAdmin.innerHTML = `<div class="card"><p class="muted">Carregando dados administrativos...</p></div>`;
 
   try {
-    lojasAdministradorCache = await valisysDB.listarTodasLojas();
+    lojasAdminCache = await valisysDB.listarTodasLojas();
 
     try {
-      lancamentosAdministradorCache = await valisysDB.listarTodosLancamentos({ status: "todos", limite: 260 });
+      lancamentosAdminCache = await valisysDB.listarTodosLancamentos({ status: "todos", limite: 260 });
     } catch (erroLancamentos) {
       console.warn("Não foi possível carregar lançamentos gerais.", erroLancamentos);
-      lancamentosAdministradorCache = [];
+      lancamentosAdminCache = [];
     }
 
-    const ativas = lojasAdministradorCache.filter(loja => (loja.status || "ativa") === "ativa").length;
-    const inativas = lojasAdministradorCache.filter(loja => (loja.status || "ativa") !== "ativa").length;
-    const ativosLancamentos = lancamentosAdministradorCache.filter(item => item.status === "ativo");
+    const ativas = lojasAdminCache.filter(loja => (loja.status || "ativa") === "ativa").length;
+    const inativas = lojasAdminCache.filter(loja => (loja.status || "ativa") !== "ativa").length;
+    const ativosLancamentos = lancamentosAdminCache.filter(item => item.status === "ativo");
     const vencidos = ativosLancamentos.filter(item => diasAteValidade(item.validade) < 0).length;
 
-    qtdLojasAdministrador.innerText = ativas;
-    qtdLojasInativasAdministrador.innerText = inativas;
-    qtdLancamentosAdministrador.innerText = ativosLancamentos.length;
-    qtdVencidosAdministrador.innerText = vencidos;
+    qtdLojasAdmin.innerText = ativas;
+    qtdLojasInativasAdmin.innerText = inativas;
+    qtdLancamentosAdmin.innerText = ativosLancamentos.length;
+    qtdVencidosAdmin.innerText = vencidos;
 
-    atualizarFiltrosAdministrador();
-    renderizarGraficosAdministrador();
-    renderizarLojaAtualAdministrador();
+    atualizarFiltrosAdmin();
+    renderizarGraficosAdmin();
+    renderizarLojaAtualAdmin();
 
-    if (lojasAdministradorCache.length === 0) {
-      listaLojasAdministrador.innerHTML = `
+    if (lojasAdminCache.length === 0) {
+      listaLojasAdmin.innerHTML = `
         <div class="card">
           <p>Nenhuma loja cadastrada ainda.</p>
         </div>
@@ -630,10 +630,10 @@ async function renderizarLojasAdministrador() {
       return;
     }
 
-    renderizarListaFiltradaAdministrador();
+    renderizarListaFiltradaAdmin();
   } catch (erro) {
     console.error(erro);
-    listaLojasAdministrador.innerHTML = `
+    listaLojasAdmin.innerHTML = `
       <div class="card">
         <p class="danger">Erro ao carregar lojas.</p>
         <p class="muted">${esc(erro.message)}</p>
@@ -644,7 +644,7 @@ async function renderizarLojasAdministrador() {
 
 async function administrarLoja(id) {
   try {
-    const loja = lojasAdministradorCache.find(item => item.id === id);
+    const loja = lojasAdminCache.find(item => item.id === id);
 
     if (!loja) {
       alert("Loja não encontrada.");
@@ -656,19 +656,19 @@ async function administrarLoja(id) {
       return;
     }
 
-    // Administrador vindo da Painel administrativo continua como admin.
+    // Admin vindo da Dashboard Admin continua como admin.
     // Reforça a sessão para não cair como funcionário/promotor por usuário antigo.
     setLojaAtual(loja);
 
     salvarJSONLocal("usuarioLogado", {
       id: usuario.id || "admin-geral",
-      nome: usuario.nome || "Administrador",
+      nome: usuario.nome || "Admin",
       cargo: "admin",
       funcionarioId: "",
       lojaIdPadrao: loja.id,
       lojaNomePadrao: loja.nome,
       setor: "",
-      modoAdministradorLoja: true,
+      modoAdminLoja: true,
       criadoEm: usuario.criadoEm || new Date().toLocaleString("pt-BR")
     });
 
@@ -749,7 +749,7 @@ async function abrirModalEdicaoLoja(loja) {
     modal.querySelector("#editarLojaRegiao").value = loja.regiao || "";
     modal.querySelector("#editarLojaCor").value = normalizarHexCor(loja.corTema) || "#2f7d4f";
 
-    const customizados = setoresAtuais.filter(setor => !setoresBaseAdministrador().includes(setor));
+    const customizados = setoresAtuais.filter(setor => !setoresBaseAdmin().includes(setor));
     renderizarSelecaoSetores(listaSetores, setoresAtuais, customizados);
 
     const atualizarAreaOutroEdicao = () => {
@@ -822,7 +822,7 @@ async function abrirModalEdicaoLoja(loja) {
 }
 
 async function editarDadosLoja(id) {
-  const loja = lojasAdministradorCache.find(item => item.id === id);
+  const loja = lojasAdminCache.find(item => item.id === id);
 
   if (!loja) {
     alert("Loja não encontrada.");
@@ -849,13 +849,13 @@ async function editarDadosLoja(id) {
     }
 
     alert("Dados da loja atualizados.");
-    await renderizarLojasAdministrador();
+    await renderizarLojasAdmin();
   } catch (erro) {
     alert("Erro ao editar loja: " + erro.message);
   }
 }
 
-async function trocarImagemLojaAdministrador(id, input) {
+async function trocarImagemLojaAdmin(id, input) {
   const arquivo = input.files && input.files[0];
 
   if (!arquivo) return;
@@ -864,7 +864,7 @@ async function trocarImagemLojaAdministrador(id, input) {
     const imagem = await comprimirImagemLoja(arquivo);
     await valisysDB.atualizarImagemLoja(id, imagem);
     alert("Imagem da loja atualizada.");
-    await renderizarLojasAdministrador();
+    await renderizarLojasAdmin();
   } catch (erro) {
     alert("Erro ao atualizar imagem: " + erro.message);
   } finally {
@@ -872,8 +872,8 @@ async function trocarImagemLojaAdministrador(id, input) {
   }
 }
 
-async function excluirLojaAdministrador(id) {
-  const loja = lojasAdministradorCache.find(item => item.id === id);
+async function excluirLojaAdmin(id) {
+  const loja = lojasAdminCache.find(item => item.id === id);
   const nome = loja?.nome || "esta loja";
 
   const confirmar = await confirmarAcao(
@@ -886,15 +886,15 @@ async function excluirLojaAdministrador(id) {
   try {
     await valisysDB.excluirLoja(id);
 
-    lojasAdministradorCache = lojasAdministradorCache.filter(item => item.id !== id);
+    lojasAdminCache = lojasAdminCache.filter(item => item.id !== id);
     alert("Loja excluída.");
-    await renderizarLojasAdministrador();
+    await renderizarLojasAdmin();
   } catch (erro) {
     alert("Erro ao excluir loja: " + erro.message);
   }
 }
 
-async function alterarStatusLojaAdministrador(id, status) {
+async function alterarStatusLojaAdmin(id, status) {
   const texto = status === "ativa" ? "ativar" : "desativar";
   const confirmar = await confirmarAcao(`Deseja ${texto} o serviço desta loja?`, "Alterar status da loja");
 
@@ -903,20 +903,20 @@ async function alterarStatusLojaAdministrador(id, status) {
   try {
     await valisysDB.alternarStatusLoja(id, status);
     alert(status === "ativa" ? "Serviço ativado." : "Serviço desativado.");
-    await renderizarLojasAdministrador();
+    await renderizarLojasAdmin();
   } catch (erro) {
     alert("Erro ao alterar status: " + erro.message);
   }
 }
 
-formLojaAdministrador.addEventListener("submit", async event => {
+formLojaAdmin.addEventListener("submit", async event => {
   event.preventDefault();
 
-  const nome = nomeLojaAdministrador.value.trim();
-  const responsavel = responsavelLojaAdministrador.value.trim();
-  const grupo = grupoLojaAdministrador.value.trim();
-  const regiao = regiaoLojaAdministrador.value.trim();
-  const corTema = normalizarHexCor(corLojaAdministrador?.value || "") || "#2f7d4f";
+  const nome = nomeLojaAdmin.value.trim();
+  const responsavel = responsavelLojaAdmin.value.trim();
+  const grupo = grupoLojaAdmin.value.trim();
+  const regiao = regiaoLojaAdmin.value.trim();
+  const corTema = normalizarHexCor(corLojaAdmin?.value || "") || "#2f7d4f";
 
   if (!nome) {
     alert("Informe o nome da loja.");
@@ -924,7 +924,7 @@ formLojaAdministrador.addEventListener("submit", async event => {
   }
 
   try {
-    const setores = setoresFormularioAdministrador();
+    const setores = setoresFormularioAdmin();
     const lojaCriada = await valisysDB.criarLoja({
       nome,
       responsavel,
@@ -936,26 +936,26 @@ formLojaAdministrador.addEventListener("submit", async event => {
 
     await valisysDB.salvarSetoresLoja(lojaCriada.id, setores);
 
-    const preFuncionarios = funcionariosPreCadastroAdministrador(setores);
+    const preFuncionarios = funcionariosPreCadastroAdmin(setores);
     if (preFuncionarios.length > 0) {
       await valisysDB.criarFuncionariosEmLote(lojaCriada.id, preFuncionarios);
     }
 
-    formLojaAdministrador.reset();
-    if (corLojaAdministrador) corLojaAdministrador.value = "#2f7d4f";
-    if (setoresLojaAdministradorLista) renderizarSelecaoSetores(setoresLojaAdministradorLista);
+    formLojaAdmin.reset();
+    if (corLojaAdmin) corLojaAdmin.value = "#2f7d4f";
+    if (setoresLojaAdminLista) renderizarSelecaoSetores(setoresLojaAdminLista);
     imagemLojaBase64 = "";
-    previewImagemLojaAdministrador.innerHTML = "";
+    previewImagemLojaAdmin.innerHTML = "";
 
     alert("Loja cadastrada.");
-    await renderizarLojasAdministrador();
+    await renderizarLojasAdmin();
   } catch (erro) {
     alert("Erro ao cadastrar loja: " + erro.message);
   }
 });
 
-[filtroGrupoAdministrador, filtroRegiaoAdministrador, filtroStatusAdministrador].forEach(filtro => {
-  filtro.addEventListener("change", renderizarListaFiltradaAdministrador);
+[filtroGrupoAdmin, filtroRegiaoAdmin, filtroStatusAdmin].forEach(filtro => {
+  filtro.addEventListener("change", renderizarListaFiltradaAdmin);
 });
 
 
@@ -971,10 +971,10 @@ function atendentePadraoSac() {
   return localStorage.getItem(chaveAtendenteSac) || "";
 }
 
-async function renderizarSacAdministrador() {
-  if (!listaSacAdministrador) return;
+async function renderizarSacAdmin() {
+  if (!listaSacAdmin) return;
 
-  listaSacAdministrador.innerHTML = `
+  listaSacAdmin.innerHTML = `
     <div class="card">
       <p class="muted">Carregando conversas...</p>
     </div>
@@ -984,15 +984,15 @@ async function renderizarSacAdministrador() {
     const conversas = await valisysDB.listarConversasChatSac({ limite: 120 });
 
     if (conversas.length === 0) {
-      listaSacAdministrador.innerHTML = `
+      listaSacAdmin.innerHTML = `
         <div class="sac-empty">
           <p>Nenhuma conversa no SAC Online.</p>
           <small>Quando alguém chamar pelo chat do site público, aparece aqui.</small>
         </div>
       `;
 
-      if (chatSacAdministradorPainel) {
-        chatSacAdministradorPainel.innerHTML = `
+      if (chatSacAdminPainel) {
+        chatSacAdminPainel.innerHTML = `
           <div class="chat-admin-empty">
             <p>Nenhuma conversa selecionada.</p>
             <small>As mensagens enviadas pelo site aparecem aqui.</small>
@@ -1003,8 +1003,8 @@ async function renderizarSacAdministrador() {
       return;
     }
 
-    listaSacAdministrador.innerHTML = conversas.map(item => `
-      <button type="button" class="chat-conversa-item ${item.sessaoId === conversaSacSelecionada ? "active" : ""}" onclick="abrirConversaSacAdministrador('${item.sessaoId}')">
+    listaSacAdmin.innerHTML = conversas.map(item => `
+      <button type="button" class="chat-conversa-item ${item.sessaoId === conversaSacSelecionada ? "active" : ""}" onclick="abrirConversaSacAdmin('${item.sessaoId}')">
         <span>
           <strong>${esc(item.nome || "Visitante")}</strong>
           <small>${esc(item.contato || "Sem contato")}</small>
@@ -1016,11 +1016,11 @@ async function renderizarSacAdministrador() {
 
     if (!conversaSacSelecionada && conversas[0]) {
       conversaSacSelecionada = conversas[0].sessaoId;
-      await abrirConversaSacAdministrador(conversaSacSelecionada, false);
+      await abrirConversaSacAdmin(conversaSacSelecionada, false);
     }
   } catch (erro) {
     console.error(erro);
-    listaSacAdministrador.innerHTML = `
+    listaSacAdmin.innerHTML = `
       <div class="card">
         <p class="danger">Erro ao carregar chat do SAC Online.</p>
         <p class="muted">${esc(erro.message)}</p>
@@ -1030,12 +1030,12 @@ async function renderizarSacAdministrador() {
   }
 }
 
-async function abrirConversaSacAdministrador(sessaoId, atualizarLista = true) {
+async function abrirConversaSacAdmin(sessaoId, atualizarLista = true) {
   conversaSacSelecionada = sessaoId;
 
-  if (!chatSacAdministradorPainel) return;
+  if (!chatSacAdminPainel) return;
 
-  chatSacAdministradorPainel.innerHTML = `
+  chatSacAdminPainel.innerHTML = `
     <div class="chat-admin-empty">
       <p>Carregando conversa...</p>
     </div>
@@ -1047,7 +1047,7 @@ async function abrirConversaSacAdministrador(sessaoId, atualizarLista = true) {
     const nome = primeira.nome || "Visitante";
     const contato = primeira.contato || "Sem contato";
 
-    chatSacAdministradorPainel.innerHTML = `
+    chatSacAdminPainel.innerHTML = `
       <div class="chat-admin-top chat-admin-top-assumir">
         <div>
           <h3>${esc(nome)}</h3>
@@ -1066,38 +1066,38 @@ async function abrirConversaSacAdministrador(sessaoId, atualizarLista = true) {
           </label>
 
           <div class="chat-assumir-actions">
-            <button type="button" class="secondary" onclick="assumirConversaSacAdministrador('${sessaoId}')">Assumir chat</button>
-            <button type="button" class="btn-danger" onclick="apagarConversaSacAdministrador('${sessaoId}')">Apagar conversa</button>
+            <button type="button" class="secondary" onclick="assumirConversaSacAdmin('${sessaoId}')">Assumir chat</button>
+            <button type="button" class="btn-danger" onclick="apagarConversaSacAdmin('${sessaoId}')">Apagar conversa</button>
           </div>
         </div>
       </div>
 
-      <div class="chat-admin-mensagens" id="chatAdministradorMensagens">
+      <div class="chat-admin-mensagens" id="chatAdminMensagens">
         ${mensagens.map(item => `
           <div class="chat-message ${item.autor === "admin" ? "bot" : "user"}">
-            <small>${item.autor === "admin" ? esc(item.atendente || "Administrador") : esc(item.nome || "Cliente")}</small>
+            <small>${item.autor === "admin" ? esc(item.atendente || "Admin") : esc(item.nome || "Cliente")}</small>
             <p>${esc(item.mensagem)}</p>
           </div>
         `).join("")}
       </div>
 
-      <form class="chat-admin-form" onsubmit="responderConversaSacAdministrador(event, '${sessaoId}')">
-        <textarea id="respostaSacAdministrador" rows="2" placeholder="Digite sua resposta..." required></textarea>
+      <form class="chat-admin-form" onsubmit="responderConversaSacAdmin(event, '${sessaoId}')">
+        <textarea id="respostaSacAdmin" rows="2" placeholder="Digite sua resposta..." required></textarea>
         <button type="submit">Responder</button>
       </form>
     `;
 
-    const caixa = document.getElementById("chatAdministradorMensagens");
+    const caixa = document.getElementById("chatAdminMensagens");
     if (caixa) caixa.scrollTop = caixa.scrollHeight;
 
     await valisysDB.marcarChatSacComoLido(sessaoId);
 
     if (atualizarLista) {
-      await renderizarSacAdministrador();
+      await renderizarSacAdmin();
     }
   } catch (erro) {
     console.error(erro);
-    chatSacAdministradorPainel.innerHTML = `
+    chatSacAdminPainel.innerHTML = `
       <div class="chat-admin-empty">
         <p class="danger">Erro ao abrir conversa.</p>
         <small>${esc(erro.message)}</small>
@@ -1106,10 +1106,10 @@ async function abrirConversaSacAdministrador(sessaoId, atualizarLista = true) {
   }
 }
 
-async function responderConversaSacAdministrador(event, sessaoId) {
+async function responderConversaSacAdmin(event, sessaoId) {
   event.preventDefault();
 
-  const campo = document.getElementById("respostaSacAdministrador");
+  const campo = document.getElementById("respostaSacAdmin");
   const mensagem = campo.value.trim();
   const nomeAtendente = document.getElementById("nomeAtendenteSac")?.value.trim() || atendentePadraoSac() || "ValiSys";
 
@@ -1131,13 +1131,13 @@ async function responderConversaSacAdministrador(event, sessaoId) {
     });
 
     campo.value = "";
-    await abrirConversaSacAdministrador(sessaoId, true);
+    await abrirConversaSacAdmin(sessaoId, true);
   } catch (erro) {
     alert("Erro ao responder SAC: " + erro.message);
   }
 }
 
-async function assumirConversaSacAdministrador(sessaoId) {
+async function assumirConversaSacAdmin(sessaoId) {
   const campoNome = document.getElementById("nomeAtendenteSac");
   const campoHorario = document.getElementById("horarioAtendimentoSac");
 
@@ -1168,13 +1168,13 @@ async function assumirConversaSacAdministrador(sessaoId) {
       atendente: nomeAtendente
     });
 
-    await abrirConversaSacAdministrador(sessaoId, true);
+    await abrirConversaSacAdmin(sessaoId, true);
   } catch (erro) {
     alert("Erro ao assumir chat: " + erro.message);
   }
 }
 
-async function apagarConversaSacAdministrador(sessaoId) {
+async function apagarConversaSacAdmin(sessaoId) {
   const confirmar = await confirmarAcao("Apagar toda esta conversa do SAC?", "Apagar conversa", "perigo");
 
   if (!confirmar) return;
@@ -1182,27 +1182,27 @@ async function apagarConversaSacAdministrador(sessaoId) {
   try {
     await valisysDB.apagarConversaChatSac(sessaoId);
     conversaSacSelecionada = "";
-    await renderizarSacAdministrador();
+    await renderizarSacAdmin();
   } catch (erro) {
     alert("Erro ao apagar conversa: " + erro.message);
   }
 }
 
-window.abrirConversaSacAdministrador = abrirConversaSacAdministrador;
-window.responderConversaSacAdministrador = responderConversaSacAdministrador;
-window.assumirConversaSacAdministrador = assumirConversaSacAdministrador;
-window.apagarConversaSacAdministrador = apagarConversaSacAdministrador;
+window.abrirConversaSacAdmin = abrirConversaSacAdmin;
+window.responderConversaSacAdmin = responderConversaSacAdmin;
+window.assumirConversaSacAdmin = assumirConversaSacAdmin;
+window.apagarConversaSacAdmin = apagarConversaSacAdmin;
 
-if (btnAtualizarSacAdministrador) {
-  btnAtualizarSacAdministrador.addEventListener("click", async () => {
-    await renderizarSacAdministrador();
+if (btnAtualizarSacAdmin) {
+  btnAtualizarSacAdmin.addEventListener("click", async () => {
+    await renderizarSacAdmin();
 
     if (conversaSacSelecionada) {
-      await abrirConversaSacAdministrador(conversaSacSelecionada, false);
+      await abrirConversaSacAdmin(conversaSacSelecionada, false);
     }
   });
 }
 
 
-renderizarLojasAdministrador();
-renderizarSacAdministrador();
+renderizarLojasAdmin();
+renderizarSacAdmin();

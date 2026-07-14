@@ -1,5 +1,5 @@
 const usuario = protegerPagina();
-if (bloquearAdministradorEmAreaLoja()) throw new Error("Administrador bloqueado na área da loja.");
+if (bloquearAdminEmAreaLoja()) throw new Error("Admin bloqueado na área da loja.");
 const lojaAtual = protegerLojaSelecionada();
 
 if (!podeGerenciarFuncionarios(usuario.cargo)) {
@@ -221,7 +221,7 @@ async function renderizarFuncionarios() {
         </div>
 
         <div class="card-actions stack-actions funcionario-card-actions">
-          <button type="button" class="btn-gerenciar-usuario" onclick="abrirEditorFuncionario('${func.id}')"> Gerenciar usuário</button>
+          <button type="button" class="btn-gerenciar-usuario" onclick="abrirEditorFuncionario('${func.id}')">⚙️ Gerenciar usuário</button>
           <button type="button" class="btn-danger" onclick="removerFuncionario('${func.id}')">Remover</button>
         </div>
       </article>

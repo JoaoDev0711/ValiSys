@@ -1,5 +1,5 @@
 const usuario = protegerPagina();
-if (bloquearAdministradorEmAreaLoja()) throw new Error("Administrador bloqueado na área da loja.");
+if (bloquearAdminEmAreaLoja()) throw new Error("Admin bloqueado na área da loja.");
 const lojaAtual = protegerLojaSelecionada();
 
 const lojaListaEl = document.getElementById("loja-lista-atual");
@@ -138,7 +138,7 @@ function erroAmigavel(erro) {
   const mensagem = String(erro?.message || "").toLowerCase();
 
   if (mensagem.includes("timeout") || mensagem.includes("canceling statement")) {
-    return "A consulta demorou mais que o normal. Rode o SQL principal atualizado e tente novamente.";
+    return "A consulta demorou mais que o normal. Execute o SQL principal atualizado e tente novamente.";
   }
 
   if (mensagem.includes("failed to fetch") || mensagem.includes("network")) {
@@ -146,7 +146,7 @@ function erroAmigavel(erro) {
   }
 
   if (mensagem.includes("function") || mensagem.includes("rpc") || mensagem.includes("schema cache")) {
-    return "A função da Lista Geral ainda não está disponível no Supabase. Rode o SQL principal atualizado.";
+    return "A função da Lista Geral ainda não está disponível no Supabase. Execute o SQL principal atualizado.";
   }
 
   return "Não foi possível atualizar a lista agora. Tente novamente em alguns segundos.";

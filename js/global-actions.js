@@ -58,7 +58,7 @@
       <a${linkClasse(inicio)} href="${inicio}">Início</a>
       <a${linkClasse("tutorial.html")} href="tutorial.html">Tutorial</a>
       <a${linkClasse("notas-atualizacao.html")} href="notas-atualizacao.html">Novidades</a>
-      <button type="button" data-action="reload">Atualizar</button>
+      <a${linkClasse("configuracoes.html")} href="configuracoes.html">Config</a>
       <button type="button" data-action="logout">Sair</button>
     `;
 

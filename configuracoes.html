@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configurações - ValiSys</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#153B2A">
+  <link rel="stylesheet" href="css/styles.css?v=admin-listas-permissoes-1">
+  <link rel="stylesheet" href="css/minimalista-profissional.css?v=admin-listas-permissoes-1">
+  <link rel="stylesheet" href="css/configuracoes.css?v=admin-listas-permissoes-1">
+</head>
+<body>
+
+<header class="topbar">
+  <a href="dashboard.html" class="user-icon" aria-label="Voltar">Voltar</a>
+  <h1>Configurações</h1>
+  <a href="#" onclick="sair()" class="user-icon" aria-label="Sair">Sair</a>
+</header>
+
+<main class="container">
+  <section class="welcome-card">
+    <p class="muted">Preferências locais</p>
+    <h2>Configurações do sistema</h2>
+    <p>Ajustes de aparência, som e acessibilidade aplicados apenas neste aparelho.</p>
+  </section>
+
+  <form id="config-form" class="config-section">
+    <section class="config-group">
+      <h3>Tema</h3>
+      <p class="muted">Controle de contraste e leitura da interface.</p>
+
+      <div class="config-options duas-colunas">
+        <label class="config-option">
+          <input type="radio" name="tema" value="claro">
+          <span>
+            <strong>Claro</strong>
+            <small class="muted">Interface clara para uso diário.</small>
+          </span>
+        </label>
+
+        <label class="config-option">
+          <input type="radio" name="tema" value="escuro">
+          <span>
+            <strong>Escuro</strong>
+            <small class="muted">Interface escura para ambientes com pouca luz.</small>
+          </span>
+        </label>
+
+        <label class="config-option">
+          <input type="radio" name="tema" value="auto">
+          <span>
+            <strong>Automático</strong>
+            <small class="muted">Segue a preferência do aparelho.</small>
+          </span>
+        </label>
+      </div>
+    </section>
+
+    <section class="config-group">
+      <h3>Estilo visual</h3>
+      <p class="muted">Variações de apresentação sem alteração das funções.</p>
+
+      <div class="config-options duas-colunas">
+        <label class="config-option">
+          <input type="radio" name="estilo" value="minimalista">
+          <span>
+            <strong>Minimalista</strong>
+            <small class="muted">Layout limpo, espaçado e direto.</small>
+          </span>
+        </label>
+
+        <label class="config-option">
+          <input type="radio" name="estilo" value="compacto">
+          <span>
+            <strong>Compacto</strong>
+            <small class="muted">Mais informações visíveis por tela.</small>
+          </span>
+        </label>
+
+        <label class="config-option">
+          <input type="radio" name="estilo" value="premium">
+          <span>
+            <strong>Premium</strong>
+            <small class="muted">Aparência mais institucional.</small>
+          </span>
+        </label>
+      </div>
+    </section>
+
+    <section class="config-group">
+      <h3>Densidade</h3>
+      <p class="muted">Espaçamento de cards, botões e formulários.</p>
+
+      <div class="config-options duas-colunas">
+        <label class="config-option">
+          <input type="radio" name="densidade" value="confortavel">
+          <span>
+            <strong>Confortável</strong>
+            <small class="muted">Melhor para operação em celular.</small>
+          </span>
+        </label>
+
+        <label class="config-option">
+          <input type="radio" name="densidade" value="compacta">
+          <span>
+            <strong>Compacta</strong>
+            <small class="muted">Reduz espaços e altura dos blocos.</small>
+          </span>
+        </label>
+      </div>
+    </section>
+
+    <section class="config-group">
+      <h3>Sons</h3>
+      <p class="muted">Feedback sonoro local. Notificações push continuam separadas.</p>
+
+      <label class="config-toggle">
+        <span>
+          <strong>Sons ativados</strong>
+          <small class="muted">Permite confirmação sonora em ações selecionadas.</small>
+        </span>
+        <input type="checkbox" id="sons">
+      </label>
+
+      <label class="config-toggle">
+        <span>
+          <strong>Som ao entrar</strong>
+          <small class="muted">Confirma abertura do painel.</small>
+        </span>
+        <input type="checkbox" id="somEntrada">
+      </label>
+
+      <label class="config-toggle">
+        <span>
+          <strong>Som de toque</strong>
+          <small class="muted">Feedback curto em botões e atalhos.</small>
+        </span>
+        <input type="checkbox" id="somClique">
+      </label>
+
+      <label class="config-toggle">
+        <span>
+          <strong>Som de confirmação</strong>
+          <small class="muted">Feedback ao concluir uma ação.</small>
+        </span>
+        <input type="checkbox" id="somSucesso">
+      </label>
+
+      <div class="config-volume">
+        <label for="volume">Volume: <strong id="volume-valor">55%</strong></label>
+        <input type="range" id="volume" min="0" max="100" step="5">
+      </div>
+
+      <button type="button" class="secondary" id="teste-som">Testar som</button>
+    </section>
+
+    <section class="config-group">
+      <h3>Acessibilidade</h3>
+
+      <label class="config-toggle">
+        <span>
+          <strong>Texto maior</strong>
+          <small class="muted">Aumenta a leitura da interface.</small>
+        </span>
+        <input type="checkbox" id="fonteMaior">
+      </label>
+
+      <label class="config-toggle">
+        <span>
+          <strong>Reduzir animações</strong>
+          <small class="muted">Remove movimentos e transições visuais.</small>
+        </span>
+        <input type="checkbox" id="reduzirMovimento">
+      </label>
+    </section>
+
+    <section class="config-group">
+      <h3>Prévia</h3>
+      <div class="config-preview">
+        <strong>Validade próxima</strong>
+        <p class="muted">Exemplo de leitura visual com as preferências aplicadas.</p>
+        <button type="submit">Salvar configurações</button>
+      </div>
+
+      <p class="muted" id="status-config">As alterações são aplicadas automaticamente.</p>
+
+      <div class="config-actions">
+        <button type="submit">Salvar</button>
+        <button type="button" class="secondary" id="reset-config">Restaurar padrão</button>
+      </div>
+    </section>
+  </form>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="js/preferencias.js?v=admin-listas-permissoes-1" defer></script>
+<script src="js/dados-config.js?v=admin-listas-permissoes-1" defer></script>
+<script src="js/dados-service.js?v=admin-listas-permissoes-1" defer></script>
+<script src="js/auth.js?v=admin-listas-permissoes-1" defer></script>
+<script src="js/cookies.js?v=admin-listas-permissoes-1" defer></script>
+<script src="js/loja.js?v=admin-listas-permissoes-1" defer></script>
+<script src="js/site-dialog.js?v=admin-listas-permissoes-1" defer></script>
+<script src="js/icons.js?v=admin-listas-permissoes-1" defer></script>
+<script src="js/navbar.js?v=admin-listas-permissoes-1" defer></script>
+<script src="js/configuracoes.js?v=admin-listas-permissoes-1" defer></script>
+<script src="js/global-actions.js?v=admin-listas-permissoes-1" defer></script>
+<script src="js/pwa-register.js?v=admin-listas-permissoes-1" defer></script>
+</body>
+</html>

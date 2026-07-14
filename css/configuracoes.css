@@ -1,0 +1,207 @@
+/* Configurações e temas do usuário */
+:root[data-tema="escuro"] {
+  --bg: #101510;
+  --surface: #151d17;
+  --surface-soft: #1d271f;
+  --text: #edf5ee;
+  --muted: #a8b3aa;
+  --line: #2c392f;
+  --primary: #67c587;
+  --primary-strong: #8be5a6;
+  --accent: #1f3023;
+  --shadow: 0 10px 30px rgba(0, 0, 0, .28);
+}
+
+:root[data-tema="escuro"] body,
+body.tema-escuro {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+:root[data-tema="escuro"] .topbar,
+:root[data-tema="escuro"] .public-header,
+:root[data-tema="escuro"] .quick-actions-bar,
+:root[data-tema="escuro"] .sidebar {
+  background: rgba(16, 21, 16, .96) !important;
+  border-color: var(--line) !important;
+}
+
+:root[data-tema="escuro"] .card,
+:root[data-tema="escuro"] .welcome-card,
+:root[data-tema="escuro"] .action-card,
+:root[data-tema="escuro"] .login-card,
+:root[data-tema="escuro"] .loja-atual-card,
+:root[data-tema="escuro"] .public-plan-card,
+:root[data-tema="escuro"] .feature-grid-redesign article,
+:root[data-tema="escuro"] .update-item,
+:root[data-tema="escuro"] .tutorial-item,
+:root[data-tema="escuro"] .config-group,
+:root[data-tema="escuro"] .config-option,
+:root[data-tema="escuro"] .config-toggle,
+:root[data-tema="escuro"] .config-preview {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--line) !important;
+}
+
+:root[data-tema="escuro"] input,
+:root[data-tema="escuro"] select,
+:root[data-tema="escuro"] textarea {
+  background: #101510 !important;
+  color: var(--text) !important;
+  border-color: var(--line) !important;
+}
+
+:root[data-tema="escuro"] .muted,
+:root[data-tema="escuro"] .small.muted {
+  color: var(--muted) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-tema="auto"] {
+    --bg: #101510;
+    --surface: #151d17;
+    --surface-soft: #1d271f;
+    --text: #edf5ee;
+    --muted: #a8b3aa;
+    --line: #2c392f;
+    --primary: #67c587;
+    --primary-strong: #8be5a6;
+    --accent: #1f3023;
+    --shadow: 0 10px 30px rgba(0, 0, 0, .28);
+  }
+
+  :root[data-tema="auto"] body {
+    background: var(--bg) !important;
+    color: var(--text) !important;
+  }
+}
+
+:root[data-estilo="compacto"] {
+  --radius: 12px;
+}
+
+:root[data-estilo="compacto"] .card,
+:root[data-estilo="compacto"] .welcome-card,
+:root[data-estilo="compacto"] .action-card {
+  padding: 14px !important;
+  border-radius: 14px !important;
+}
+
+:root[data-estilo="premium"] {
+  --bg: #f5f2eb;
+  --surface: #fffdf7;
+  --surface-soft: #f0eadf;
+  --primary: #1b5f3b;
+  --primary-strong: #123f29;
+  --accent: #e8dcc7;
+  --line: #e4dacb;
+}
+
+:root[data-fonte-maior="sim"] body {
+  font-size: 17px;
+}
+
+:root[data-densidade="compacta"] .card,
+:root[data-densidade="compacta"] .action-card,
+:root[data-densidade="compacta"] .welcome-card {
+  padding: 14px !important;
+}
+
+:root[data-reduzir-movimento="sim"] *,
+body.reduzir-movimento * {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+.config-section,
+.config-options {
+  display: grid;
+  gap: 14px;
+}
+
+.config-group {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+}
+
+.config-group h3 {
+  margin: 0;
+}
+
+.config-option {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-soft);
+  cursor: pointer;
+}
+
+.config-option input {
+  margin-top: 3px;
+}
+
+.config-option strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.config-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-soft);
+}
+
+.config-toggle input {
+  width: 22px;
+  height: 22px;
+}
+
+.config-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.config-actions button {
+  width: auto;
+  min-width: 160px;
+}
+
+.config-volume {
+  display: grid;
+  gap: 8px;
+}
+
+.config-volume input {
+  width: 100%;
+}
+
+.config-preview {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px dashed var(--line);
+  background: var(--surface-soft);
+}
+
+@media (min-width: 760px) {
+  .config-options.duas-colunas {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

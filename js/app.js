@@ -1,5 +1,5 @@
 const usuario = protegerPagina();
-if (bloquearAdministradorEmAreaLoja()) throw new Error('Administrador bloqueado na área da loja.');
+if (bloquearAdminEmAreaLoja()) throw new Error('Admin bloqueado na área da loja.');
 
 if (usuario) {
   const lojaAtual = protegerLojaSelecionada();
@@ -82,7 +82,7 @@ function prepararLembretesSobDemanda() {
   if (lembretesArea) {
     lembretesArea.innerHTML = `
       <div class="empty-state">
-        <span></span>
+        <span>⚡</span>
         <p>Lembretes em modo leve.</p>
         <p class="muted">Para acelerar o dashboard, os vencimentos só são buscados quando você abre esta área.</p>
       </div>
@@ -121,7 +121,7 @@ async function carregarResumoInicial() {
     limite.setDate(limite.getDate() + 30);
     const limiteISO = limite.toISOString().slice(0, 10);
 
-    let lancamentos = await valisysDB.listarLancamentosPainel({
+    let lancamentos = await valisysDB.listarLancamentosDashboard({
       lojaId: lojaAtual.id,
       status: "ativo",
       limiteData: limiteISO,
@@ -170,13 +170,13 @@ async function carregarResumoInicial() {
 
     const grupos = [
       {
-        titulo: " Vencidos",
+        titulo: "🚨 Vencidos",
         descricao: "Produtos que já passaram da validade",
         itens: vencidos.sort((a, b) => a.dias - b.dias),
         classe: "danger"
       },
       {
-        titulo: " Vencem hoje",
+        titulo: "📅 Vencem hoje",
         descricao: "Itens que precisam de ação imediata",
         itens: hojeLista.sort((a, b) => a.nomeProduto.localeCompare(b.nomeProduto)),
         classe: "danger"
@@ -188,7 +188,7 @@ async function carregarResumoInicial() {
         classe: "warning"
       },
       {
-        titulo: " Até 30 dias",
+        titulo: "🗓️ Até 30 dias",
         descricao: "Produtos para acompanhar com calma",
         itens: trintaDias.sort((a, b) => a.dias - b.dias),
         classe: "success"
@@ -200,17 +200,17 @@ async function carregarResumoInicial() {
     if (gruposComItens.length === 0) {
       lembretesArea.innerHTML = `
         <div class="empty-state">
-          <span></span>
+          <span>✅</span>
           <p>Nenhum vencimento próximo encontrado nesta loja.</p>
           <p class="muted">O dashboard carrega somente itens vencidos ou até 30 dias para ficar rápido.</p>
-          <a class="mini-link" href="lista-geral.html">Ver lista completa</a>
+          <a class="mini-link" href="lista-geral.html">Ver Lista Geral</a>
         </div>
       `;
       return;
     }
 
     const avisoLimite = lancamentosComDias.length >= 320
-      ? `<p class="muted mais-itens">Mostrando os primeiros 120 itens próximos. Use a Lista Geral para buscar mais.</p>`
+      ? `<p class="muted mais-itens">Mostrando os primeiros 120 itens próximos. Use a Lista completa para buscar mais.</p>`
       : "";
 
     lembretesArea.innerHTML = avisoLimite + gruposComItens.map(grupo => renderizarGrupoLembrete(grupo)).join("");
@@ -225,9 +225,9 @@ async function carregarResumoInicial() {
 
     lembretesArea.innerHTML = `
       <div class="card">
-        <p class="danger">Não consegui atualizar os lembretes agora, mas o sistema continua funcionando.</p>
-        <p class="muted">${esc(mensagem.includes("timeout") ? "O banco demorou demais para responder. Rode o SQL principal para criar os índices e tente novamente." : mensagem)}</p>
-        <a class="mini-link" href="lista-geral.html">Abrir lista completa</a>
+        <p class="danger">Não foi possível atualizar os lembretes agora, O restante do sistema permanece disponível.</p>
+        <p class="muted">${esc(mensagem.includes("timeout") ? "O banco demorou demais para responder. Execute o SQL principal para criar os índices e tente novamente." : mensagem)}</p>
+        <a class="mini-link" href="lista-geral.html">Abrir Lista Geral</a>
       </div>
     `;
   }
@@ -315,7 +315,7 @@ function renderizarItemLembrete(item) {
         ${
           item.fotoFinal
             ? `<img src="${item.fotoFinal}" alt="${esc(item.nomeProduto)}">`
-            : `<span></span>`
+            : `<span>📦</span>`
         }
       </div>
 

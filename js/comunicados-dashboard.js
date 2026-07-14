@@ -12,7 +12,7 @@
     aviso.className = "comunicado-dashboard-inline";
     aviso.innerHTML = `
       <div class="comunicado-inline-topo">
-        <span> Aviso da equipe</span>
+        <span>📣 Aviso da equipe</span>
         <strong id="comunicado-inline-titulo">Nenhum aviso recente</strong>
       </div>
       <p id="comunicado-inline-mensagem">Quando a gerência enviar um comunicado, ele aparece aqui.</p>

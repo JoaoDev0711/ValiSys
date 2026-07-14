@@ -252,9 +252,6 @@ label {
   margin-right: auto;
 }
 
-.real-screens-showcase {
-  display: none !important;
-}
 
 .hero-metrics {
   justify-content: center;
@@ -581,4 +578,113 @@ label {
   .quick-actions-bar {
     z-index: 80;
   }
+}
+
+
+/* Correção do fluxo visual no mobile */
+.real-screens-showcase {
+  display: block !important;
+  width: 100%;
+  margin-top: 34px;
+}
+
+@media (max-width: 760px) {
+  .public-hero-redesign {
+    text-align: left !important;
+  }
+
+  .real-screens-showcase {
+    overflow: visible !important;
+    min-height: 420px;
+  }
+
+  .coverflow-stage.phone-stack-stage {
+    position: relative !important;
+    display: flex !important;
+    gap: 14px !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory;
+    padding: 8px 8px 20px !important;
+    min-height: 390px !important;
+    transform: none !important;
+    perspective: none !important;
+  }
+
+  .coverflow-stage.phone-stack-stage::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .coverflow-slide,
+  .coverflow-slide.active,
+  .coverflow-slide.left-1,
+  .coverflow-slide.left-2,
+  .coverflow-slide.right-1,
+  .coverflow-slide.right-2,
+  .coverflow-slide.hidden {
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+    opacity: 1 !important;
+    display: block !important;
+    visibility: visible !important;
+    min-width: 74vw !important;
+    max-width: 280px !important;
+    scroll-snap-align: center;
+    pointer-events: auto !important;
+  }
+
+  .coverflow-window.phone-window {
+    width: 100% !important;
+    max-width: 280px !important;
+    margin: 0 auto !important;
+  }
+
+  .coverflow-image.phone-screen {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    object-fit: cover !important;
+  }
+
+  .coverflow-dots {
+    display: none !important;
+  }
+
+  .importance-pin-section {
+    padding: 52px 16px !important;
+  }
+
+  .importance-sticky,
+  .importance-scene,
+  .importance-phone {
+    min-height: auto !important;
+    height: auto !important;
+  }
+
+  .importance-scene {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Linguagem visual mais institucional */
+.public-hero-redesign p,
+.public-section-redesign p,
+.workflow-redesign p,
+.split-redesign p,
+.cta-redesign p {
+  color: var(--muted);
+}
+
+.icon-btn,
+.user-icon {
+  width: auto !important;
+  min-width: 44px;
+  padding: 0 12px;
+  font-size: 13px !important;
+  font-weight: 800;
+  white-space: nowrap;
 }

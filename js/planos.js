@@ -1,5 +1,5 @@
 const usuario = protegerPagina();
-if (bloquearAdministradorEmAreaLoja()) throw new Error("Administrador bloqueado na área da loja.");
+if (bloquearAdminEmAreaLoja()) throw new Error("Admin bloqueado na área da loja.");
 const lojaAtual = protegerLojaSelecionada();
 
 const lojaPlanosAtual = document.getElementById("loja-planos-atual");
@@ -8,9 +8,9 @@ const assinaturaResumo = document.getElementById("assinatura-resumo-planos");
 
 if (lojaPlanosAtual && lojaAtual) lojaPlanosAtual.innerHTML = lojaInlineHTML(lojaAtual);
 
-if (!["gerente", "admin"].includes(usuario.cargo)) {
-  alert("Somente gerente ou admin podem alterar plano da loja.");
-  window.location.href = "dashboard.html";
+if (usuario.cargo !== "admin") {
+  alert("Área exclusiva da administração geral.");
+  window.location.href = usuario.cargo === "admin" ? "admin-dashboard.html" : "dashboard.html";
   throw new Error("Área financeira restrita.");
 }
 
@@ -107,7 +107,7 @@ async function selecionarPlano(codigo) {
     window.location.href = "minha-assinatura.html";
   } catch (erro) {
     console.error(erro);
-    alert("Não foi possível atualizar o plano. Rode o SQL principal no Supabase e tente novamente.");
+    alert("Não foi possível atualizar o plano. Execute o SQL principal no Supabase e tente novamente.");
   }
 }
 

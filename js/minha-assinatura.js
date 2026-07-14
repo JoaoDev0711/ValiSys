@@ -1,5 +1,5 @@
 const usuario = protegerPagina();
-if (bloquearAdministradorEmAreaLoja()) throw new Error("Administrador bloqueado na área da loja.");
+if (bloquearAdminEmAreaLoja()) throw new Error("Admin bloqueado na área da loja.");
 const lojaAtual = protegerLojaSelecionada();
 
 const lojaAssinaturaAtual = document.getElementById("loja-assinatura-atual");
@@ -10,9 +10,9 @@ const modalPagamentoConteudo = document.getElementById("modal-pagamento-conteudo
 
 if (lojaAssinaturaAtual && lojaAtual) lojaAssinaturaAtual.innerHTML = lojaInlineHTML(lojaAtual);
 
-if (!["gerente", "admin"].includes(usuario.cargo)) {
-  alert("Somente gerente ou admin podem acessar a assinatura da loja.");
-  window.location.href = "dashboard.html";
+if (usuario.cargo !== "admin") {
+  alert("Área exclusiva da administração geral.");
+  window.location.href = usuario.cargo === "admin" ? "admin-dashboard.html" : "dashboard.html";
   throw new Error("Área financeira restrita.");
 }
 
@@ -323,7 +323,7 @@ async function carregarAssinatura() {
       assinaturaResumo.innerHTML = `
         <div class="finance-status-card vencida">
           <strong>Não foi possível carregar a assinatura.</strong>
-          <p>Rode o SQL principal atualizado no Supabase para criar o módulo financeiro.</p>
+          <p>Execute o SQL principal atualizado no Supabase para criar o módulo financeiro.</p>
           <a class="button-link" href="planos.html">Ver planos</a>
         </div>
       `;

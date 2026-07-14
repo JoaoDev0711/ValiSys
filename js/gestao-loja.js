@@ -1,5 +1,5 @@
 const usuario = protegerPagina();
-if (bloquearAdministradorEmAreaLoja()) throw new Error("Administrador bloqueado na gestão da loja.");
+if (bloquearAdminEmAreaLoja()) throw new Error("Admin bloqueado na gestão da loja.");
 
 if (!podeVerGestaoLoja(usuario.cargo)) {
   alert("Área disponível para gerente e encarregado.");
@@ -21,7 +21,7 @@ if (gestaoLojaAtual) gestaoLojaAtual.innerHTML = lojaInlineHTML(lojaAtual);
 if (gestaoSubtitulo) gestaoSubtitulo.innerText = `${lojaAtual.grupo || "Sem grupo"} • ${lojaAtual.regiao || "Sem região"}`;
 
 gestaoTitulo.innerText = usuario.cargo === "admin"
-  ? "Administradoristração da loja"
+  ? "Administração da loja"
   : usuario.cargo === "gerente"
     ? "Gestão da loja"
     : "Gestão do encarregado";
@@ -105,7 +105,7 @@ async function carregarGestao() {
     limiteGestao.setDate(limiteGestao.getDate() + 30);
     const limiteDataGestao = limiteGestao.toISOString().slice(0, 10);
 
-    let lancamentos = await valisysDB.listarLancamentosPainel({
+    let lancamentos = await valisysDB.listarLancamentosDashboard({
       lojaId: lojaAtual.id,
       status: "ativo",
       limiteData: limiteDataGestao,
