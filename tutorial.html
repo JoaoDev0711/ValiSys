@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tutorial - ValiSys</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#153B2A">
+  <link rel="stylesheet" href="css/styles.css?v=minimalista-profissional-1">
+  <link rel="stylesheet" href="css/minimalista-profissional.css?v=minimalista-profissional-1">
+</head>
+<body>
+
+<header class="topbar">
+  <a href="dashboard.html" class="user-icon" aria-label="Voltar">←</a>
+  <h1>Tutorial</h1>
+  <a href="#" onclick="sair()" class="user-icon" aria-label="Sair">Sair</a>
+</header>
+
+<main class="container">
+  <section class="welcome-card">
+    <p class="muted">Guia rápido</p>
+    <h2>Como usar o ValiSys</h2>
+    <p>Passo a passo simples para qualquer pessoa da equipe entender o fluxo principal.</p>
+  </section>
+
+  <section class="tutorial-list">
+    <article class="tutorial-item">
+      <h3>1. Escolha a loja</h3>
+      <p>Na tela inicial, selecione a loja correta. Todos os lançamentos ficam vinculados a essa unidade.</p>
+    </article>
+
+    <article class="tutorial-item">
+      <h3>2. Entre com o perfil correto</h3>
+      <p>Escolha Promotor, Encarregado ou Gerente. Quando o perfil exigir código, use o botão Mostrar para conferir o código antes de entrar.</p>
+    </article>
+
+    <article class="tutorial-item">
+      <h3>3. Lance uma validade</h3>
+      <p>Use a tela Lançar validade para informar EAN, produto, marca, gramagem, setor, quantidade e data de validade.</p>
+    </article>
+
+    <article class="tutorial-item">
+      <h3>4. Acompanhe os registros</h3>
+      <p>Meus lançamentos mostra o que você registrou. Lista Geral mostra a visão da equipe quando seu cargo permite.</p>
+    </article>
+
+    <article class="tutorial-item">
+      <h3>5. Priorize o que vence primeiro</h3>
+      <p>Comece por vencidos, vencem hoje e vencem em até 7 dias. Isso ajuda a reduzir perda e retrabalho.</p>
+    </article>
+
+    <article class="tutorial-item">
+      <h3>6. Gestão da loja</h3>
+      <p>Gerente e administrador podem acessar Gestão da loja para acompanhar operação, usuários, comunicados e relatórios.</p>
+    </article>
+
+    <article class="tutorial-item">
+      <h3>7. Planos e assinatura</h3>
+      <p>Em Minha assinatura, o gerente acompanha plano atual, cobranças dos próximos 12 meses e meios de pagamento disponíveis.</p>
+    </article>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="js/dados-config.js?v=minimalista-profissional-1" defer></script>
+<script src="js/auth.js?v=minimalista-profissional-1" defer></script>
+<script src="js/loja.js?v=minimalista-profissional-1" defer></script>
+<script src="js/site-dialog.js?v=minimalista-profissional-1" defer></script>
+<script src="js/icons.js?v=minimalista-profissional-1" defer></script>
+<script src="js/global-actions.js?v=minimalista-profissional-1" defer></script>
+<script src="js/onboarding.js?v=minimalista-profissional-1" defer></script>
+<script src="js/pwa-register.js?v=minimalista-profissional-1" defer></script>
+</body>
+</html>

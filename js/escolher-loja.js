@@ -86,7 +86,7 @@ function renderizarListaLojas() {
         <p class="muted">Responsável: ${esc(loja.responsavel || "Não informado")}</p>
         <p><strong>Grupo/Rede:</strong> ${esc(loja.grupo || "Sem grupo")}</p>
         <p><strong>Região:</strong> ${esc(loja.regiao || "Sem região")}</p>
-        <p class="small muted">Toque nesta loja para entrar.</p>
+        <p class="small muted">Selecione nesta loja para entrar.</p>
       </div>
 
       <div class="loja-enter-indicator">Entrar →</div>

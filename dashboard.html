@@ -3,38 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema - Dashboard</title>
+  <title>Sistema - Painel</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#153B2A">
-  <link rel="stylesheet" href="css/styles.css?v=foto-placeholder-visivel-1">
+  <link rel="stylesheet" href="css/styles.css?v=minimalista-profissional-1">
+  <link rel="stylesheet" href="css/minimalista-profissional.css?v=minimalista-profissional-1">
 </head>
 <body>
 
 <header class="topbar">
-  <button id="menu-btn" class="icon-btn" aria-label="Abrir menu">☰</button>
+  <button id="menu-btn" class="icon-btn" aria-label="Abrir menu">Menu</button>
   <h1>Vencimentos</h1>
-  <a href="#" onclick="sair()" class="user-icon" aria-label="Sair">🚪</a>
+  <a href="#" onclick="sair()" class="user-icon" aria-label="Sair">Sair</a>
 </header>
 
 <nav id="sidebar" class="sidebar">
   <div class="sidebar-user">
-    <div class="avatar">👤</div>
+    <div class="avatar"></div>
     <div>
       <strong id="sidebar-nome">Usuário</strong>
       <p id="sidebar-cargo">Cargo</p>
     </div>
   </div>
 
-  <a href="dashboard.html">🏠 Dashboard</a>
-  <a href="lancar.html">📦 Lançar validade</a>
-  <a href="meus-lancamentos.html">📋 Meus lançamentos</a>
-  <a href="lista-geral.html" data-role="lista-geral">📅 Lista completa</a>
-  <a href="gestao-loja.html" data-role="gestao-loja">📊 Gestão da loja</a>
-  <a href="cadastrar-produto.html" data-role="produtos">➕ Cadastrar produto</a>
-<a href="usuarios.html" data-role="funcionarios">👥 Usuários</a>
-  <a href="admin-dashboard.html" data-role="admin">⚙️ Dashboard Admin</a>
-  <a href="#" onclick="trocarLojaComConfirmacao()">🏪 Trocar loja</a>
-  <a href="#" onclick="sair()">🚪 Sair</a>
+  <a href="dashboard.html"> Painel</a>
+  <a href="lancar.html"> Lançar validade</a>
+  <a href="meus-lancamentos.html"> Meus lançamentos</a>
+  <a href="lista-geral.html" data-role="lista-geral"> Lista Geral</a>
+  <a href="gestao-loja.html" data-role="gestao-loja"> Gestão da loja</a>
+  <a href="minha-assinatura.html" data-role="gestao-loja"> Minha assinatura</a>
+  <a href="planos.html" data-role="gestao-loja"> Planos</a>
+  <a href="cadastrar-produto.html" data-role="produtos"> Cadastrar produto</a>
+<a href="usuarios.html" data-role="funcionarios"> Usuários</a>
+  <a href="admin-dashboard.html" data-role="admin"> Painel administrativo</a>
+
+  <a href="tutorial.html">Tutorial</a>
+  <a href="notas-atualizacao.html">Atualizações</a>
+  <a href="#" onclick="trocarLojaComConfirmacao()"> Trocar loja</a>
+  <a href="#" onclick="sair()">Sair</a>
 </nav>
 
 <div id="overlay"></div>
@@ -59,7 +65,7 @@
 
   <section class="resumo-vencimentos">
     <div class="resumo-card danger-soft">
-      <span>🚨</span>
+      <span></span>
       <div>
         <strong id="qtd-vencidos">0</strong>
         <p>Vencidos</p>
@@ -67,7 +73,7 @@
     </div>
 
     <div class="resumo-card warning-soft">
-      <span>📅</span>
+      <span></span>
       <div>
         <strong id="qtd-hoje">0</strong>
         <p>Hoje</p>
@@ -83,7 +89,7 @@
     </div>
 
     <div class="resumo-card ok-soft">
-      <span>🗓️</span>
+      <span></span>
       <div>
         <strong id="qtd-30dias">0</strong>
         <p>30 dias</p>
@@ -93,7 +99,7 @@
 
   <section class="grid-actions">
     <a href="lancar.html" class="action-card">
-      <span>📦</span>
+      <span></span>
       <div>
         <h3>Lançar validade</h3>
         <p>Escaneie o código e registre itens perto da validade.</p>
@@ -101,7 +107,7 @@
     </a>
 
     <a href="meus-lancamentos.html" class="action-card">
-      <span>📋</span>
+      <span></span>
       <div>
         <h3>Meus lançamentos</h3>
         <p>Veja os produtos que você lançou hoje e nos últimos dias.</p>
@@ -109,15 +115,15 @@
     </a>
 
     <a href="lista-geral.html" class="action-card" data-role="lista-geral">
-      <span>📅</span>
+      <span></span>
       <div>
-        <h3>Lista completa</h3>
+        <h3>Lista Geral</h3>
         <p>Acompanhe tudo que foi lançado pela equipe.</p>
       </div>
     </a>
 
     <a href="gestao-loja.html" class="action-card" data-role="gestao-loja">
-      <span>📊</span>
+      <span></span>
       <div>
         <h3>Gestão da loja</h3>
         <p>Área administrativa operacional para gerente e encarregado.</p>
@@ -125,7 +131,7 @@
     </a>
 
     <a href="cadastrar-produto.html" class="action-card" data-role="produtos">
-      <span>➕</span>
+      <span></span>
       <div>
         <h3>Cadastrar produto</h3>
         <p>Adicione produtos pequenos que não existem no sistema.</p>
@@ -133,10 +139,42 @@
     </a>
 
     <a href="usuarios.html" class="action-card" data-role="funcionarios">
-      <span>👥</span>
+      <span></span>
       <div>
         <h3>Usuários</h3>
         <p>Cadastre funcionários da loja e veja acessos do sistema.</p>
+      </div>
+    </a>
+
+    <a href="minha-assinatura.html" class="action-card" data-role="gestao-loja">
+      <span></span>
+      <div>
+        <h3>Minha assinatura</h3>
+        <p>Veja plano, cobranças dos próximos 12 meses e formas de pagamento.</p>
+      </div>
+    </a>
+
+    <a href="planos.html" class="action-card" data-role="gestao-loja">
+      <span></span>
+      <div>
+        <h3>Planos</h3>
+        <p>Escolha ou altere o plano da loja.</p>
+      </div>
+    </a>
+  
+    <a href="tutorial.html" class="action-card">
+      <span></span>
+      <div>
+        <h3>Tutorial</h3>
+        <p>Veja o passo a passo completo para usar o ValiSys na operação da loja.</p>
+      </div>
+    </a>
+
+    <a href="notas-atualizacao.html" class="action-card">
+      <span></span>
+      <div>
+        <h3>Atualizações</h3>
+        <p>Acompanhe as principais melhorias aplicadas no sistema.</p>
       </div>
     </a>
   </section>
@@ -157,18 +195,20 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="js/dados-config.js?v=foto-placeholder-visivel-1" defer></script>
-<script src="js/dados-service.js?v=foto-placeholder-visivel-1" defer></script>
-<script src="js/auth.js?v=foto-placeholder-visivel-1" defer></script>
-<script src="js/cookies.js?v=foto-placeholder-visivel-1" defer></script>
-<script src="js/loja.js?v=foto-placeholder-visivel-1" defer></script>
-<script src="js/site-dialog.js?v=foto-placeholder-visivel-1" defer></script>
-<script src="js/icons.js?v=foto-placeholder-visivel-1" defer></script>
-<script src="js/navbar.js?v=foto-placeholder-visivel-1" defer></script>
-<script src="js/app.js?v=foto-placeholder-visivel-1" defer></script>
-<script src="js/comunicados-core.js?v=foto-placeholder-visivel-1" defer></script>
-<script src="js/comunicados-dashboard.js?v=foto-placeholder-visivel-1" defer></script>
-<script src="js/push-notifications-v2.js?v=foto-placeholder-visivel-1" defer></script>
-<script src="js/pwa-register.js?v=foto-placeholder-visivel-1" defer></script>
+<script src="js/dados-config.js?v=minimalista-profissional-1" defer></script>
+<script src="js/dados-service.js?v=minimalista-profissional-1" defer></script>
+<script src="js/auth.js?v=minimalista-profissional-1" defer></script>
+<script src="js/cookies.js?v=minimalista-profissional-1" defer></script>
+<script src="js/loja.js?v=minimalista-profissional-1" defer></script>
+<script src="js/site-dialog.js?v=minimalista-profissional-1" defer></script>
+<script src="js/icons.js?v=minimalista-profissional-1" defer></script>
+<script src="js/navbar.js?v=minimalista-profissional-1" defer></script>
+<script src="js/app.js?v=minimalista-profissional-1" defer></script>
+<script src="js/comunicados-core.js?v=minimalista-profissional-1" defer></script>
+<script src="js/comunicados-dashboard.js?v=minimalista-profissional-1" defer></script>
+<script src="js/push-notifications-v2.js?v=minimalista-profissional-1" defer></script>
+<script src="js/onboarding.js?v=minimalista-profissional-1" defer></script>
+<script src="js/global-actions.js?v=minimalista-profissional-1" defer></script>
+<script src="js/pwa-register.js?v=minimalista-profissional-1" defer></script>
 </body>
 </html>

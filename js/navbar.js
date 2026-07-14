@@ -1,6 +1,6 @@
 /*
   ValiSys - Navbar lateral global
-  Faz o botão ☰ funcionar em todas as telas sem depender do JS específico da página.
+  Faz o botão  funcionar em todas as telas sem depender do JS específico da página.
 */
 
 (function () {

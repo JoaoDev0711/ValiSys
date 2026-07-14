@@ -30,7 +30,7 @@ function mostrarBannerCookies() {
   banner.className = "cookie-banner";
   banner.innerHTML = `
     <div>
-      <strong>🍪 Cookies</strong>
+      <strong> Cookies</strong>
       <p>
         Usamos cookies apenas para lembrar este aviso. Os dados do sistema ficam salvos no navegador deste aparelho.
       </p>

@@ -8197,3 +8197,429 @@ body.camera-aberta #reader {
     min-height: 56px;
   }
 }
+
+
+/* ===== Financeiro: planos e assinatura ===== */
+.planos-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.plano-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.plano-card.destaque {
+  border-color: rgba(47, 125, 79, .45);
+  box-shadow: 0 16px 36px rgba(47, 125, 79, .14);
+}
+
+.plano-tag {
+  display: inline-flex;
+  width: fit-content;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.plano-preco {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 18px 0 14px;
+}
+
+.plano-preco strong {
+  font-size: 32px;
+  letter-spacing: -.8px;
+}
+
+.plano-preco span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.plano-recursos {
+  padding-left: 18px;
+  margin: 0 0 18px;
+  color: var(--text);
+}
+
+.plano-recursos li {
+  margin-bottom: 8px;
+}
+
+.finance-status-card {
+  background: rgba(255, 255, 255, .92);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--primary);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+
+.finance-status-card.pago,
+.finance-status-card.ativa {
+  border-left-color: var(--success);
+}
+
+.finance-status-card.pendente,
+.finance-status-card.aguardando {
+  border-left-color: var(--warning);
+}
+
+.finance-status-card.vencida,
+.finance-status-card.cancelada {
+  border-left-color: var(--danger);
+}
+
+.finance-label {
+  display: inline-block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 5px;
+}
+
+.finance-info-grid {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.finance-info-grid p {
+  margin: 0;
+}
+
+.inline-link,
+.button-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 44px;
+  padding: 12px 15px;
+  border-radius: 14px;
+  background: var(--primary);
+  color: white;
+  text-decoration: none;
+  font-weight: 800;
+  margin-top: 8px;
+}
+
+.inline-link {
+  background: #eef2e9;
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+
+.cobranca-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: center;
+  border-left: 5px solid var(--line);
+}
+
+.cobranca-card.pago {
+  border-left-color: var(--success);
+}
+
+.cobranca-card.pendente,
+.cobranca-card.aguardando {
+  border-left-color: var(--warning);
+}
+
+.cobranca-card.vencida {
+  border-left-color: var(--danger);
+}
+
+.cobranca-card h3 {
+  margin: 0 0 6px;
+}
+
+.cobranca-meta {
+  text-align: right;
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+}
+
+.cobranca-meta strong {
+  font-size: 22px;
+}
+
+.badge-finance {
+  display: inline-flex;
+  width: fit-content;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  background: #eef2e9;
+  color: var(--text);
+}
+
+.badge-finance.pago {
+  background: #e8f6ec;
+  color: var(--success);
+}
+
+.badge-finance.pendente,
+.badge-finance.aguardando {
+  background: #fff4dd;
+  color: #9b650e;
+}
+
+.badge-finance.vencida {
+  background: #fdeceb;
+  color: var(--danger);
+}
+
+.payment-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(21, 32, 24, .54);
+  z-index: 60;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+}
+
+.payment-modal.active {
+  display: flex;
+}
+
+.payment-modal-card {
+  width: 100%;
+  max-width: 620px;
+  max-height: 86vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border-radius: 26px;
+  padding: 18px;
+  box-shadow: 0 22px 70px rgba(0, 0, 0, .24);
+}
+
+.payment-modal-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.small-btn {
+  width: auto;
+  min-width: 96px;
+  padding: 12px 14px;
+  margin-top: 0;
+}
+
+.payment-methods {
+  display: grid;
+  gap: 10px;
+}
+
+.payment-method-btn {
+  text-align: left;
+  background: #f3f7f4;
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+
+.payment-method-btn strong,
+.payment-method-btn span {
+  display: block;
+}
+
+.payment-method-btn span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.payment-details {
+  display: grid;
+  gap: 10px;
+}
+
+.payment-details p {
+  margin: 0;
+}
+
+.payment-details code {
+  word-break: break-all;
+  white-space: normal;
+}
+
+.payment-details textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.payment-warning {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 18px;
+  background: #fff8e8;
+  border: 1px solid rgba(211, 139, 24, .22);
+}
+
+.payment-warning p {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.no-shadow {
+  box-shadow: none;
+}
+
+@media (max-width: 640px) {
+  .cobranca-card {
+    grid-template-columns: 1fr;
+  }
+
+  .cobranca-meta {
+    text-align: left;
+    justify-items: start;
+  }
+
+  .payment-modal {
+    padding: 10px;
+  }
+
+  .payment-modal-card {
+    border-radius: 24px 24px 16px 16px;
+  }
+
+  .plano-preco strong {
+    font-size: 28px;
+  }
+}
+
+
+/* ===== Planos no site público ===== */
+.public-plans-section {
+  padding-top: 72px;
+}
+
+.public-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.public-plan-card {
+  position: relative;
+  background: rgba(255, 255, 255, .94);
+  border: 1px solid rgba(226, 232, 220, .95);
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: 0 18px 42px rgba(21, 32, 24, .08);
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.public-plan-card.destaque {
+  border-color: rgba(47, 125, 79, .42);
+  transform: translateY(-8px);
+  box-shadow: 0 26px 56px rgba(47, 125, 79, .16);
+}
+
+.public-plan-kicker {
+  color: var(--primary);
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.public-plan-tag {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.public-plan-card h3 {
+  margin: 18px 0 8px;
+  font-size: clamp(32px, 4vw, 44px);
+  letter-spacing: -1.4px;
+}
+
+.public-plan-card h3 span {
+  font-size: 15px;
+  letter-spacing: 0;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.public-plan-card p {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.public-plan-card ul {
+  padding-left: 18px;
+  margin: 12px 0 24px;
+  color: var(--text);
+  flex: 1;
+}
+
+.public-plan-card li {
+  margin-bottom: 9px;
+}
+
+.public-plan-card .primary-link,
+.public-plan-card .secondary-link {
+  width: 100%;
+  text-align: center;
+  justify-content: center;
+}
+
+.public-plans-note {
+  margin: 22px auto 0;
+  max-width: 760px;
+  background: rgba(255, 255, 255, .72);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 18px;
+  text-align: center;
+}
+
+.public-plans-note p {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.public-plans-note .inline-link {
+  margin-top: 12px;
+}
+
+@media (max-width: 900px) {
+  .public-plans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .public-plan-card.destaque {
+    transform: none;
+  }
+}

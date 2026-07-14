@@ -107,7 +107,7 @@ const VALISYS_PUSH_PUBLIC_KEY = "BIW4knHLKLF65FEIR_ndLGXfXCS13MtruNHLqYmRyRlzRCd
 
     widget.innerHTML = `
       <button type="button" class="push-widget-toggle" data-push-toggle aria-label="Ativar notificações">
-        🔔
+        
       </button>
 
       <div class="push-widget-card" data-push-card>

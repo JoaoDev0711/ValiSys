@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lista Geral - Vencimentos</title>
+  <title>Planos - ValiSys</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#153B2A">
   <link rel="stylesheet" href="css/styles.css?v=minimalista-profissional-1">
@@ -13,7 +13,7 @@
 
 <header class="topbar">
   <a href="dashboard.html" class="user-icon" aria-label="Voltar">←</a>
-  <h1>Lista Geral</h1>
+  <h1>Planos</h1>
   <a href="#" onclick="sair()" class="user-icon" aria-label="Sair">Sair</a>
 </header>
 
@@ -21,33 +21,37 @@
   <section class="loja-atual-card compact">
     <div>
       <div>
-        <strong id="loja-lista-atual">Loja não selecionada</strong>
-        <p>Lista filtrada pela loja atual.</p>
+        <strong id="loja-planos-atual">Loja não selecionada</strong>
+        <p>O plano será vinculado à loja atual.</p>
       </div>
     </div>
-    <a href="escolher-loja.html">Trocar</a>
+    <a href="minha-assinatura.html">Assinatura</a>
   </section>
 
-  <section class="card">
-    <h2>Lista Geral</h2>
-    <p class="muted">Carregamento paginado por loja para operação estável.</p>
-
-    <input type="search" id="filtro" placeholder="Buscar por produto, EAN, marca, gramagem ou usuário">
+  <section class="welcome-card">
+    <p class="muted">Financeiro</p>
+    <h2>Escolha o plano da loja</h2>
+    <p>Ao selecionar um plano, o sistema cria a assinatura e prepara as cobranças dos próximos 12 meses.</p>
   </section>
 
-  <div id="lista"></div>
+  <section id="assinatura-resumo-planos"></section>
+
+  <section id="planos-lista" class="planos-grid"></section>
 </main>
+
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script src="js/dados-config.js?v=minimalista-profissional-1" defer></script>
 <script src="js/dados-service.js?v=minimalista-profissional-1" defer></script>
+<script src="js/financeiro-service.js?v=minimalista-profissional-1" defer></script>
 <script src="js/auth.js?v=minimalista-profissional-1" defer></script>
 <script src="js/cookies.js?v=minimalista-profissional-1" defer></script>
 <script src="js/loja.js?v=minimalista-profissional-1" defer></script>
 <script src="js/site-dialog.js?v=minimalista-profissional-1" defer></script>
 <script src="js/icons.js?v=minimalista-profissional-1" defer></script>
-<script src="js/lista.js?v=minimalista-profissional-1" defer></script>
-<script src="js/push-notifications-v2.js?v=minimalista-profissional-1" defer></script>
+<script src="js/navbar.js?v=minimalista-profissional-1" defer></script>
+
+<script src="js/planos.js?v=minimalista-profissional-1" defer></script>
 <script src="js/onboarding.js?v=minimalista-profissional-1" defer></script>
 <script src="js/global-actions.js?v=minimalista-profissional-1" defer></script>
 <script src="js/pwa-register.js?v=minimalista-profissional-1" defer></script>
