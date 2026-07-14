@@ -1,6 +1,6 @@
 /*
   ValiSys - Ícones SVG profissionais
-  Remove emojis visíveis do site e renderiza SVGs sem fundo.
+  Correção: nunca substitui texto vazio por ícone.
 */
 
 (function () {
@@ -42,27 +42,29 @@
   };
 
   const EMOJI_TO_ICON = {
-    "☰": "menu", "←": "back", "↪️": "user", "🚪": "logout", "📦": "box",
-    "🏠": "home", "📋": "list", "📅": "calendar", "🗓️": "calendar", "📊": "chart",
-    "🔔": "bell", "➕": "plus", "👥": "users", "⚙️": "admin", "🏪": "store",
-    "📌": "pin", "🔎": "search", "👤": "user", "🛒": "cart", "🚨": "alert",
-    "⏳": "clock", "✅": "check", "⚠️": "alert", "❌": "error", "📷": "camera",
-    "🏷️": "tag", "🧾": "file", "📥": "database", "📝": "edit", "🗑️": "trash",
-    "ℹ️": "info", "🔒": "lock", "🔑": "key", "✨": "spark", "🥤": "product",
-    "🧀": "product", "🥩": "product", "🥬": "product", "🥖": "product",
-    "❄️": "product", "🧼": "product", "🧴": "product", "🐾": "product"
+    "←": "back",
+    "↪": "user",
+    "⏳": "clock",
+    "ℹ": "info"
   };
-
-  const keys = Object.keys(EMOJI_TO_ICON).sort((a, b) => b.length - a.length);
-  const emojiRegex = new RegExp(keys.map(escapeRegExp).join("|"), "g");
-
-  function escapeRegExp(text) {
-    return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  }
 
   function iconHTML(name) {
     const paths = ICONS[name] || ICONS.generic;
     return `<svg class="svg-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+  }
+
+  window.svgIconHTML = iconHTML;
+
+  const keys = Object.keys(EMOJI_TO_ICON).filter(Boolean).sort((a, b) => b.length - a.length);
+
+  if (!keys.length) {
+    return;
+  }
+
+  const emojiRegex = new RegExp(keys.map(escapeRegExp).join("|"), "g");
+
+  function escapeRegExp(text) {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
   function iconElement(name) {
@@ -154,8 +156,6 @@
 
     observer.observe(document.body, { childList: true, subtree: true });
   }
-
-  window.svgIconHTML = iconHTML;
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", start);

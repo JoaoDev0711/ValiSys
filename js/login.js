@@ -13,6 +13,8 @@ const voltarLogin = document.getElementById("voltar-login");
 const marcaPromotorArea = document.getElementById("marca-promotor-area");
 const marcaPromotorSelect = document.getElementById("marcaPromotor");
 const novaMarcaPromotorInput = document.getElementById("novaMarcaPromotor");
+const toggleCodigoAcesso = document.getElementById("toggle-codigo-acesso");
+const codigoAcessoInfo = document.getElementById("codigo-acesso-info");
 
 const lojaAtual = getLojaAtual();
 const usuarioAtual = getUsuarioLogado();
@@ -66,6 +68,30 @@ function atualizarAreaPromotor() {
   }
 }
 
+
+function configurarVisualizacaoCodigo() {
+  if (!toggleCodigoAcesso || !senhaInput) return;
+
+  toggleCodigoAcesso.addEventListener("click", () => {
+    const visivel = senhaInput.type === "text";
+    senhaInput.type = visivel ? "password" : "text";
+    toggleCodigoAcesso.innerText = visivel ? "Mostrar" : "Ocultar";
+  });
+}
+
+function atualizarNotaCodigo(cargo) {
+  if (!codigoAcessoInfo || !senhaAjuda) return;
+
+  if (cargo === "encarregado") {
+    codigoAcessoInfo.style.display = "block";
+    senhaAjuda.innerText = "Digite o código cadastrado para este encarregado. Use Mostrar para conferir antes de entrar.";
+    return;
+  }
+
+  codigoAcessoInfo.style.display = "block";
+  senhaAjuda.innerText = "Este perfil não exige código de acesso nesta loja.";
+}
+
 function configurarTiposDeAcesso() {
   cargoSelect.innerHTML = `
     <option value="">Selecione</option>
@@ -102,7 +128,7 @@ function renderizarLojaLogin() {
 
   lojaLoginCard.innerHTML = `
     <strong>Nenhuma loja selecionada</strong>
-    <p>Clique primeiro na loja desejada para abrir o login dela.</p>
+    <p>Selecione primeiro na loja desejada para abrir o login dela.</p>
   `;
   textoLogin.innerText = "Login operacional da loja.";
 }
@@ -115,15 +141,15 @@ function atualizarCamposLogin() {
   nomeArea.style.display = "block";
   nomeInput.required = true;
   textoLogin.innerText = lojaAtual
-    ? `Login da loja ${lojaAtual.nome}`
-    : "Clique primeiro na loja desejada para entrar.";
+    ? `Acesso da loja ${lojaAtual.nome}`
+    : "Selecione primeiro a loja desejada para entrar.";
 
   if (cargo === "encarregado") {
     senhaArea.style.display = "block";
     senhaInput.required = true;
     senhaLabel.innerText = "Código de acesso";
     senhaInput.placeholder = "Código cadastrado para este encarregado";
-    senhaAjuda.innerText = "Somente encarregado usa código cadastrado na loja.";
+    atualizarNotaCodigo(cargo);
     return;
   }
 
@@ -131,7 +157,7 @@ function atualizarCamposLogin() {
     senhaArea.style.display = "none";
     senhaInput.required = false;
     senhaInput.value = "";
-    senhaAjuda.innerText = "";
+    atualizarNotaCodigo(cargo);
     return;
   }
 
@@ -141,6 +167,7 @@ function atualizarCamposLogin() {
 }
 
 configurarTiposDeAcesso();
+configurarVisualizacaoCodigo();
 cargoSelect.addEventListener("change", atualizarCamposLogin);
 renderizarLojaLogin();
 atualizarCamposLogin();
@@ -160,7 +187,7 @@ form.addEventListener("submit", async function(event) {
   const senha = senhaInput.value.trim();
 
   if (!lojaAtual) {
-    alert("Clique primeiro na loja desejada para entrar.");
+    alert("Selecione primeiro na loja desejada para entrar.");
     window.location.href = "escolher-loja.html";
     return;
   }

@@ -36,7 +36,7 @@ const valisysFinanceiro = {
           "Usuários por cargo",
           "Lista Geral completa",
           "Comunicados internos",
-          "Dashboard da loja",
+          "Painel da loja",
           "Notificações"
         ],
         destaque: true
