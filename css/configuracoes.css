@@ -1,98 +1,267 @@
 /* Configurações seguras do ValiSys
-   Escopo limitado ao sistema interno. O site público mantém identidade própria. */
+   Escopo: apenas sistema interno. O site público não recebe tema do usuário. */
 
 body.valisys-preferencias-publico-bloqueadas {
   color-scheme: light;
 }
 
-/* Tema escuro seguro */
-body.valisys-tema-escuro {
-  background: #101510 !important;
-  color: #eef5ef !important;
+/* Base clara explícita para desfazer preferências antigas */
+body.valisys-tema-claro:not(.public-page) {
+  --bg: #f7f8f5;
+  --surface: #ffffff;
+  --surface-soft: #f3f5f0;
+  --text: #17211b;
+  --muted: #6d766f;
+  --line: #e4e8df;
 }
 
-body.valisys-tema-escuro .topbar,
-body.valisys-tema-escuro .sidebar,
-body.valisys-tema-escuro .quick-actions-bar {
-  background: rgba(16, 21, 16, .96) !important;
-  border-color: #2c392f !important;
-  color: #eef5ef !important;
+/* Tema escuro real e consistente */
+body.valisys-tema-escuro:not(.public-page),
+body.valisys-auto-escuro:not(.public-page) {
+  --bg: #07110b;
+  --surface: #101a13;
+  --surface-soft: #162219;
+  --text: #f2f7f3;
+  --muted: #b7c5bb;
+  --line: #314036;
+  --primary: #2f8f58;
+  --primary-strong: #4fb974;
+  --accent: #17271d;
+  --danger: #ff8f86;
+  --success: #78d69a;
+  --warning: #ffd891;
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  color-scheme: dark;
 }
 
-body.valisys-tema-escuro .card,
-body.valisys-tema-escuro .welcome-card,
-body.valisys-tema-escuro .action-card,
-body.valisys-tema-escuro .login-card,
-body.valisys-tema-escuro .loja-atual-card,
-body.valisys-tema-escuro .update-item,
-body.valisys-tema-escuro .tutorial-item,
-body.valisys-tema-escuro .config-group,
-body.valisys-tema-escuro .config-option,
-body.valisys-tema-escuro .config-toggle,
-body.valisys-tema-escuro .config-preview,
-body.valisys-tema-escuro .finance-status-card,
-body.valisys-tema-escuro .cobranca-card,
-body.valisys-tema-escuro .plano-card {
-  background: #151d17 !important;
-  color: #eef5ef !important;
-  border-color: #2c392f !important;
+body.valisys-tema-escuro:not(.public-page) .topbar,
+body.valisys-auto-escuro:not(.public-page) .topbar,
+body.valisys-tema-escuro:not(.public-page) .sidebar,
+body.valisys-auto-escuro:not(.public-page) .sidebar,
+body.valisys-tema-escuro:not(.public-page) .quick-actions-bar,
+body.valisys-auto-escuro:not(.public-page) .quick-actions-bar {
+  background: rgba(7, 17, 11, .96) !important;
+  border-color: var(--line) !important;
+  color: var(--text) !important;
 }
 
-body.valisys-tema-escuro input,
-body.valisys-tema-escuro select,
-body.valisys-tema-escuro textarea {
-  background: #101510 !important;
-  color: #eef5ef !important;
-  border-color: #2c392f !important;
+body.valisys-tema-escuro:not(.public-page) .topbar h1,
+body.valisys-auto-escuro:not(.public-page) .topbar h1,
+body.valisys-tema-escuro:not(.public-page) .sidebar *,
+body.valisys-auto-escuro:not(.public-page) .sidebar * {
+  color: var(--text) !important;
 }
 
-body.valisys-tema-escuro .muted,
-body.valisys-tema-escuro .small.muted {
-  color: #a8b3aa !important;
+/* Escurece todos os blocos operacionais que antes ficavam claros */
+body.valisys-tema-escuro:not(.public-page) :is(
+  .card,
+  .welcome-card,
+  .action-card,
+  .login-card,
+  .loja-atual-card,
+  .update-item,
+  .tutorial-item,
+  .config-group,
+  .config-option,
+  .config-toggle,
+  .config-preview,
+  .config-safe-note,
+  .finance-status-card,
+  .cobranca-card,
+  .plano-card,
+  .produto-card,
+  .produto-lista-card,
+  .produto-item,
+  .lancamento-card,
+  .lancamento-item,
+  .validade-card,
+  .validade-item,
+  .lembrete-grupo,
+  .lembrete-item,
+  .lembrete-card,
+  .empty-state,
+  .loja-card,
+  .loja-card-clickable,
+  .admin-current-store,
+  .admin-percent-card,
+  .sac-admin-section,
+  .chat-admin-painel,
+  .chat-admin-conversas,
+  .payment-details,
+  .payment-modal-card,
+  .camera-help,
+  .camera-helper,
+  .scan-help,
+  .manual-entry-box,
+  .section-box,
+  .resumo-card
+),
+body.valisys-auto-escuro:not(.public-page) :is(
+  .card,
+  .welcome-card,
+  .action-card,
+  .login-card,
+  .loja-atual-card,
+  .update-item,
+  .tutorial-item,
+  .config-group,
+  .config-option,
+  .config-toggle,
+  .config-preview,
+  .config-safe-note,
+  .finance-status-card,
+  .cobranca-card,
+  .plano-card,
+  .produto-card,
+  .produto-lista-card,
+  .produto-item,
+  .lancamento-card,
+  .lancamento-item,
+  .validade-card,
+  .validade-item,
+  .lembrete-grupo,
+  .lembrete-item,
+  .lembrete-card,
+  .empty-state,
+  .loja-card,
+  .loja-card-clickable,
+  .admin-current-store,
+  .admin-percent-card,
+  .sac-admin-section,
+  .chat-admin-painel,
+  .chat-admin-conversas,
+  .payment-details,
+  .payment-modal-card,
+  .camera-help,
+  .camera-helper,
+  .scan-help,
+  .manual-entry-box,
+  .section-box,
+  .resumo-card
+) {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--line) !important;
 }
 
-body.valisys-tema-escuro button.secondary,
-body.valisys-tema-escuro .secondary-link,
-body.valisys-tema-escuro .inline-link {
-  background: #1d271f !important;
-  color: #eef5ef !important;
-  border-color: #2c392f !important;
+/* Caixas internas/avisos que ficavam brancas */
+body.valisys-tema-escuro:not(.public-page) :is(
+  .login-code-note,
+  .produto-thumb-placeholder,
+  .foto-box-lista,
+  .grupo-content,
+  .produto-detalhes,
+  .lote-card,
+  .produto-info,
+  .cobranca-meta,
+  .finance-info-grid,
+  .plano-recursos,
+  .resumo-dados-operacao p,
+  .contratacao-info,
+  .contratacao-admin-box
+),
+body.valisys-auto-escuro:not(.public-page) :is(
+  .login-code-note,
+  .produto-thumb-placeholder,
+  .foto-box-lista,
+  .grupo-content,
+  .produto-detalhes,
+  .lote-card,
+  .produto-info,
+  .cobranca-meta,
+  .finance-info-grid,
+  .plano-recursos,
+  .resumo-dados-operacao p,
+  .contratacao-info,
+  .contratacao-admin-box
+) {
+  background: var(--surface-soft) !important;
+  color: var(--text) !important;
+  border-color: var(--line) !important;
 }
 
-body.valisys-tema-escuro .quick-actions-bar a:not(.is-active),
-body.valisys-tema-escuro .quick-actions-bar button:not(.is-active) {
-  background: #1d271f !important;
-  color: #eef5ef !important;
-  border-color: #2c392f !important;
+/* Texto sempre legível no escuro */
+body.valisys-tema-escuro:not(.public-page) :is(h1,h2,h3,h4,p,span,strong,label,li,small,summary,td,th,div),
+body.valisys-auto-escuro:not(.public-page) :is(h1,h2,h3,h4,p,span,strong,label,li,small,summary,td,th,div) {
+  color: inherit;
 }
 
-/* Tema automático: só escurece o sistema interno quando o aparelho está em dark mode */
-@media (prefers-color-scheme: dark) {
-  body.valisys-tema-auto:not(.public-page) {
-    background: #101510 !important;
-    color: #eef5ef !important;
-  }
+body.valisys-tema-escuro:not(.public-page) :is(.muted,.small.muted,.finance-label,.plano-recursos li),
+body.valisys-auto-escuro:not(.public-page) :is(.muted,.small.muted,.finance-label,.plano-recursos li) {
+  color: var(--muted) !important;
+}
 
-  body.valisys-tema-auto:not(.public-page) .card,
-  body.valisys-tema-auto:not(.public-page) .welcome-card,
-  body.valisys-tema-auto:not(.public-page) .action-card,
-  body.valisys-tema-auto:not(.public-page) .login-card,
-  body.valisys-tema-auto:not(.public-page) .config-group,
-  body.valisys-tema-auto:not(.public-page) .config-option,
-  body.valisys-tema-auto:not(.public-page) .config-toggle,
-  body.valisys-tema-auto:not(.public-page) .config-preview {
-    background: #151d17 !important;
-    color: #eef5ef !important;
-    border-color: #2c392f !important;
-  }
+body.valisys-tema-escuro:not(.public-page) :is(.danger,.erro,.error),
+body.valisys-auto-escuro:not(.public-page) :is(.danger,.erro,.error) {
+  color: #ffada7 !important;
+}
 
-  body.valisys-tema-auto:not(.public-page) input,
-  body.valisys-tema-auto:not(.public-page) select,
-  body.valisys-tema-auto:not(.public-page) textarea {
-    background: #101510 !important;
-    color: #eef5ef !important;
-    border-color: #2c392f !important;
-  }
+body.valisys-tema-escuro:not(.public-page) :is(.success,.ok),
+body.valisys-auto-escuro:not(.public-page) :is(.success,.ok) {
+  color: #91e5ae !important;
+}
+
+body.valisys-tema-escuro:not(.public-page) :is(.warning,.alerta),
+body.valisys-auto-escuro:not(.public-page) :is(.warning,.alerta) {
+  color: #ffe0a3 !important;
+}
+
+/* Inputs */
+body.valisys-tema-escuro:not(.public-page) :is(input,select,textarea),
+body.valisys-auto-escuro:not(.public-page) :is(input,select,textarea) {
+  background: #08120c !important;
+  color: var(--text) !important;
+  border-color: var(--line) !important;
+}
+
+body.valisys-tema-escuro:not(.public-page) :is(input,textarea)::placeholder,
+body.valisys-auto-escuro:not(.public-page) :is(input,textarea)::placeholder {
+  color: #819185 !important;
+}
+
+/* Botões */
+body.valisys-tema-escuro:not(.public-page) button,
+body.valisys-auto-escuro:not(.public-page) button,
+body.valisys-tema-escuro:not(.public-page) .button-link,
+body.valisys-auto-escuro:not(.public-page) .button-link,
+body.valisys-tema-escuro:not(.public-page) .primary-link,
+body.valisys-auto-escuro:not(.public-page) .primary-link {
+  color: #ffffff !important;
+}
+
+body.valisys-tema-escuro:not(.public-page) :is(button.secondary,.secondary-link,.inline-link,.user-icon,.icon-btn),
+body.valisys-auto-escuro:not(.public-page) :is(button.secondary,.secondary-link,.inline-link,.user-icon,.icon-btn) {
+  background: var(--surface-soft) !important;
+  color: var(--text) !important;
+  border-color: var(--line) !important;
+}
+
+/* Barra inferior */
+body:not(.public-page) main.container {
+  padding-bottom: 118px !important;
+}
+
+body.valisys-tema-escuro:not(.public-page) .quick-actions-bar,
+body.valisys-auto-escuro:not(.public-page) .quick-actions-bar {
+  background: rgba(7, 17, 11, .94) !important;
+  box-shadow: 0 14px 42px rgba(0, 0, 0, .35) !important;
+}
+
+body.valisys-tema-escuro:not(.public-page) .quick-actions-bar a:not(.is-active),
+body.valisys-tema-escuro:not(.public-page) .quick-actions-bar button:not(.is-active),
+body.valisys-auto-escuro:not(.public-page) .quick-actions-bar a:not(.is-active),
+body.valisys-auto-escuro:not(.public-page) .quick-actions-bar button:not(.is-active) {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--line) !important;
+}
+
+body.valisys-tema-escuro:not(.public-page) .quick-actions-bar .is-active,
+body.valisys-auto-escuro:not(.public-page) .quick-actions-bar .is-active {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  border-color: var(--primary) !important;
 }
 
 /* Estilos seguros */
@@ -114,10 +283,6 @@ body.valisys-estilo-premium .welcome-card,
 body.valisys-estilo-premium .action-card,
 body.valisys-estilo-premium .login-card {
   border-color: #d8c8a9 !important;
-}
-
-body.valisys-estilo-premium .topbar {
-  border-bottom-color: #d8c8a9 !important;
 }
 
 body.valisys-fonte-maior {
@@ -235,5 +400,19 @@ body.valisys-reduzir-movimento *::after {
 @media (min-width: 760px) {
   .config-options.duas-colunas {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Mobile: barra fixa sem esmagar conteúdo */
+@media (max-width: 640px) {
+  body:not(.public-page) main.container {
+    padding-bottom: 130px !important;
+  }
+
+  .quick-actions-bar {
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 10px !important;
+    width: auto !important;
   }
 }

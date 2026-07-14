@@ -1,7 +1,7 @@
 /*
   ValiSys - Preferências locais seguras
-  As preferências são locais do aparelho e não alteram banco de dados.
-  Para evitar quebra visual, o site público não recebe tema/estilo do usuário.
+  Salva no aparelho. Não altera banco de dados.
+  Site público mantém visual próprio.
 */
 (function () {
   const STORAGE_KEY = "valisysPreferencias";
@@ -73,6 +73,7 @@
       "valisys-tema-claro",
       "valisys-tema-escuro",
       "valisys-tema-auto",
+      "valisys-auto-escuro",
       "valisys-estilo-minimalista",
       "valisys-estilo-compacto",
       "valisys-estilo-premium",
@@ -87,6 +88,10 @@
       "fonte-maior",
       "reduzir-movimento"
     );
+  }
+
+  function autoEscuroAtivo(pref) {
+    return pref.tema === "auto" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
   }
 
   function aplicarPreferencias(preferencias = lerPreferencias()) {
@@ -105,13 +110,17 @@
 
     limparClasses(body);
 
-    // Site público fica sempre com identidade visual própria.
     if (ehPaginaPublica()) {
       body.classList.add("valisys-preferencias-publico-bloqueadas");
       return;
     }
 
     body.classList.add(`valisys-tema-${pref.tema}`);
+
+    if (autoEscuroAtivo(pref)) {
+      body.classList.add("valisys-auto-escuro");
+    }
+
     body.classList.add(`valisys-estilo-${pref.estilo}`);
     body.classList.add(`valisys-densidade-${pref.densidade}`);
 
@@ -192,6 +201,16 @@
     }, { capture: true });
   }
 
+  function observarTemaSistema() {
+    if (!window.matchMedia) return;
+
+    const query = window.matchMedia("(prefers-color-scheme: dark)");
+    const atualizar = () => aplicarPreferencias(lerPreferencias());
+
+    if (query.addEventListener) query.addEventListener("change", atualizar);
+    else if (query.addListener) query.addListener(atualizar);
+  }
+
   window.valisysPreferencias = {
     defaults: DEFAULTS,
     ler: lerPreferencias,
@@ -205,10 +224,12 @@
       aplicarPreferencias();
       ativarSomClique();
       tocarAoEntrar();
+      observarTemaSistema();
     });
   } else {
     aplicarPreferencias();
     ativarSomClique();
     tocarAoEntrar();
+    observarTemaSistema();
   }
 })();

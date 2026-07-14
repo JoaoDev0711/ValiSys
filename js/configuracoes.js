@@ -116,7 +116,7 @@ resetBtn.addEventListener("click", async () => {
   localStorage.removeItem("valisysPreferencias");
 
   if (window.valisysPreferencias) {
-    valisysPreferencias.salvar(valisysPreferencias.defaults);
+    valisysPreferencias.salvar({ ...valisysPreferencias.defaults, tema: "claro", estilo: "minimalista", densidade: "confortavel" });
   }
 
   preencherFormulario();
