@@ -112,16 +112,6 @@ body::before {
   align-items: flex-start;
 }
 
-.action-card > span,
-.resumo-card > span,
-.section-title > span,
-.login-logo,
-.feature-icon,
-.impact-card-number,
-.impact-card-icon {
-  display: none !important;
-}
-
 .action-card h3 {
   font-size: 17px;
 }
@@ -525,4 +515,70 @@ label {
   font-size: 13px !important;
   font-weight: 800;
   white-space: nowrap;
+}
+
+
+/* Correção: SVGs e ícones visíveis sem poluir o layout */
+.svg-icon {
+  width: 1.15em;
+  height: 1.15em;
+  display: inline-block;
+  vertical-align: -0.16em;
+  flex: 0 0 auto;
+}
+
+.action-card > span,
+.resumo-card > span,
+.section-title > span,
+.feature-icon,
+.impact-card-icon {
+  display: grid !important;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 12px;
+  background: #eef6ee;
+  color: #1f6f46;
+  font-size: 18px;
+}
+
+.login-logo {
+  display: grid !important;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 10px;
+  border-radius: 16px;
+  background: #eef6ee;
+  color: #1f6f46;
+}
+
+.login-logo::before {
+  content: "V";
+  font-weight: 900;
+  font-size: 24px;
+}
+
+/* Barra inferior com página ativa */
+.quick-actions-bar a.primary,
+.quick-actions-bar button.primary,
+.quick-actions-bar a.is-active,
+.quick-actions-bar button.is-active {
+  background: var(--primary) !important;
+  color: #fff !important;
+  border-color: var(--primary) !important;
+}
+
+.quick-actions-bar a:not(.is-active):not(.primary),
+.quick-actions-bar button:not(.is-active):not(.primary) {
+  background: #f3f5f0 !important;
+  color: var(--text) !important;
+  border-color: var(--line) !important;
+}
+
+@media (max-width: 640px) {
+  .quick-actions-bar {
+    z-index: 80;
+  }
 }

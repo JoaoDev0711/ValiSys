@@ -47,3 +47,12 @@ function getDadosOnlineClient() {
   2) base pública de produtos
   3) Brasilfonte GTIN, quando disponível
 */
+
+
+/* Fallback global para evitar perda de conexão por escopo de script/cache */
+try {
+  if (typeof SUPABASE_URL !== "undefined") window.VALISYS_SUPABASE_URL = SUPABASE_URL;
+  if (typeof SUPABASE_ANON_KEY !== "undefined") window.VALISYS_SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
+} catch (erro) {
+  console.warn("Configuração Supabase não exposta no escopo global.", erro);
+}

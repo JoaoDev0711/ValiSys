@@ -1,7 +1,14 @@
-
 (function () {
   function paginaAtual() {
     return location.pathname.split("/").pop() || "index.html";
+  }
+
+  function usuarioAtual() {
+    try {
+      return typeof getUsuarioLogado === "function" ? getUsuarioLogado() : null;
+    } catch {
+      return null;
+    }
   }
 
   function deveExibir() {
@@ -15,26 +22,42 @@
     ]);
 
     if (paginasIgnoradas.has(pagina)) return false;
-    if (typeof getUsuarioLogado !== "function") return false;
+    return Boolean(usuarioAtual());
+  }
 
-    return Boolean(getUsuarioLogado());
+  function ativoPara(href) {
+    const pagina = paginaAtual();
+    if (!href) return false;
+
+    if (href === pagina) return true;
+
+    const usuario = usuarioAtual();
+    if (href === "dashboard.html" && pagina === "dashboard.html" && usuario?.cargo !== "admin") return true;
+    if (href === "admin-dashboard.html" && pagina === "admin-dashboard.html") return true;
+
+    return false;
+  }
+
+  function linkClasse(href) {
+    return ativoPara(href) ? ' class="is-active"' : "";
   }
 
   function criarBarra() {
     if (!deveExibir()) return;
     if (document.querySelector(".quick-actions-bar")) return;
 
-    const usuario = getUsuarioLogado();
+    const usuario = usuarioAtual();
     const inicio = usuario?.cargo === "admin" ? "admin-dashboard.html" : "dashboard.html";
+    const pagina = paginaAtual();
 
     const bar = document.createElement("nav");
     bar.className = "quick-actions-bar";
     bar.setAttribute("aria-label", "Ações rápidas");
 
     bar.innerHTML = `
-      <a class="primary" href="${inicio}">Início</a>
-      <a href="tutorial.html">Tutorial</a>
-      <a href="notas-atualizacao.html">Novidades</a>
+      <a${linkClasse(inicio)} href="${inicio}">Início</a>
+      <a${linkClasse("tutorial.html")} href="tutorial.html">Tutorial</a>
+      <a${linkClasse("notas-atualizacao.html")} href="notas-atualizacao.html">Novidades</a>
       <button type="button" data-action="reload">Atualizar</button>
       <button type="button" data-action="logout">Sair</button>
     `;
