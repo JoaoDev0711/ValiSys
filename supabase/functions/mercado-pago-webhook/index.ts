@@ -5,20 +5,22 @@ const MP_API = "https://api.mercadopago.com";
 
 function requiredEnv(name: string) {
   const value = Deno.env.get(name);
-
-  if (!value) {
-    throw new Error(`Variável ${name} não configurada.`);
-  }
-
+  if (!value) throw new Error(`Variável ${name} não configurada.`);
   return value;
 }
 
-function paymentIdFrom(url: URL, payload: Record<string, unknown>) {
-  const queryId = url.searchParams.get("data.id") || url.searchParams.get("id");
+function paymentIdFrom(
+  url: URL,
+  payload: Record<string, unknown>
+) {
+  const queryId =
+    url.searchParams.get("data.id") ||
+    url.searchParams.get("id");
 
   if (queryId) return queryId;
 
-  const data = payload.data as Record<string, unknown> | undefined;
+  const data =
+    payload.data as Record<string, unknown> | undefined;
 
   return String(data?.id || payload.id || "");
 }
@@ -43,25 +45,30 @@ Deno.serve(async (req) => {
     const paymentId = paymentIdFrom(url, payload);
 
     if (!paymentId) {
-      return jsonResponse({ ok: true, ignorado: true, motivo: "Sem payment id." });
+      return jsonResponse({
+        ok: true,
+        ignorado: true,
+        motivo: "Sem payment id."
+      });
     }
 
-    const mpAccessToken = requiredEnv("MP_ACCESS_TOKEN");
-
-    const mpResponse = await fetch(`${MP_API}/v1/payments/${paymentId}`, {
-      headers: {
-        "Authorization": `Bearer ${mpAccessToken}`
+    const mpResponse = await fetch(
+      `${MP_API}/v1/payments/${paymentId}`,
+      {
+        headers: {
+          "Authorization":
+            `Bearer ${requiredEnv("MP_ACCESS_TOKEN")}`
+        }
       }
-    });
+    );
 
     const payment = await mpResponse.json();
 
     if (!mpResponse.ok) {
-      console.error("Consulta Mercado Pago:", payment);
-
       return jsonResponse({
         ok: false,
-        erro: "Não foi possível consultar o pagamento no Mercado Pago."
+        erro:
+          "Não foi possível consultar o pagamento no Mercado Pago."
       }, 400);
     }
 
@@ -79,66 +86,66 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabase = createClient(
-      requiredEnv("SUPABASE_URL"),
-      requiredEnv("SUPABASE_SERVICE_ROLE_KEY"),
-      { auth: { persistSession: false, autoRefreshToken: false } }
-    );
-
     const mercadoPagoStatus = String(payment.status || "");
     let cobrancaStatus = "aguardando_pagamento";
     let pagoEm: string | null = null;
 
     if (mercadoPagoStatus === "approved") {
       cobrancaStatus = "pago";
-      pagoEm = payment.date_approved || new Date().toISOString();
-    } else if (["rejected", "cancelled", "refunded", "charged_back"].includes(mercadoPagoStatus)) {
+      pagoEm =
+        payment.date_approved ||
+        new Date().toISOString();
+    } else if (
+      ["rejected", "cancelled", "refunded", "charged_back"]
+        .includes(mercadoPagoStatus)
+    ) {
       cobrancaStatus = "pendente";
     }
 
-    const updateCompleto: Record<string, unknown> = {
+    const supabase = createClient(
+      requiredEnv("SUPABASE_URL"),
+      requiredEnv("SUPABASE_SERVICE_ROLE_KEY"),
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false
+        }
+      }
+    );
+
+    const updatePayload: Record<string, unknown> = {
       status: cobrancaStatus,
       meio_pagamento: "mercadopago",
-      mercado_pago_payment_id: String(payment.id || paymentId),
+      mercado_pago_payment_id:
+        String(payment.id || paymentId),
       mercado_pago_status: mercadoPagoStatus,
-      mercado_pago_external_reference: externalReference,
+      mercado_pago_external_reference:
+        externalReference,
       atualizado_em: new Date().toISOString()
     };
 
-    if (pagoEm) updateCompleto.pago_em = pagoEm;
-
-    let resultado = await supabase
-      .from("financeiro_cobrancas")
-      .update(updateCompleto)
-      .eq("id", externalReference)
-      .select("id, loja_id, assinatura_id, status, vencimento")
-      .maybeSingle();
-
-    if (resultado.error) {
-      const updateBasico: Record<string, unknown> = {
-        status: cobrancaStatus,
-        meio_pagamento: "mercadopago",
-        atualizado_em: new Date().toISOString()
-      };
-
-      if (pagoEm) updateBasico.pago_em = pagoEm;
-
-      resultado = await supabase
-        .from("financeiro_cobrancas")
-        .update(updateBasico)
-        .eq("id", externalReference)
-        .select("id, loja_id, assinatura_id, status, vencimento")
-        .maybeSingle();
+    if (pagoEm) {
+      updatePayload.pago_em = pagoEm;
     }
 
-    if (resultado.error) {
+    const { data: cobranca, error: updateErro } =
+      await supabase
+        .from("financeiro_cobrancas")
+        .update(updatePayload)
+        .eq("id", externalReference)
+        .select(
+          "id, loja_id, assinatura_id, status, vencimento"
+        )
+        .maybeSingle();
+
+    if (updateErro) {
       return jsonResponse({
         ok: false,
-        erro: `Erro ao atualizar cobrança: ${resultado.error.message}`
+        erro:
+          `Permissão/atualização da cobrança: ` +
+          updateErro.message
       }, 500);
     }
-
-    const cobranca = resultado.data;
 
     if (cobrancaStatus === "pago" && cobranca) {
       await supabase
@@ -171,7 +178,10 @@ Deno.serve(async (req) => {
 
     return jsonResponse({
       ok: false,
-      erro: erro instanceof Error ? erro.message : "Erro interno no webhook."
+      erro:
+        erro instanceof Error
+          ? erro.message
+          : "Erro interno no webhook."
     }, 500);
   }
 });

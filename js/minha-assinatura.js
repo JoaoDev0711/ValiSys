@@ -370,7 +370,7 @@ async function pagarMercadoPago(cobrancaId) {
     }
 
     window.open(link, "_blank", "noopener");
-    await iniciarMinhaAssinatura();
+    await carregarAssinatura();
   } catch (erro) {
     console.error(erro);
     alert(`Não foi possível gerar o pagamento no Mercado Pago.\n\nDetalhe: ${erro.message || erro}`);
@@ -397,7 +397,7 @@ async function cancelarAssinaturaAtual() {
     });
 
     alert("Assinatura cancelada.");
-    await iniciarMinhaAssinatura();
+    await carregarAssinatura();
   } catch (erro) {
     console.error(erro);
     alert(`Não foi possível cancelar a assinatura.\n\nDetalhe: ${erro.message || erro}`);

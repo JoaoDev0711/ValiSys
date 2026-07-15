@@ -9,10 +9,7 @@ type CancelBody = {
 
 function requiredEnv(name: string) {
   const value = Deno.env.get(name);
-  if (!value) {
-    throw new Error(`Variável ${name} não disponível na Edge Function.`);
-  }
-
+  if (!value) throw new Error(`Variável ${name} não configurada.`);
   return value;
 }
 
@@ -30,36 +27,47 @@ Deno.serve(async (req) => {
     const lojaId = String(body.lojaId || "").trim();
 
     if (!lojaId) {
-      return jsonResponse({ ok: false, erro: "Loja não informada." }, 400);
+      return jsonResponse({
+        ok: false,
+        erro: "Loja não informada."
+      }, 400);
     }
 
     const supabase = createClient(
       requiredEnv("SUPABASE_URL"),
       requiredEnv("SUPABASE_SERVICE_ROLE_KEY"),
-      { auth: { persistSession: false, autoRefreshToken: false } }
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false
+        }
+      }
     );
 
-    const { data: assinatura, error: assinaturaErro } = await supabase
-      .from("financeiro_assinaturas")
-      .select("id, loja_id, status")
-      .eq("loja_id", lojaId)
-      .maybeSingle();
+    const { data: assinatura, error: assinaturaErro } =
+      await supabase
+        .from("financeiro_assinaturas")
+        .select("id, loja_id, status")
+        .eq("loja_id", lojaId)
+        .maybeSingle();
 
     if (assinaturaErro) {
       return jsonResponse({
         ok: false,
-        erro: `Erro ao consultar assinatura: ${assinaturaErro.message}`
+        erro:
+          `Permissão/consulta da assinatura: ` +
+          assinaturaErro.message
       }, 500);
     }
 
     if (!assinatura) {
       return jsonResponse({
         ok: false,
-        erro: "Nenhuma assinatura foi encontrada para esta loja."
+        erro: "Nenhuma assinatura encontrada para esta loja."
       }, 404);
     }
 
-    const { error: atualizarAssinaturaErro } = await supabase
+    const { error: cancelarErro } = await supabase
       .from("financeiro_assinaturas")
       .update({
         status: "cancelada",
@@ -67,27 +75,37 @@ Deno.serve(async (req) => {
       })
       .eq("id", assinatura.id);
 
-    if (atualizarAssinaturaErro) {
+    if (cancelarErro) {
       return jsonResponse({
         ok: false,
-        erro: `Erro ao cancelar assinatura: ${atualizarAssinaturaErro.message}`
+        erro:
+          `Permissão/cancelamento da assinatura: ` +
+          cancelarErro.message
       }, 500);
     }
 
-    const { error: cobrancasErro } = await supabase
+    const cobrancas = await supabase
       .from("financeiro_cobrancas")
       .update({
         status: "cancelada",
         atualizado_em: new Date().toISOString()
       })
       .eq("assinatura_id", assinatura.id)
-      .in("status", ["pendente", "aguardando_pagamento", "vencida"]);
+      .in(
+        "status",
+        ["pendente", "aguardando_pagamento", "vencida"]
+      );
 
-    if (cobrancasErro) {
-      console.error("Erro ao cancelar cobranças:", cobrancasErro);
+    if (cobrancas.error) {
+      return jsonResponse({
+        ok: false,
+        erro:
+          `Assinatura cancelada, mas cobranças não foram ` +
+          `atualizadas: ${cobrancas.error.message}`
+      }, 500);
     }
 
-    const { error: lojaErro } = await supabase
+    const loja = await supabase
       .from("lojas")
       .update({
         plano_codigo: null,
@@ -97,14 +115,20 @@ Deno.serve(async (req) => {
       })
       .eq("id", lojaId);
 
-    if (lojaErro) {
-      console.error("Erro ao atualizar loja:", lojaErro);
+    if (loja.error) {
+      return jsonResponse({
+        ok: false,
+        erro:
+          `Assinatura cancelada, mas a loja não foi ` +
+          `atualizada: ${loja.error.message}`
+      }, 500);
     }
 
     return jsonResponse({
       ok: true,
       assinatura: {
-        ...assinatura,
+        id: assinatura.id,
+        loja_id: lojaId,
         status: "cancelada",
         cancelado_por: body.usuarioNome || "",
         cancelado_cargo: body.usuarioCargo || ""
@@ -115,7 +139,10 @@ Deno.serve(async (req) => {
 
     return jsonResponse({
       ok: false,
-      erro: erro instanceof Error ? erro.message : "Erro interno ao cancelar assinatura."
+      erro:
+        erro instanceof Error
+          ? erro.message
+          : "Erro interno ao cancelar assinatura."
     }, 500);
   }
 });

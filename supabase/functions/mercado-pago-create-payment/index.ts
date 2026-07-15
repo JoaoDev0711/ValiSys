@@ -12,11 +12,7 @@ const MP_API = "https://api.mercadopago.com";
 
 function requiredEnv(name: string) {
   const value = Deno.env.get(name);
-
-  if (!value) {
-    throw new Error(`Variável ${name} não configurada.`);
-  }
-
+  if (!value) throw new Error(`Variável ${name} não configurada.`);
   return value;
 }
 
@@ -25,12 +21,20 @@ function normalizeSiteUrl(value: string) {
 }
 
 function mercadoPagoError(payload: Record<string, unknown>) {
-  const message = String(payload.message || payload.error || "Erro não informado pelo Mercado Pago.");
+  const message = String(
+    payload.message ||
+    payload.error ||
+    "Erro não informado pelo Mercado Pago."
+  );
+
   const cause = Array.isArray(payload.cause)
-    ? payload.cause.map((item) => {
-        const row = item as Record<string, unknown>;
-        return String(row.description || row.code || "");
-      }).filter(Boolean).join(" | ")
+    ? payload.cause
+        .map((item) => {
+          const row = item as Record<string, unknown>;
+          return String(row.description || row.code || "");
+        })
+        .filter(Boolean)
+        .join(" | ")
     : "";
 
   return cause ? `${message}: ${cause}` : message;
@@ -61,13 +65,25 @@ Deno.serve(async (req) => {
     const serviceRole = requiredEnv("SUPABASE_SERVICE_ROLE_KEY");
     const mpAccessToken = requiredEnv("MP_ACCESS_TOKEN");
 
-    const supabase = createClient(supabaseUrl, serviceRole, {
-      auth: { persistSession: false, autoRefreshToken: false }
-    });
+    const supabase = createClient(
+      supabaseUrl,
+      serviceRole,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false
+        },
+        global: {
+          headers: {
+            "X-Client-Info": "valisys-mercado-pago"
+          }
+        }
+      }
+    );
 
     const { data: cobranca, error: cobrancaErro } = await supabase
       .from("financeiro_cobrancas")
-      .select("id, loja_id, descricao, valor, vencimento, status")
+      .select("id, loja_id, assinatura_id, descricao, valor, vencimento, status")
       .eq("id", cobrancaId)
       .eq("loja_id", lojaId)
       .maybeSingle();
@@ -75,7 +91,7 @@ Deno.serve(async (req) => {
     if (cobrancaErro) {
       return jsonResponse({
         ok: false,
-        erro: `Erro ao consultar cobrança: ${cobrancaErro.message}`
+        erro: `Permissão/consulta da cobrança: ${cobrancaErro.message}`
       }, 500);
     }
 
@@ -86,10 +102,12 @@ Deno.serve(async (req) => {
       }, 404);
     }
 
-    if (["pago", "recebido", "cancelada"].includes(String(cobranca.status))) {
+    const statusAtual = String(cobranca.status || "");
+
+    if (["pago", "recebido", "cancelada"].includes(statusAtual)) {
       return jsonResponse({
         ok: false,
-        erro: `Cobrança indisponível. Status atual: ${cobranca.status}.`
+        erro: `Cobrança indisponível. Status atual: ${statusAtual}.`
       }, 400);
     }
 
@@ -108,12 +126,12 @@ Deno.serve(async (req) => {
       "https://joaodev0711.github.io/ValiSys"
     );
 
-    const notificationUrl = `${supabaseUrl}/functions/v1/mercado-pago-webhook`;
     const externalReference = String(cobranca.id);
 
     const preferencePayload = {
       external_reference: externalReference,
-      notification_url: notificationUrl,
+      notification_url:
+        `${supabaseUrl}/functions/v1/mercado-pago-webhook`,
       items: [
         {
           id: externalReference,
@@ -137,15 +155,18 @@ Deno.serve(async (req) => {
       }
     };
 
-    const mpResponse = await fetch(`${MP_API}/checkout/preferences`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${mpAccessToken}`,
-        "Content-Type": "application/json",
-        "X-Idempotency-Key": `valisys-${externalReference}`
-      },
-      body: JSON.stringify(preferencePayload)
-    });
+    const mpResponse = await fetch(
+      `${MP_API}/checkout/preferences`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${mpAccessToken}`,
+          "Content-Type": "application/json",
+          "X-Idempotency-Key": `valisys-${externalReference}`
+        },
+        body: JSON.stringify(preferencePayload)
+      }
+    );
 
     const mpText = await mpResponse.text();
     let mpData: Record<string, unknown> = {};
@@ -153,64 +174,58 @@ Deno.serve(async (req) => {
     try {
       mpData = mpText ? JSON.parse(mpText) : {};
     } catch {
-      mpData = { message: mpText || "Resposta inválida do Mercado Pago." };
+      mpData = {
+        message: mpText || "Resposta inválida do Mercado Pago."
+      };
     }
 
     if (!mpResponse.ok) {
-      const erroMp = mercadoPagoError(mpData);
-      console.error("Mercado Pago:", mpResponse.status, mpData);
-
       return jsonResponse({
         ok: false,
-        erro: `Mercado Pago (${mpResponse.status}): ${erroMp}`
+        erro:
+          `Mercado Pago (${mpResponse.status}): ` +
+          mercadoPagoError(mpData)
       }, 400);
     }
 
-    const initPoint = String(mpData.init_point || "");
-    const sandboxInitPoint = String(mpData.sandbox_init_point || "");
     const preferenceId = String(mpData.id || "");
+    const initPoint = String(mpData.init_point || "");
+    const sandboxInitPoint = String(
+      mpData.sandbox_init_point || ""
+    );
 
     if (!initPoint && !sandboxInitPoint) {
       return jsonResponse({
         ok: false,
-        erro: "O Mercado Pago criou a preferência, mas não retornou o link de pagamento."
+        erro: "O Mercado Pago não retornou o link de pagamento."
       }, 500);
     }
 
-    const updateCompleto = await supabase
+    const { error: updateErro } = await supabase
       .from("financeiro_cobrancas")
       .update({
         status: "aguardando_pagamento",
         meio_pagamento: "mercadopago",
         link_pagamento: initPoint || sandboxInitPoint,
-        mercado_pago_preference_id: preferenceId || null,
-        mercado_pago_external_reference: externalReference,
-        mercado_pago_init_point: initPoint || null,
-        mercado_pago_sandbox_init_point: sandboxInitPoint || null,
+        mercado_pago_preference_id:
+          preferenceId || null,
+        mercado_pago_external_reference:
+          externalReference,
+        mercado_pago_init_point:
+          initPoint || null,
+        mercado_pago_sandbox_init_point:
+          sandboxInitPoint || null,
         atualizado_em: new Date().toISOString()
       })
       .eq("id", externalReference);
 
-    let avisoBanco = "";
-
-    if (updateCompleto.error) {
-      console.error("Update completo falhou:", updateCompleto.error);
-
-      const updateBasico = await supabase
-        .from("financeiro_cobrancas")
-        .update({
-          status: "aguardando_pagamento",
-          meio_pagamento: "mercadopago",
-          link_pagamento: initPoint || sandboxInitPoint,
-          atualizado_em: new Date().toISOString()
-        })
-        .eq("id", externalReference);
-
-      if (updateBasico.error) {
-        avisoBanco = `Pagamento criado, mas não foi possível atualizar a cobrança: ${updateBasico.error.message}`;
-      } else {
-        avisoBanco = "Pagamento criado usando compatibilidade com a estrutura atual do banco.";
-      }
+    if (updateErro) {
+      return jsonResponse({
+        ok: false,
+        erro:
+          "O Mercado Pago criou o pagamento, mas o banco " +
+          `negou a atualização: ${updateErro.message}`
+      }, 500);
     }
 
     return jsonResponse({
@@ -218,15 +233,17 @@ Deno.serve(async (req) => {
       preference_id: preferenceId,
       init_point: initPoint,
       sandbox_init_point: sandboxInitPoint,
-      external_reference: externalReference,
-      aviso: avisoBanco
+      external_reference: externalReference
     });
   } catch (erro) {
     console.error(erro);
 
     return jsonResponse({
       ok: false,
-      erro: erro instanceof Error ? erro.message : "Erro interno ao criar pagamento."
+      erro:
+        erro instanceof Error
+          ? erro.message
+          : "Erro interno ao criar pagamento."
     }, 500);
   }
 });

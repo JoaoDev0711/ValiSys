@@ -271,31 +271,14 @@ const valisysFinanceiro = {
   },
 
   async cancelarAssinatura({ lojaId, usuarioNome = "", usuarioCargo = "" }) {
-    try {
-      return await this.invocarFuncaoPublica("financeiro-cancelar-assinatura", {
+    return this.invocarFuncaoPublica(
+      "financeiro-cancelar-assinatura",
+      {
         lojaId,
         usuarioNome,
         usuarioCargo
-      });
-    } catch (erroEdge) {
-      try {
-        const db = this.client();
-
-        const { data, error } = await db.rpc("valisys_financeiro_cancelar_assinatura", {
-          p_loja_id: lojaId,
-          p_cancelado_por: usuarioNome,
-          p_cancelado_cargo: usuarioCargo
-        });
-
-        if (error) throw error;
-
-        return this.extrairJsonRpc(data);
-      } catch (erroRpc) {
-        throw new Error(
-          `Edge Function: ${erroEdge.message}. RPC: ${erroRpc.message}`
-        );
       }
-    }
+    );
   },
 
   async criarPagamentoMercadoPago({ cobrancaId, lojaId, usuarioNome = "" }) {
