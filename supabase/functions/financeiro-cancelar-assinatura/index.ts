@@ -27,10 +27,7 @@ Deno.serve(async (req) => {
     const lojaId = String(body.lojaId || "").trim();
 
     if (!lojaId) {
-      return jsonResponse({
-        ok: false,
-        erro: "Loja não informada."
-      }, 400);
+      return jsonResponse({ ok: false, erro: "Loja não informada." }, 400);
     }
 
     const supabase = createClient(
@@ -44,95 +41,34 @@ Deno.serve(async (req) => {
       }
     );
 
-    const { data: assinatura, error: assinaturaErro } =
-      await supabase
-        .from("financeiro_assinaturas")
-        .select("id, loja_id, status")
-        .eq("loja_id", lojaId)
-        .maybeSingle();
+    const { data, error } = await supabase.rpc(
+      "valisys_financeiro_cancelar_assinatura",
+      {
+        p_loja_id: lojaId,
+        p_cancelado_por: body.usuarioNome || "",
+        p_cancelado_cargo: body.usuarioCargo || ""
+      }
+    );
 
-    if (assinaturaErro) {
+    if (error) {
       return jsonResponse({
         ok: false,
-        erro:
-          `Permissão/consulta da assinatura: ` +
-          assinaturaErro.message
+        erro: `RPC de cancelamento: ${error.message}`
       }, 500);
     }
 
-    if (!assinatura) {
+    if (data?.ok === false) {
       return jsonResponse({
         ok: false,
-        erro: "Nenhuma assinatura encontrada para esta loja."
-      }, 404);
-    }
-
-    const { error: cancelarErro } = await supabase
-      .from("financeiro_assinaturas")
-      .update({
-        status: "cancelada",
-        atualizado_em: new Date().toISOString()
-      })
-      .eq("id", assinatura.id);
-
-    if (cancelarErro) {
-      return jsonResponse({
-        ok: false,
-        erro:
-          `Permissão/cancelamento da assinatura: ` +
-          cancelarErro.message
-      }, 500);
-    }
-
-    const cobrancas = await supabase
-      .from("financeiro_cobrancas")
-      .update({
-        status: "cancelada",
-        atualizado_em: new Date().toISOString()
-      })
-      .eq("assinatura_id", assinatura.id)
-      .in(
-        "status",
-        ["pendente", "aguardando_pagamento", "vencida"]
-      );
-
-    if (cobrancas.error) {
-      return jsonResponse({
-        ok: false,
-        erro:
-          `Assinatura cancelada, mas cobranças não foram ` +
-          `atualizadas: ${cobrancas.error.message}`
-      }, 500);
-    }
-
-    const loja = await supabase
-      .from("lojas")
-      .update({
-        plano_codigo: null,
-        assinatura_status: "cancelada",
-        acesso_bloqueado: false,
-        assinatura_vencimento: null
-      })
-      .eq("id", lojaId);
-
-    if (loja.error) {
-      return jsonResponse({
-        ok: false,
-        erro:
-          `Assinatura cancelada, mas a loja não foi ` +
-          `atualizada: ${loja.error.message}`
-      }, 500);
+        erro: data.erro || "Cancelamento não concluído."
+      }, 400);
     }
 
     return jsonResponse({
       ok: true,
-      assinatura: {
-        id: assinatura.id,
-        loja_id: lojaId,
-        status: "cancelada",
-        cancelado_por: body.usuarioNome || "",
-        cancelado_cargo: body.usuarioCargo || ""
-      }
+      assinatura: null,
+      cobrancas: [],
+      modo: "gratuito"
     });
   } catch (erro) {
     console.error(erro);

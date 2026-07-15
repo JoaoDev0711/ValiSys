@@ -148,22 +148,30 @@ Deno.serve(async (req) => {
     }
 
     if (cobrancaStatus === "pago" && cobranca) {
-      await supabase
+      const { data: assinatura } = await supabase
         .from("financeiro_assinaturas")
-        .update({
-          status: "ativa",
-          atualizado_em: new Date().toISOString()
-        })
-        .eq("id", cobranca.assinatura_id);
+        .select("id, status")
+        .eq("id", cobranca.assinatura_id)
+        .maybeSingle();
 
-      await supabase
-        .from("lojas")
-        .update({
-          assinatura_status: "ativa",
-          acesso_bloqueado: false,
-          assinatura_vencimento: cobranca.vencimento
-        })
-        .eq("id", cobranca.loja_id);
+      if (assinatura && assinatura.status !== "cancelada") {
+        await supabase
+          .from("financeiro_assinaturas")
+          .update({
+            status: "ativa",
+            atualizado_em: new Date().toISOString()
+          })
+          .eq("id", cobranca.assinatura_id);
+
+        await supabase
+          .from("lojas")
+          .update({
+            assinatura_status: "ativa",
+            acesso_bloqueado: false,
+            assinatura_vencimento: cobranca.vencimento
+          })
+          .eq("id", cobranca.loja_id);
+      }
     }
 
     return jsonResponse({

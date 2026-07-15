@@ -103,7 +103,7 @@ async function selecionarPlano(codigo) {
       usuarioNome: usuario.nome
     });
 
-    alert("Plano atualizado. As cobranças dos próximos 12 meses foram preparadas.");
+    alert("Plano selecionado. A assinatura ficará aguardando pagamento até a confirmação do Mercado Pago.");
     window.location.href = "minha-assinatura.html";
   } catch (erro) {
     console.error(erro);

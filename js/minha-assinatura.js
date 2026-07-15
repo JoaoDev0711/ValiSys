@@ -52,8 +52,7 @@ function statusTexto(status = "") {
     cancelada: "Cancelada",
     pago: "Pago",
     recebido: "Recebido",
-    teste: "Teste",
-    cancelada: "Cancelada"
+    teste: "Teste"
   };
 
   return mapa[status] || status || "Pendente";
@@ -72,8 +71,8 @@ function renderizarAssinatura() {
   if (!assinaturaAtual) {
     assinaturaResumo.innerHTML = `
       <div class="finance-status-card pendente">
-        <strong>Esta loja ainda não tem assinatura.</strong>
-        <p>Escolha um plano para gerar as cobranças dos próximos 12 meses.</p>
+        <strong>Plano gratuito</strong>
+        <p>A loja está no modo gratuito, sem plano pago e sem cobranças ativas.</p>
         <a class="button-link" href="planos.html">Ver planos</a>
       </div>
     `;
@@ -396,8 +395,11 @@ async function cancelarAssinaturaAtual() {
       usuarioCargo: usuario.cargo
     });
 
-    alert("Assinatura cancelada.");
-    await carregarAssinatura();
+    assinaturaAtual = null;
+    cobrancasCache = [];
+    renderizarAssinatura();
+    renderizarCobrancas();
+    alert("Assinatura cancelada. A loja voltou ao plano gratuito.");
   } catch (erro) {
     console.error(erro);
     alert(`Não foi possível cancelar a assinatura.\n\nDetalhe: ${erro.message || erro}`);
