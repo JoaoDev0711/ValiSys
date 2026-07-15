@@ -1124,3 +1124,204 @@ analyze public.financeiro_cobrancas;
 analyze public.financeiro_meios_pagamento;
 
 notify pgrst, 'reload schema';
+
+-- =========================================================
+-- Financeiro: cancelamento de assinatura + Mercado Pago
+-- =========================================================
+
+alter table public.financeiro_assinaturas
+add column if not exists cancelado_em timestamptz;
+
+alter table public.financeiro_assinaturas
+add column if not exists cancelado_por text;
+
+alter table public.financeiro_assinaturas
+add column if not exists cancelado_cargo text;
+
+alter table public.financeiro_cobrancas
+add column if not exists mercado_pago_preference_id text;
+
+alter table public.financeiro_cobrancas
+add column if not exists mercado_pago_payment_id text;
+
+alter table public.financeiro_cobrancas
+add column if not exists mercado_pago_status text;
+
+alter table public.financeiro_cobrancas
+add column if not exists mercado_pago_external_reference text;
+
+alter table public.financeiro_cobrancas
+add column if not exists mercado_pago_init_point text;
+
+alter table public.financeiro_cobrancas
+add column if not exists mercado_pago_sandbox_init_point text;
+
+create index if not exists financeiro_cobrancas_mp_payment_idx
+on public.financeiro_cobrancas(mercado_pago_payment_id);
+
+create index if not exists financeiro_cobrancas_mp_reference_idx
+on public.financeiro_cobrancas(mercado_pago_external_reference);
+
+insert into public.financeiro_meios_pagamento
+  (tipo, nome, descricao, instrucoes, ativo, ordem)
+select
+  'mercadopago',
+  'Mercado Pago',
+  'Pagamento via link seguro do Mercado Pago.',
+  'Ao clicar em pagar, o sistema gera um link seguro do Mercado Pago.',
+  true,
+  1
+where not exists (
+  select 1
+  from public.financeiro_meios_pagamento
+  where tipo = 'mercadopago'
+);
+
+drop function if exists public.valisys_financeiro_cancelar_assinatura(uuid, text, text);
+
+create or replace function public.valisys_financeiro_cancelar_assinatura(
+  p_loja_id uuid,
+  p_cancelado_por text default '',
+  p_cancelado_cargo text default ''
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  assinatura_atual public.financeiro_assinaturas%rowtype;
+  assinatura_json jsonb;
+  cobrancas_json jsonb;
+  meios_json jsonb;
+begin
+  select *
+  into assinatura_atual
+  from public.financeiro_assinaturas
+  where loja_id = p_loja_id
+  limit 1;
+
+  if assinatura_atual.id is null then
+    return jsonb_build_object(
+      'ok', false,
+      'erro', 'Assinatura não encontrada.'
+    );
+  end if;
+
+  update public.financeiro_assinaturas
+  set status = 'cancelada',
+      cancelado_em = now(),
+      cancelado_por = coalesce(p_cancelado_por, ''),
+      cancelado_cargo = coalesce(p_cancelado_cargo, ''),
+      atualizado_em = now()
+  where id = assinatura_atual.id;
+
+  update public.financeiro_cobrancas
+  set status = 'cancelada',
+      atualizado_em = now()
+  where assinatura_id = assinatura_atual.id
+    and status in ('pendente', 'aguardando_pagamento', 'vencida');
+
+  update public.lojas
+  set plano_codigo = null,
+      assinatura_status = 'cancelada',
+      acesso_bloqueado = false,
+      assinatura_vencimento = null
+  where id = p_loja_id;
+
+  select to_jsonb(x)
+  into assinatura_json
+  from (
+    select
+      a.id,
+      a.loja_id,
+      a.plano_id,
+      a.status,
+      a.ciclo,
+      a.inicio_em,
+      a.proximo_vencimento,
+      a.cancelado_em,
+      a.cancelado_por,
+      a.criado_em,
+      jsonb_build_object(
+        'id', p.id,
+        'codigo', p.codigo,
+        'nome', p.nome,
+        'descricao', p.descricao,
+        'valor_mensal', p.valor_mensal,
+        'limite_lojas', p.limite_lojas,
+        'limite_usuarios', p.limite_usuarios,
+        'recursos', p.recursos,
+        'destaque', p.destaque
+      ) as plano
+    from public.financeiro_assinaturas a
+    join public.financeiro_planos p on p.id = a.plano_id
+    where a.id = assinatura_atual.id
+  ) x;
+
+  select coalesce(jsonb_agg(to_jsonb(c) order by c.competencia asc), '[]'::jsonb)
+  into cobrancas_json
+  from (
+    select
+      id,
+      assinatura_id,
+      loja_id,
+      competencia,
+      descricao,
+      valor,
+      vencimento,
+      status,
+      link_pagamento,
+      boleto_url,
+      linha_digitavel,
+      pix_copia_cola,
+      meio_pagamento,
+      pago_em,
+      mercado_pago_preference_id,
+      mercado_pago_payment_id,
+      mercado_pago_status,
+      mercado_pago_init_point,
+      mercado_pago_sandbox_init_point,
+      criado_em
+    from public.financeiro_cobrancas
+    where loja_id = p_loja_id
+      and competencia >= date_trunc('month', current_date)::date
+      and competencia < (date_trunc('month', current_date)::date + interval '12 months')::date
+    order by competencia asc
+  ) c;
+
+  select coalesce(jsonb_agg(to_jsonb(m) order by m.ordem asc), '[]'::jsonb)
+  into meios_json
+  from (
+    select
+      id,
+      tipo,
+      nome,
+      descricao,
+      chave_pix,
+      pix_nome_recebedor,
+      link_pagamento,
+      boleto_url,
+      linha_digitavel,
+      dados_bancarios,
+      instrucoes,
+      ativo,
+      ordem
+    from public.financeiro_meios_pagamento
+    where ativo = true
+    order by ordem asc
+  ) m;
+
+  return jsonb_build_object(
+    'ok', true,
+    'assinatura', assinatura_json,
+    'cobrancas', cobrancas_json,
+    'meios_pagamento', meios_json
+  );
+end;
+$$;
+
+grant execute on function public.valisys_financeiro_cancelar_assinatura(uuid, text, text) to anon, authenticated;
+
+notify pgrst, 'reload schema';
+

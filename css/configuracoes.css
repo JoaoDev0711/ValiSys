@@ -1,12 +1,7 @@
-/* ValiSys - Tema definitivo.
-   Não altera site público. Corrige contrastes de lembretes, planos e formulários. */
+/* ValiSys - Configurações visuais definitivas */
 
-body.valisys-preferencias-publico-bloqueadas {
-  color-scheme: light;
-}
-
-/* CLARO explícito */
-body.valisys-tema-claro:not(.public-page) {
+/* CLARO */
+body.valisys-tema-claro {
   --bg: #f7f8f5;
   --surface: #ffffff;
   --surface-soft: #f3f5f0;
@@ -25,15 +20,51 @@ body.valisys-tema-claro:not(.public-page) {
   color-scheme: light;
 }
 
-body.valisys-tema-claro:not(.public-page) :is(
+/* ESCURO PRETO TOTAL */
+body.valisys-tema-escuro,
+body.valisys-auto-escuro {
+  --bg: #000000;
+  --surface: #000000;
+  --surface-soft: #050505;
+  --text: #ffffff;
+  --muted: #d6d6d6;
+  --line: #303030;
+  --primary: #168447;
+  --primary-strong: #22a85d;
+  --accent: #090909;
+  --danger: #ff6b6b;
+  --success: #54e186;
+  --warning: #ffd166;
+  --shadow: none;
+  background: #000000 !important;
+  color: #ffffff !important;
+  color-scheme: dark;
+}
+
+/* Força tema em todos os blocos e todos os HTMLs */
+body.valisys-tema-escuro *,
+body.valisys-auto-escuro * {
+  border-color: var(--line) !important;
+}
+
+body.valisys-tema-escuro :is(
   .topbar,
+  .public-header,
   .sidebar,
+  .sidebar-user,
   .quick-actions-bar,
   .card,
   .welcome-card,
   .action-card,
   .login-card,
   .loja-atual-card,
+  .public-plan-card,
+  .feature-grid-redesign article,
+  .impact-stack-card,
+  .management-card,
+  .cta-redesign,
+  .update-item,
+  .tutorial-item,
   .config-group,
   .config-option,
   .config-toggle,
@@ -42,97 +73,22 @@ body.valisys-tema-claro:not(.public-page) :is(
   .finance-status-card,
   .cobranca-card,
   .plano-card,
+  .produto-card,
+  .produto-lista-card,
+  .produto-item,
+  .lancamento-card,
+  .lancamento-item,
+  .validade-card,
+  .validade-item,
   .grupo-lembrete,
   .subgrupo-dia,
+  .subgrupo-itens,
   .subgrupo-itens .lembrete-item,
   .lembrete-item,
   .empty-state,
   .resumo-card,
   .loja-card,
   .loja-card-clickable,
-  .admin-current-store
-) {
-  background: var(--surface) !important;
-  color: var(--text) !important;
-  border-color: var(--line) !important;
-}
-
-body.valisys-tema-claro:not(.public-page) :is(.config-option,.config-toggle,.config-preview,.config-safe-note,.subgrupo-dia,.lembrete-foto,.foto-box-lista,.produto-thumb-placeholder) {
-  background: var(--surface-soft) !important;
-  color: var(--text) !important;
-}
-
-/* ESCURO explícito e AUTO escuro */
-body.valisys-tema-escuro:not(.public-page),
-body.valisys-auto-escuro:not(.public-page) {
-  --bg: #07110b;
-  --surface: #0f1a13;
-  --surface-soft: #17251b;
-  --text: #f4faf5;
-  --muted: #bdd0c2;
-  --line: #33463a;
-  --primary: #26814d;
-  --primary-strong: #44ad6d;
-  --accent: #182d20;
-  --danger: #ff9c96;
-  --success: #8ce5aa;
-  --warning: #ffd68a;
-  --shadow: 0 8px 24px rgba(0, 0, 0, .28);
-  background: var(--bg) !important;
-  color: var(--text) !important;
-  color-scheme: dark;
-}
-
-body.valisys-tema-escuro:not(.public-page) .topbar,
-body.valisys-auto-escuro:not(.public-page) .topbar {
-  background: #f7f8f5 !important;
-  color: #17211b !important;
-  border-color: #dfe7dd !important;
-}
-
-body.valisys-tema-escuro:not(.public-page) .topbar :is(h1,a,button),
-body.valisys-auto-escuro:not(.public-page) .topbar :is(h1,a,button) {
-  color: #17211b !important;
-}
-
-body.valisys-tema-escuro:not(.public-page) .icon-btn,
-body.valisys-auto-escuro:not(.public-page) .icon-btn,
-body.valisys-tema-escuro:not(.public-page) .user-icon,
-body.valisys-auto-escuro:not(.public-page) .user-icon {
-  background: #ffffff !important;
-  color: #17211b !important;
-  border-color: #dfe7dd !important;
-}
-
-body.valisys-tema-escuro:not(.public-page) :is(
-  .sidebar,
-  .quick-actions-bar,
-  .card,
-  .welcome-card,
-  .action-card,
-  .login-card,
-  .loja-atual-card,
-  .update-item,
-  .tutorial-item,
-  .config-group,
-  .config-option,
-  .config-toggle,
-  .config-preview,
-  .config-safe-note,
-  .finance-status-card,
-  .cobranca-card,
-  .plano-card,
-  .produto-card,
-  .produto-lista-card,
-  .produto-item,
-  .lancamento-card,
-  .lancamento-item,
-  .validade-card,
-  .validade-item,
-  .grupo-lembrete,
-  .empty-state,
-  .loja-card,
-  .loja-card-clickable,
   .admin-current-store,
   .admin-percent-card,
   .sac-admin-section,
@@ -145,16 +101,29 @@ body.valisys-tema-escuro:not(.public-page) :is(
   .scan-help,
   .manual-entry-box,
   .section-box,
-  .resumo-card
+  .login-code-note,
+  .contratacao-info,
+  .contratacao-admin-box,
+  .resumo-dados-operacao p,
+  .public-plan-flow-note,
+  .cookie-banner
 ),
-body.valisys-auto-escuro:not(.public-page) :is(
+body.valisys-auto-escuro :is(
+  .topbar,
+  .public-header,
   .sidebar,
+  .sidebar-user,
   .quick-actions-bar,
   .card,
   .welcome-card,
   .action-card,
   .login-card,
   .loja-atual-card,
+  .public-plan-card,
+  .feature-grid-redesign article,
+  .impact-stack-card,
+  .management-card,
+  .cta-redesign,
   .update-item,
   .tutorial-item,
   .config-group,
@@ -173,7 +142,12 @@ body.valisys-auto-escuro:not(.public-page) :is(
   .validade-card,
   .validade-item,
   .grupo-lembrete,
+  .subgrupo-dia,
+  .subgrupo-itens,
+  .subgrupo-itens .lembrete-item,
+  .lembrete-item,
   .empty-state,
+  .resumo-card,
   .loja-card,
   .loja-card-clickable,
   .admin-current-store,
@@ -188,160 +162,116 @@ body.valisys-auto-escuro:not(.public-page) :is(
   .scan-help,
   .manual-entry-box,
   .section-box,
-  .resumo-card
+  .login-code-note,
+  .contratacao-info,
+  .contratacao-admin-box,
+  .resumo-dados-operacao p,
+  .public-plan-flow-note,
+  .cookie-banner
 ) {
-  background: var(--surface) !important;
-  color: var(--text) !important;
+  background: #000000 !important;
+  color: #ffffff !important;
   border-color: var(--line) !important;
+  box-shadow: none !important;
 }
 
-/* Lembretes: corrige exatamente a parte branca da imagem */
-body.valisys-tema-escuro:not(.public-page) .grupo-lembrete,
-body.valisys-auto-escuro:not(.public-page) .grupo-lembrete {
-  background: var(--surface) !important;
-  color: var(--text) !important;
-}
-
-body.valisys-tema-escuro:not(.public-page) .subgrupo-dia,
-body.valisys-auto-escuro:not(.public-page) .subgrupo-dia,
-body.valisys-tema-escuro:not(.public-page) .subgrupo-itens,
-body.valisys-auto-escuro:not(.public-page) .subgrupo-itens {
-  background: var(--surface-soft) !important;
-  color: var(--text) !important;
-  border-color: var(--line) !important;
-}
-
-body.valisys-tema-escuro:not(.public-page) .subgrupo-dia summary,
-body.valisys-auto-escuro:not(.public-page) .subgrupo-dia summary {
-  background: var(--surface-soft) !important;
-  color: var(--warning) !important;
-}
-
-body.valisys-tema-escuro:not(.public-page) .subgrupo-itens .lembrete-item,
-body.valisys-auto-escuro:not(.public-page) .subgrupo-itens .lembrete-item,
-body.valisys-tema-escuro:not(.public-page) .lembrete-item,
-body.valisys-auto-escuro:not(.public-page) .lembrete-item {
-  background: #0a160e !important;
-  color: var(--text) !important;
-  border-color: var(--line) !important;
-}
-
-body.valisys-tema-escuro:not(.public-page) .lembrete-foto,
-body.valisys-auto-escuro:not(.public-page) .lembrete-foto,
-body.valisys-tema-escuro:not(.public-page) .produto-thumb-placeholder,
-body.valisys-auto-escuro:not(.public-page) .produto-thumb-placeholder,
-body.valisys-tema-escuro:not(.public-page) .foto-box-lista,
-body.valisys-auto-escuro:not(.public-page) .foto-box-lista {
-  background: #f7f8f5 !important;
-  color: #17211b !important;
-  border-color: #dfe7dd !important;
-}
-
-body.valisys-tema-escuro:not(.public-page) :is(.lembrete-info h3,.lembrete-info p,.grupo-lembrete h3,.grupo-lembrete p),
-body.valisys-auto-escuro:not(.public-page) :is(.lembrete-info h3,.lembrete-info p,.grupo-lembrete h3,.grupo-lembrete p) {
-  color: var(--text) !important;
-}
-
-body.valisys-tema-escuro:not(.public-page) :is(.muted,.small.muted,.finance-label,.plano-recursos li,.mais-itens),
-body.valisys-auto-escuro:not(.public-page) :is(.muted,.small.muted,.finance-label,.plano-recursos li,.mais-itens) {
-  color: var(--muted) !important;
-}
-
-/* Inputs */
-body.valisys-tema-escuro:not(.public-page) :is(input,select,textarea),
-body.valisys-auto-escuro:not(.public-page) :is(input,select,textarea) {
-  background: #08120c !important;
-  color: var(--text) !important;
-  border-color: var(--line) !important;
-}
-
-body.valisys-tema-escuro:not(.public-page) :is(input,textarea)::placeholder,
-body.valisys-auto-escuro:not(.public-page) :is(input,textarea)::placeholder {
-  color: #92a196 !important;
-}
-
-/* Botões */
-body.valisys-tema-escuro:not(.public-page) :is(button,.button-link,.primary-link),
-body.valisys-auto-escuro:not(.public-page) :is(button,.button-link,.primary-link) {
+/* Palavras brancas */
+body.valisys-tema-escuro :is(h1,h2,h3,h4,h5,p,span,strong,label,li,small,summary,td,th,div,a),
+body.valisys-auto-escuro :is(h1,h2,h3,h4,h5,p,span,strong,label,li,small,summary,td,th,div,a) {
   color: #ffffff !important;
 }
 
-body.valisys-tema-escuro:not(.public-page) :is(button.secondary,.secondary-link,.inline-link),
-body.valisys-auto-escuro:not(.public-page) :is(button.secondary,.secondary-link,.inline-link) {
-  background: var(--surface-soft) !important;
-  color: var(--text) !important;
+body.valisys-tema-escuro :is(.muted,.small.muted,.finance-label,.plano-recursos li,.mais-itens),
+body.valisys-auto-escuro :is(.muted,.small.muted,.finance-label,.plano-recursos li,.mais-itens) {
+  color: #d6d6d6 !important;
+}
+
+/* Inputs */
+body.valisys-tema-escuro :is(input,select,textarea),
+body.valisys-auto-escuro :is(input,select,textarea) {
+  background: #000000 !important;
+  color: #ffffff !important;
   border-color: var(--line) !important;
 }
 
-/* Barra inferior sem cobrir conteúdo */
+body.valisys-tema-escuro :is(input,textarea)::placeholder,
+body.valisys-auto-escuro :is(input,textarea)::placeholder {
+  color: #a8a8a8 !important;
+}
+
+/* Fotos e placeholders podem ficar claros para imagem aparecer */
+body.valisys-tema-escuro :is(.lembrete-foto,.produto-thumb-placeholder,.foto-box-lista),
+body.valisys-auto-escuro :is(.lembrete-foto,.produto-thumb-placeholder,.foto-box-lista) {
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+/* Botões */
+body.valisys-tema-escuro :is(button,.button-link,.primary-link),
+body.valisys-auto-escuro :is(button,.button-link,.primary-link) {
+  color: #ffffff !important;
+}
+
+body.valisys-tema-escuro :is(button.secondary,.secondary-link,.inline-link,.user-icon,.icon-btn),
+body.valisys-auto-escuro :is(button.secondary,.secondary-link,.inline-link,.user-icon,.icon-btn) {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: var(--line) !important;
+}
+
+/* Barra inferior */
 body:not(.public-page) main.container {
-  padding-bottom: 128px !important;
+  padding-bottom: 132px !important;
 }
 
-body.valisys-tema-escuro:not(.public-page) .quick-actions-bar,
-body.valisys-auto-escuro:not(.public-page) .quick-actions-bar {
-  background: rgba(7, 17, 11, .96) !important;
-  border-color: var(--line) !important;
-  box-shadow: 0 14px 42px rgba(0,0,0,.35) !important;
-}
-
-body.valisys-tema-escuro:not(.public-page) .quick-actions-bar a,
-body.valisys-tema-escuro:not(.public-page) .quick-actions-bar button,
-body.valisys-auto-escuro:not(.public-page) .quick-actions-bar a,
-body.valisys-auto-escuro:not(.public-page) .quick-actions-bar button {
-  background: var(--surface) !important;
-  color: var(--text) !important;
+body.valisys-tema-escuro .quick-actions-bar,
+body.valisys-auto-escuro .quick-actions-bar {
+  background: rgba(0,0,0,.96) !important;
   border-color: var(--line) !important;
 }
 
-body.valisys-tema-escuro:not(.public-page) .quick-actions-bar .is-active,
-body.valisys-auto-escuro:not(.public-page) .quick-actions-bar .is-active {
+body.valisys-tema-escuro .quick-actions-bar a,
+body.valisys-tema-escuro .quick-actions-bar button,
+body.valisys-auto-escuro .quick-actions-bar a,
+body.valisys-auto-escuro .quick-actions-bar button {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: var(--line) !important;
+}
+
+body.valisys-tema-escuro .quick-actions-bar .is-active,
+body.valisys-auto-escuro .quick-actions-bar .is-active {
   background: var(--primary) !important;
-  color: #fff !important;
+  color: #ffffff !important;
   border-color: var(--primary) !important;
 }
 
-/* Estilos seguros */
-body.valisys-estilo-compacto .card,
-body.valisys-estilo-compacto .welcome-card,
-body.valisys-estilo-compacto .action-card,
-body.valisys-densidade-compacta .card,
-body.valisys-densidade-compacta .welcome-card,
-body.valisys-densidade-compacta .action-card {
-  padding: 14px !important;
+/* SVGs */
+.svg-icon {
+  width: 1.2em;
+  height: 1.2em;
+  display: inline-block;
+  vertical-align: -0.18em;
+  flex: 0 0 auto;
 }
 
-body.valisys-estilo-compacto .grid-actions {
-  gap: 10px !important;
+.action-card > span,
+.resumo-card > span,
+.section-title > span,
+.feature-icon,
+.impact-card-icon {
+  display: grid !important;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 12px;
+  background: var(--surface-soft);
+  color: var(--primary);
+  font-size: 18px;
 }
 
-body.valisys-estilo-premium .card,
-body.valisys-estilo-premium .welcome-card,
-body.valisys-estilo-premium .action-card,
-body.valisys-estilo-premium .login-card {
-  border-color: #d8c8a9 !important;
-}
-
-body.valisys-fonte-maior {
-  font-size: 17px;
-}
-
-body.valisys-fonte-maior input,
-body.valisys-fonte-maior select,
-body.valisys-fonte-maior textarea,
-body.valisys-fonte-maior button {
-  font-size: 16px;
-}
-
-body.valisys-reduzir-movimento *,
-body.valisys-reduzir-movimento *::before,
-body.valisys-reduzir-movimento *::after {
-  animation: none !important;
-  transition: none !important;
-  scroll-behavior: auto !important;
-}
-
-/* Tela de configurações */
+/* Configurações */
 .config-section,
 .config-options {
   display: grid;
@@ -421,6 +351,26 @@ body.valisys-reduzir-movimento *::after {
   background: var(--surface-soft, #f3f5f0);
 }
 
+/* Assinatura */
+.finance-danger-zone {
+  border-color: rgba(255, 107, 107, .45) !important;
+}
+
+.cancelar-assinatura-btn {
+  background: #b9342d !important;
+  color: #ffffff !important;
+  border-color: #b9342d !important;
+}
+
+.mercado-pago-box {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+}
+
 @media (min-width: 760px) {
   .config-options.duas-colunas {
     grid-template-columns: repeat(3, 1fr);
@@ -429,7 +379,7 @@ body.valisys-reduzir-movimento *::after {
 
 @media (max-width: 640px) {
   body:not(.public-page) main.container {
-    padding-bottom: 140px !important;
+    padding-bottom: 144px !important;
   }
 
   .quick-actions-bar {

@@ -52,7 +52,8 @@ function statusTexto(status = "") {
     cancelada: "Cancelada",
     pago: "Pago",
     recebido: "Recebido",
-    teste: "Teste"
+    teste: "Teste",
+    cancelada: "Cancelada"
   };
 
   return mapa[status] || status || "Pendente";
@@ -94,7 +95,10 @@ function renderizarAssinatura() {
         <p><strong>Ciclo:</strong> ${esc(assinaturaAtual.ciclo || "mensal")}</p>
       </div>
 
-      <a class="inline-link" href="planos.html">Trocar plano</a>
+      <div class="config-actions finance-danger-zone">
+        <a class="inline-link" href="planos.html">Trocar plano</a>
+        <button type="button" class="cancelar-assinatura-btn" onclick="cancelarAssinaturaAtual()">Cancelar assinatura</button>
+      </div>
     </div>
   `;
 }
@@ -142,7 +146,10 @@ function renderizarCobrancas() {
         ${paga ? `
           <p class="muted">Pagamento registrado em ${dataBR(cobranca.pagoEm)}.</p>
         ` : `
-          <button type="button" onclick="abrirPagamento('${esc(cobranca.id)}')">Pagar</button>
+          <div class="config-actions">
+            <button type="button" onclick="abrirPagamento('${esc(cobranca.id)}')">Pagar</button>
+            <button type="button" class="secondary" onclick="pagarMercadoPago('${esc(cobranca.id)}')">Mercado Pago</button>
+          </div>
         `}
       </article>
     `;
@@ -334,3 +341,67 @@ async function carregarAssinatura() {
 }
 
 carregarAssinatura();
+
+
+async function pagarMercadoPago(cobrancaId) {
+  const cobranca = cobrancasCache.find(item => item.id === cobrancaId);
+
+  if (!cobranca) return;
+
+  const confirmar = await confirmarAcao(
+    `Gerar pagamento de ${moedaBR(cobranca.valor)} no Mercado Pago?`,
+    "Pagar com Mercado Pago"
+  );
+
+  if (!confirmar) return;
+
+  try {
+    const resposta = await valisysFinanceiro.criarPagamentoMercadoPago({
+      cobrancaId,
+      lojaId: lojaAtual.id,
+      usuarioNome: usuario.nome
+    });
+
+    const link = resposta.init_point || resposta.sandbox_init_point;
+
+    if (!link) {
+      alert("Pagamento criado, mas o Mercado Pago não retornou o link.");
+      return;
+    }
+
+    window.open(link, "_blank", "noopener");
+    await iniciarMinhaAssinatura();
+  } catch (erro) {
+    console.error(erro);
+    alert("Não foi possível gerar o pagamento no Mercado Pago. Confira se a Edge Function foi implantada e se o MP_ACCESS_TOKEN foi configurado.");
+  }
+}
+
+window.pagarMercadoPago = pagarMercadoPago;
+
+async function cancelarAssinaturaAtual() {
+  if (!assinaturaAtual) return;
+
+  const confirmar = await confirmarAcao(
+    "Cancelar a assinatura da loja? As cobranças pendentes serão canceladas e a loja ficará sem assinatura ativa.",
+    "Cancelar assinatura"
+  );
+
+  if (!confirmar) return;
+
+  try {
+    await valisysFinanceiro.cancelarAssinatura({
+      lojaId: lojaAtual.id,
+      usuarioNome: usuario.nome,
+      usuarioCargo: usuario.cargo
+    });
+
+    alert("Assinatura cancelada.");
+    await iniciarMinhaAssinatura();
+  } catch (erro) {
+    console.error(erro);
+    alert("Não foi possível cancelar a assinatura. Rode o SQL principal atualizado no Supabase.");
+  }
+}
+
+window.cancelarAssinaturaAtual = cancelarAssinaturaAtual;

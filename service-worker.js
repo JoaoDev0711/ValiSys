@@ -1,5 +1,5 @@
 /* ValiSys - Service Worker PWA + Web Push */
-const VALISYS_CACHE = "valisys-pwa-v26";
+const VALISYS_CACHE = "valisys-pwa-v27";
 
 const APP_SHELL = [
   "./",

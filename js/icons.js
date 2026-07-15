@@ -1,8 +1,7 @@
 /*
-  ValiSys - Ícones SVG profissionais
-  Correção: nunca substitui texto vazio por ícone.
+  ValiSys - Ícones SVG seguros
+  Não substitui texto vazio entre letras. Preenche somente áreas visuais conhecidas.
 */
-
 (function () {
   const ICONS = {
     menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
@@ -38,6 +37,10 @@
     key: '<circle cx="7" cy="17" r="3"/><path d="M10 17h11"/><path d="M17 17v-3M14 17v-2"/>',
     spark: '<path d="M12 2l2.2 6.2L20 10l-5.8 1.8L12 18l-2.2-6.2L4 10l5.8-1.8L12 2z"/>',
     admin: '<path d="M12 3l7 3v5c0 4.5-2.9 8.5-7 10-4.1-1.5-7-5.5-7-10V6l7-3z"/><path d="M9 12l2 2 4-5"/>',
+    money: '<path d="M3 7h18v10H3z"/><circle cx="12" cy="12" r="2"/><path d="M7 9h.01M17 15h.01"/>',
+    credit: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/>',
+    cancel: '<circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/>',
+    moon: '<path d="M21 13.2A8 8 0 0 1 10.8 3 7 7 0 1 0 21 13.2z"/>',
     generic: '<circle cx="12" cy="12" r="9"/><path d="M8 12h8"/>'
   };
 
@@ -45,8 +48,31 @@
     "←": "back",
     "↪": "user",
     "⏳": "clock",
-    "ℹ": "info"
+    "ℹ": "info",
+    "✅": "check",
+    "⚡": "spark",
+    "📦": "box",
+    "🔔": "bell"
   };
+
+  const TEXT_ICON = [
+    ["lançar", "plus"],
+    ["meus lançamentos", "list"],
+    ["lista geral", "list"],
+    ["gestão", "settings"],
+    ["cadastrar produto", "product"],
+    ["usuários", "users"],
+    ["assinatura", "money"],
+    ["planos", "credit"],
+    ["tutorial", "file"],
+    ["atualizações", "bell"],
+    ["configurações", "settings"],
+    ["nova implantação", "store"],
+    ["lojas", "store"],
+    ["vencimentos", "clock"],
+    ["gráficos", "chart"],
+    ["admin", "admin"]
+  ];
 
   function iconHTML(name) {
     const paths = ICONS[name] || ICONS.generic;
@@ -55,30 +81,50 @@
 
   window.svgIconHTML = iconHTML;
 
-  const keys = Object.keys(EMOJI_TO_ICON).filter(Boolean).sort((a, b) => b.length - a.length);
-
-  if (!keys.length) {
-    return;
-  }
-
-  const emojiRegex = new RegExp(keys.map(escapeRegExp).join("|"), "g");
-
-  function escapeRegExp(text) {
-    return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  }
-
   function iconElement(name) {
     const temp = document.createElement("span");
     temp.innerHTML = iconHTML(name);
     return temp.firstElementChild;
   }
 
+  function iconByText(text = "") {
+    const lower = String(text || "").toLowerCase();
+    const item = TEXT_ICON.find(([key]) => lower.includes(key));
+    return item ? item[1] : "generic";
+  }
+
+  function preencherSpansVisuais(root = document) {
+    root.querySelectorAll?.(".action-card > span, .resumo-card > span, .section-title > span, .feature-icon, .impact-card-icon").forEach((span) => {
+      if (span.querySelector("svg")) return;
+
+      const contexto = span.closest(".action-card, .resumo-card, .section-title, article, section, .card") || span.parentElement;
+      const texto = contexto?.innerText || "";
+      span.innerHTML = iconHTML(iconByText(texto));
+    });
+
+    root.querySelectorAll?.("[data-svg-icon]").forEach((el) => {
+      if (el.querySelector("svg")) return;
+      el.innerHTML = iconHTML(el.dataset.svgIcon || "generic");
+    });
+  }
+
+  const keys = Object.keys(EMOJI_TO_ICON).filter(Boolean).sort((a, b) => b.length - a.length);
+  const emojiRegex = keys.length
+    ? new RegExp(keys.map(escapeRegExp).join("|"), "g")
+    : null;
+
+  function escapeRegExp(text) {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
   function hasEmoji(text) {
+    if (!emojiRegex) return false;
     emojiRegex.lastIndex = 0;
     return emojiRegex.test(text);
   }
 
   function cleanOption(option) {
+    if (!emojiRegex) return;
     option.textContent = option.textContent.replace(emojiRegex, "").replace(/\s+/g, " ").trim();
   }
 
@@ -90,6 +136,8 @@
   }
 
   function replaceTextNode(node) {
+    if (!emojiRegex) return;
+
     const text = node.nodeValue;
 
     if (!text || !hasEmoji(text) || skip(node)) return;
@@ -124,6 +172,7 @@
   function scan(root) {
     if (!root) return;
 
+    preencherSpansVisuais(root);
     root.querySelectorAll?.("option").forEach(cleanOption);
 
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -134,6 +183,7 @@
     }
 
     nodes.forEach(replaceTextNode);
+    preencherSpansVisuais(root);
   }
 
   function start() {

@@ -1,11 +1,12 @@
 /*
-  ValiSys - Preferências locais definitivas
-  Corrige versões antigas salvas no aparelho e aplica tema apenas no sistema interno.
+  ValiSys - Preferências locais
+  Tema, estilo, sons e acessibilidade.
+  As preferências são locais do aparelho.
 */
 (function () {
   const STORAGE_KEY = "valisysPreferencias";
   const VERSION_KEY = "valisysPreferenciasVersao";
-  const CURRENT_VERSION = "modo-tema-definitivo-2";
+  const CURRENT_VERSION = "mp-cancelar-svg-dark-black-1";
 
   const DEFAULTS = {
     tema: "claro",
@@ -19,15 +20,6 @@
     fonteMaior: false,
     densidade: "confortavel"
   };
-
-  function paginaAtual() {
-    return location.pathname.split("/").pop() || "index.html";
-  }
-
-  function ehPaginaPublica() {
-    const pagina = paginaAtual();
-    return ["index.html", "contratacao.html"].includes(pagina) || document.body?.classList.contains("public-page");
-  }
 
   function clamp(num, min, max) {
     const value = Number(num);
@@ -99,7 +91,8 @@
       "estilo-compacto",
       "estilo-premium",
       "fonte-maior",
-      "reduzir-movimento"
+      "reduzir-movimento",
+      "valisys-preferencias-publico-bloqueadas"
     );
   }
 
@@ -122,11 +115,6 @@
     if (!body) return;
 
     limparClasses(body);
-
-    if (ehPaginaPublica()) {
-      body.classList.add("valisys-preferencias-publico-bloqueadas");
-      return;
-    }
 
     body.classList.add(`valisys-tema-${pref.tema}`);
 
@@ -189,10 +177,8 @@
   }
 
   function tocarAoEntrar() {
-    if (ehPaginaPublica()) return;
-
     const paginasLogin = ["dashboard.html", "admin-dashboard.html"];
-    const pagina = paginaAtual();
+    const pagina = location.pathname.split("/").pop() || "index.html";
 
     if (!paginasLogin.includes(pagina)) return;
 
@@ -205,8 +191,6 @@
 
   function ativarSomClique() {
     document.addEventListener("click", (event) => {
-      if (ehPaginaPublica()) return;
-
       const alvo = event.target.closest("button, a, .action-card, .loja-card-clickable");
       if (!alvo) return;
 

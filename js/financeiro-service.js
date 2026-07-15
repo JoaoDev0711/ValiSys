@@ -36,7 +36,7 @@ const valisysFinanceiro = {
           "Usuários por cargo",
           "Lista Geral completa",
           "Comunicados internos",
-          "Dashboard da loja",
+          "Painel da loja",
           "Notificações"
         ],
         destaque: true
@@ -102,6 +102,8 @@ const valisysFinanceiro = {
       ciclo: assinatura.ciclo || "mensal",
       inicioEm: assinatura.inicio_em || assinatura.inicioEm || "",
       proximoVencimento: assinatura.proximo_vencimento || assinatura.proximoVencimento || "",
+      canceladoEm: assinatura.cancelado_em || assinatura.canceladoEm || "",
+      canceladoPor: assinatura.cancelado_por || assinatura.canceladoPor || "",
       criadoEm: assinatura.criado_em || assinatura.criadoEm || ""
     };
   },
@@ -121,7 +123,12 @@ const valisysFinanceiro = {
       linhaDigitavel: cobranca.linha_digitavel || cobranca.linhaDigitavel || "",
       pixCopiaCola: cobranca.pix_copia_cola || cobranca.pixCopiaCola || "",
       pagoEm: cobranca.pago_em || cobranca.pagoEm || "",
-      meioPagamento: cobranca.meio_pagamento || cobranca.meioPagamento || ""
+      meioPagamento: cobranca.meio_pagamento || cobranca.meioPagamento || "",
+      mercadoPagoPreferenceId: cobranca.mercado_pago_preference_id || cobranca.mercadoPagoPreferenceId || "",
+      mercadoPagoPaymentId: cobranca.mercado_pago_payment_id || cobranca.mercadoPagoPaymentId || "",
+      mercadoPagoStatus: cobranca.mercado_pago_status || cobranca.mercadoPagoStatus || "",
+      mercadoPagoInitPoint: cobranca.mercado_pago_init_point || cobranca.mercadoPagoInitPoint || "",
+      mercadoPagoSandboxInitPoint: cobranca.mercado_pago_sandbox_init_point || cobranca.mercadoPagoSandboxInitPoint || ""
     };
   },
 
@@ -218,5 +225,43 @@ const valisysFinanceiro = {
     if (error) throw error;
 
     return this.extrairJsonRpc(data);
+  },
+
+  async cancelarAssinatura({ lojaId, usuarioNome = "", usuarioCargo = "" }) {
+    const db = this.client();
+
+    const { data, error } = await db.rpc("valisys_financeiro_cancelar_assinatura", {
+      p_loja_id: lojaId,
+      p_cancelado_por: usuarioNome,
+      p_cancelado_cargo: usuarioCargo
+    });
+
+    if (error) throw error;
+
+    const payload = this.extrairJsonRpc(data);
+
+    return {
+      assinatura: payload.assinatura ? this.assinaturaDBParaApp(payload.assinatura) : null,
+      cobrancas: (payload.cobrancas || []).map(this.cobrancaDBParaApp.bind(this)),
+      meiosPagamento: (payload.meios_pagamento || []).map(this.meioPagamentoDBParaApp.bind(this))
+    };
+  },
+
+  async criarPagamentoMercadoPago({ cobrancaId, lojaId, usuarioNome = "" }) {
+    const db = this.client();
+
+    const { data, error } = await db.functions.invoke("mercado-pago-create-payment", {
+      body: {
+        cobrancaId,
+        lojaId,
+        usuarioNome,
+        origem: location.origin
+      }
+    });
+
+    if (error) throw error;
+    if (!data?.ok) throw new Error(data?.erro || "Não foi possível gerar pagamento no Mercado Pago.");
+
+    return data;
   }
 };
