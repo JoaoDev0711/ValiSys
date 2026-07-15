@@ -373,7 +373,7 @@ async function pagarMercadoPago(cobrancaId) {
     await iniciarMinhaAssinatura();
   } catch (erro) {
     console.error(erro);
-    alert("Não foi possível gerar o pagamento no Mercado Pago. Confira se a Edge Function foi implantada e se o MP_ACCESS_TOKEN foi configurado.");
+    alert(`Não foi possível gerar o pagamento no Mercado Pago.\n\nDetalhe: ${erro.message || erro}`);
   }
 }
 
@@ -400,7 +400,7 @@ async function cancelarAssinaturaAtual() {
     await iniciarMinhaAssinatura();
   } catch (erro) {
     console.error(erro);
-    alert("Não foi possível cancelar a assinatura. Rode o SQL principal atualizado no Supabase.");
+    alert(`Não foi possível cancelar a assinatura.\n\nDetalhe: ${erro.message || erro}`);
   }
 }
 

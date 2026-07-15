@@ -1,0 +1,10 @@
+project_id = "bwrgkzetsnglmkneqqzs"
+
+[functions.mercado-pago-create-payment]
+verify_jwt = false
+
+[functions.mercado-pago-webhook]
+verify_jwt = false
+
+[functions.financeiro-cancelar-assinatura]
+verify_jwt = false

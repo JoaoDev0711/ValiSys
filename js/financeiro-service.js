@@ -3,6 +3,49 @@ const valisysFinanceiro = {
     return getDadosOnlineClient();
   },
 
+  async invocarFuncaoPublica(nome, body = {}) {
+    const base = String(VALISYS_DADOS_URL || "").replace(/\/+$/, "");
+    const url = `${base}/functions/v1/${nome}`;
+
+    let resposta;
+
+    try {
+      resposta = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": VALISYS_DADOS_PUBLIC_KEY
+        },
+        body: JSON.stringify(body)
+      });
+    } catch (erro) {
+      throw new Error(`Falha de rede ao chamar ${nome}: ${erro.message}`);
+    }
+
+    const texto = await resposta.text();
+    let payload = {};
+
+    try {
+      payload = texto ? JSON.parse(texto) : {};
+    } catch {
+      payload = {
+        erro: texto || `Resposta inválida da função ${nome}.`
+      };
+    }
+
+    if (!resposta.ok || payload.ok === false) {
+      const mensagem =
+        payload.erro ||
+        payload.message ||
+        payload.error ||
+        `HTTP ${resposta.status}`;
+
+      throw new Error(`${nome}: ${mensagem}`);
+    }
+
+    return payload;
+  },
+
   planosPadrao() {
     return [
       {
@@ -228,40 +271,42 @@ const valisysFinanceiro = {
   },
 
   async cancelarAssinatura({ lojaId, usuarioNome = "", usuarioCargo = "" }) {
-    const db = this.client();
+    try {
+      return await this.invocarFuncaoPublica("financeiro-cancelar-assinatura", {
+        lojaId,
+        usuarioNome,
+        usuarioCargo
+      });
+    } catch (erroEdge) {
+      try {
+        const db = this.client();
 
-    const { data, error } = await db.rpc("valisys_financeiro_cancelar_assinatura", {
-      p_loja_id: lojaId,
-      p_cancelado_por: usuarioNome,
-      p_cancelado_cargo: usuarioCargo
-    });
+        const { data, error } = await db.rpc("valisys_financeiro_cancelar_assinatura", {
+          p_loja_id: lojaId,
+          p_cancelado_por: usuarioNome,
+          p_cancelado_cargo: usuarioCargo
+        });
 
-    if (error) throw error;
+        if (error) throw error;
 
-    const payload = this.extrairJsonRpc(data);
-
-    return {
-      assinatura: payload.assinatura ? this.assinaturaDBParaApp(payload.assinatura) : null,
-      cobrancas: (payload.cobrancas || []).map(this.cobrancaDBParaApp.bind(this)),
-      meiosPagamento: (payload.meios_pagamento || []).map(this.meioPagamentoDBParaApp.bind(this))
-    };
+        return this.extrairJsonRpc(data);
+      } catch (erroRpc) {
+        throw new Error(
+          `Edge Function: ${erroEdge.message}. RPC: ${erroRpc.message}`
+        );
+      }
+    }
   },
 
   async criarPagamentoMercadoPago({ cobrancaId, lojaId, usuarioNome = "" }) {
-    const db = this.client();
+    const caminhoBase = location.pathname.replace(/\/[^/]*$/, "");
+    const siteUrl = `${location.origin}${caminhoBase}`.replace(/\/+$/, "");
 
-    const { data, error } = await db.functions.invoke("mercado-pago-create-payment", {
-      body: {
-        cobrancaId,
-        lojaId,
-        usuarioNome,
-        origem: location.origin
-      }
+    return this.invocarFuncaoPublica("mercado-pago-create-payment", {
+      cobrancaId,
+      lojaId,
+      usuarioNome,
+      siteUrl
     });
-
-    if (error) throw error;
-    if (!data?.ok) throw new Error(data?.erro || "Não foi possível gerar pagamento no Mercado Pago.");
-
-    return data;
   }
 };
